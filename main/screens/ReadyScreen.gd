@@ -86,7 +86,7 @@ func _on_ReadyButton_pressed() -> void:
 	emit_signal("ready_pressed")
 
 func _on_MatchCopyButton_pressed() -> void:
-	OS.clipboard = match_id_label.text
+	DisplayServer.clipboard_set(match_id_label.text)
 
 #####
 # OnlineMatch callbacks:

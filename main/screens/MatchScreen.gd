@@ -82,7 +82,7 @@ func _on_OnlineMatch_joined(match_id: String, match_mode: int):
 	ui_layer.show_screen("ReadyScreen", info)
 
 func _on_PasteButton_pressed() -> void:
-	join_match_id_control.text = OS.clipboard
+	join_match_id_control.text = DisplayServer.clipboard_get( )
 
 func _on_LeaderboardButton_pressed() -> void:
 	ui_layer.show_screen("LeaderboardScreen")

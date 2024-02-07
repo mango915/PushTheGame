@@ -18,23 +18,23 @@ var skin_resources = [
 	preload("res://assets/sprites/whale_purple.png"),
 ]
 
-@export (PlayerSkin) var player_skin := PlayerSkin.BLUE: set = set_player_skin
-@export (float) var speed := 350.0
-@export (float) var acceleration := 2000.0
-@export (float) var friction := 1500.0
-@export (float) var sliding_friction := 400.0
-@export (float) var jump_speed := 700.0
-@export (float) var glide_speed := -100.0
-@export (float) var terminal_velocity := 1000.0
-@export (float) var push_back_speed := 50.0
-@export (float) var throw_velocity := 300.0
-@export (float) var throw_upward_velocity := 500.0
-@export (float) var throw_vector_mix := 0.5
-@export (float) var throw_vector_max_length := 700.0
-@export (float) var throw_torque := 10.0
-@export (bool) var invincible := false
-@export (bool) var player_controlled := false
-@export (String) var input_prefix := "player1_"
+@export var player_skin : PlayerSkin = PlayerSkin.BLUE: set = set_player_skin
+@export var speed : float = 350.0
+@export var acceleration : float = 2000.0
+@export var friction : float = 1500.0
+@export var sliding_friction : float = 400.0
+@export var jump_speed : float = 700.0
+@export var glide_speed : float = -100.0
+@export var terminal_velocity : float = 1000.0
+@export var push_back_speed : float = 50.0
+@export var throw_velocity : float = 300.0
+@export var throw_upward_velocity : float = 500.0
+@export var throw_vector_mix : float = 0.5
+@export var throw_vector_max_length : float = 700.0
+@export var throw_torque : float = 10.0
+@export var invincible : bool = false
+@export var player_controlled : bool = false
+@export var input_prefix : String = "player1_"
 
 signal player_dead ()
 

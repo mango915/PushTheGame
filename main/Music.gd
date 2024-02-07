@@ -1,6 +1,6 @@
 extends Node
 
-@export (float) var cross_fade_duration = 2.0
+@export var cross_fade_duration: float = 2.0
 
 signal song_finished (song)
 

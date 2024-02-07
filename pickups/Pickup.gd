@@ -12,7 +12,7 @@ enum PickupPosition {
 	BACK,
 }
 
-@export (PickupPosition) var pickup_position = PickupPosition.FRONT
+@export var pickup_position : PickupPosition = PickupPosition.FRONT
 
 enum PickupState {
 	FREE = 0,

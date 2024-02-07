@@ -3,11 +3,11 @@ extends Pickup
 var DisintegrateEffect: PackedScene = preload("res://pickups/DisintegrateEffect.tscn")
 var SparksEffect: PackedScene = preload("res://pickups/SparksEffect.tscn")
 
-@export (PackedScene) var projectile_scene: PackedScene = preload("res://pickups/Projectile.tscn")
-@export (float) var projectile_velocity := 1200.0
-@export (float) var projectile_range := 400.0
-@export (float) var cooldown_time := 0.3
-@export (int) var max_ammo := 3
+@export var projectile_scene: PackedScene = preload("res://pickups/Projectile.tscn")
+@export var projectile_velocity : float = 1200.0
+@export var projectile_range : float = 400.0
+@export var cooldown_time : float = 0.3
+@export var max_ammo : int = 3
 
 @onready var projectile_position := $ProjectilePosition
 @onready var sparks_position := $SparksPosition

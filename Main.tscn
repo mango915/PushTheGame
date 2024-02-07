@@ -87,9 +87,6 @@ focus_mode = 0
 icon = ExtResource("19")
 clip_text = true
 script = ExtResource("17")
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="MuteButton" type="Button" parent="UILayer/Overlay"]
 layout_mode = 0
@@ -102,9 +99,6 @@ toggle_mode = true
 icon = ExtResource("18")
 clip_text = true
 script = ExtResource("17")
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Music" type="Node" parent="."]
 script = ExtResource("9")
@@ -135,6 +129,9 @@ process_thread_group = 0
 editor_description = ""
 script = null
 
+[connection signal="player_dead" from="Game" to="." method="_on_Game_player_dead"]
 [connection signal="change_screen" from="UILayer" to="." method="_on_UILayer_change_screen"]
+[connection signal="ready_pressed" from="UILayer/Screens/ReadyScreen" to="." method="_on_ReadyScreen_ready_pressed"]
 [connection signal="pressed" from="UILayer/Overlay/BackButton" to="UILayer" method="_on_BackButton_pressed"]
 [connection signal="toggled" from="UILayer/Overlay/MuteButton" to="UILayer" method="_on_MuteButton_toggled"]
+[connection signal="song_finished" from="Music" to="." method="_on_Music_song_finished"]

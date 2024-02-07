@@ -59,7 +59,7 @@ func game_start(players: Dictionary) -> void:
 	camera.update_position_and_zoom(false)
 
 	if GameState.online_play:
-		var my_id := get_tree().get_unique_id()
+		var my_id = get_tree().get_unique_id()
 		var my_player := players_node.get_node(str(my_id))
 		my_player.player_controlled = true
 
