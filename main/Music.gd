@@ -4,7 +4,7 @@ extends Node
 
 signal song_finished (song)
 
-@onready var tween = $Tween
+#@onready var tween = $Tween
 
 var current_song
 var initial_volume_dbs := {}
@@ -20,6 +20,7 @@ func play(song_name: String) -> void:
 	if !next_song or next_song.playing:
 		return
 	
+	var tween = create_tween()
 	if current_song:
 		tween.interpolate_property(current_song, "volume_db", current_song.volume_db, -40.0, (cross_fade_duration / 2.0), Tween.TRANS_LINEAR, Tween.EASE_IN_OUT)
 	
