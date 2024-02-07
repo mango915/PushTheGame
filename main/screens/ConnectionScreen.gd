@@ -1,8 +1,8 @@
 extends "res://main/Screen.gd"
 
-onready var tab_container := $TabContainer
-onready var login_email_field := $TabContainer/Login/GridContainer/Email
-onready var login_password_field := $TabContainer/Login/GridContainer/Password
+@onready var tab_container := $TabContainer
+@onready var login_email_field := $TabContainer/Login/GridContainer/Email
+@onready var login_password_field := $TabContainer/Login/GridContainer/Password
 
 const CREDENTIALS_FILENAME = 'user://credentials.json'
 
@@ -13,10 +13,11 @@ var _reconnect: bool = false
 var _next_screen
 
 func _ready() -> void:
-	var file = File.new()
-	if file.file_exists(CREDENTIALS_FILENAME):
-		file.open(CREDENTIALS_FILENAME, File.READ)
-		var result := JSON.parse(file.get_as_text())
+	if FileAccess.file_exists(CREDENTIALS_FILENAME):
+		var file = FileAccess.open(CREDENTIALS_FILENAME, FileAccess.READ)
+		var test_json_conv = JSON.new()
+		test_json_conv.parse(file.get_as_text())
+		var result = test_json_conv.get_data()
 		if result.result is Dictionary:
 			email = result.result['email']
 			password = result.result['password']
@@ -25,13 +26,12 @@ func _ready() -> void:
 		file.close()
 
 func _save_credentials() -> void:
-	var file = File.new()
-	file.open(CREDENTIALS_FILENAME, File.WRITE)
+	var file = FileAccess.open(CREDENTIALS_FILENAME, FileAccess.WRITE)
 	var credentials = {
 		email = email,
 		password = password,
 	}
-	file.store_line(JSON.print(credentials))
+	file.store_line(JSON.stringify(credentials))
 	file.close()
 
 func _show_screen(info: Dictionary = {}) -> void:
@@ -52,7 +52,7 @@ func do_login(save_credentials: bool = false) -> void:
 	else:
 		ui_layer.show_message("Logging in...")
 	
-	var nakama_session = yield(Online.nakama_client.authenticate_email_async(email, password, null, false), "completed")
+	var nakama_session = await Online.nakama_client.authenticate_email_async(email, password, null, false)
 	
 	if nakama_session.is_exception():
 		visible = true
@@ -100,7 +100,7 @@ func _on_CreateAccountButton_pressed() -> void:
 	visible = false
 	ui_layer.show_message("Creating account...")
 
-	var nakama_session = yield(Online.nakama_client.authenticate_email_async(email, password, username, true), "completed")
+	var nakama_session = await Online.nakama_client.authenticate_email_async(email, password, username, true)
 	
 	if nakama_session.is_exception():
 		visible = true

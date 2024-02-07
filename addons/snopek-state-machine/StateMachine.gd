@@ -1,7 +1,11 @@
-tool
+@tool
 extends Node
 
-export (String, MULTILINE) var allowed_transitions setget set_allowed_transitions
+@export_multiline var allowed_transitions : String = '' :
+	set(value):
+		set_allowed_transitions(value)
+	get:
+		return allowed_transitions
 
 var current_state
 var allowed_transitions_parsed := {}
@@ -87,7 +91,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if current_state and current_state.has_method('_state_unhandled_input'):
 		current_state._state_unhandled_input(event)
 
-func _unhandled_key_input(event: InputEventKey) -> void:
+func _unhandled_key_input(event: InputEvent) -> void:
 	if current_state and current_state.has_method('_state_unhandled_key_input'):
 		current_state._state_unhandled_key_input(event)
 

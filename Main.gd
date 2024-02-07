@@ -1,9 +1,9 @@
 extends Node2D
 
-onready var game = $Game
-onready var ui_layer: UILayer = $UILayer
-onready var ready_screen = $UILayer/Screens/ReadyScreen
-onready var music := $Music
+@onready var game = $Game
+@onready var ui_layer: UILayer = $UILayer
+@onready var ready_screen = $UILayer/Screens/ReadyScreen
+@onready var music := $Music
 
 var players := {}
 
@@ -13,10 +13,10 @@ var players_score := {}
 var match_started := false
 
 func _ready() -> void:
-	OnlineMatch.connect("error", self, "_on_OnlineMatch_error")
-	OnlineMatch.connect("disconnected", self, "_on_OnlineMatch_disconnected")
-	OnlineMatch.connect("player_joined", self, "_on_OnlineMatch_player_joined")
-	OnlineMatch.connect("player_left", self, "_on_OnlineMatch_player_left")
+	OnlineMatch.connect("error", Callable(self, "_on_OnlineMatch_error"))
+	OnlineMatch.connect("disconnected", Callable(self, "_on_OnlineMatch_disconnected"))
+	OnlineMatch.connect("player_joined", Callable(self, "_on_OnlineMatch_player_joined"))
+	OnlineMatch.connect("player_left", Callable(self, "_on_OnlineMatch_player_left"))
 
 	randomize()
 	music.play_random()
@@ -68,7 +68,7 @@ func _on_UILayer_back_button() -> void:
 		ui_layer.show_screen("MatchScreen")
 
 func _on_ReadyScreen_ready_pressed() -> void:
-	rpc("player_ready", get_tree().get_network_unique_id())
+	rpc("player_ready", get_tree().get_unique_id())
 
 #####
 # OnlineMatch callbacks
@@ -96,19 +96,19 @@ func _on_OnlineMatch_player_left(player) -> void:
 		ui_layer.show_message(player.username + " has left")
 
 func _on_OnlineMatch_player_joined(player) -> void:
-	if get_tree().is_network_server():
+	if get_tree().is_server():
 		# Tell this new player about all the other players that are already ready.
-		for player in players_ready.values():
-			rpc_id(player.peer_id, "player_ready", player.peer_id)
+		for player_ready in players_ready.values():
+			rpc_id(player_ready.peer_id, "player_ready", player_ready.peer_id)
 
 #####
 # Gameplay methods and callbacks
 #####
 
-remotesync func player_ready(peer_id: int) -> void:
+@rpc("any_peer", "call_local") func player_ready(peer_id: int) -> void:
 	ready_screen.set_status(peer_id, "READY!")
 
-	if get_tree().is_network_server() and not players_ready.has(peer_id):
+	if get_tree().is_server() and not players_ready.has(peer_id):
 		players_ready[peer_id] = true
 		if players_ready.size() == OnlineMatch.players.size():
 			if OnlineMatch.match_state != OnlineMatch.MatchState.PLAYING:
@@ -150,7 +150,7 @@ func _on_Game_game_started() -> void:
 
 func _on_Game_player_dead(peer_id: int) -> void:
 	if GameState.online_play:
-		var my_id = get_tree().get_network_unique_id()
+		var my_id = get_tree().get_unique_id()
 		if peer_id == my_id:
 			ui_layer.show_message("You lose!")
 
@@ -159,7 +159,7 @@ func _on_Game_game_over(peer_id: int) -> void:
 
 	if not GameState.online_play:
 		show_winner(players[peer_id])
-	elif get_tree().is_network_server():
+	elif get_tree().is_server():
 		if not players_score.has(peer_id):
 			players_score[peer_id] = 1
 		else:
@@ -172,24 +172,24 @@ func _on_Game_game_over(peer_id: int) -> void:
 func update_wins_leaderboard() -> void:
 	if not Online.nakama_session or Online.nakama_session.is_expired():
 		# If our session has expired, then wait until a new session is setup.
-		yield(Online, "session_connected")
+		await Online.session_connected
 
 	Online.nakama_client.write_leaderboard_record_async(Online.nakama_session, 'fish_game_wins', 1)
 
-remotesync func show_winner(name: String, peer_id: int = 0, score: int = 0, is_match: bool = false) -> void:
+@rpc("any_peer", "call_local") func show_winner(name: String, peer_id: int = 0, score: int = 0, is_match: bool = false) -> void:
 	if is_match:
 		ui_layer.show_message(name + " WINS THE WHOLE MATCH!")
 	else:
 		ui_layer.show_message(name + " wins this round!")
 
-	yield(get_tree().create_timer(2.0), "timeout")
+	await get_tree().create_timer(2.0).timeout
 	if not game.game_started:
 		return
 
 	if GameState.online_play:
 		if is_match:
 			stop_game()
-			if peer_id != 0 and peer_id == get_tree().get_network_unique_id():
+			if peer_id != 0 and peer_id == get_tree().get_unique_id():
 				update_wins_leaderboard()
 			ui_layer.show_screen("MatchScreen")
 		else:

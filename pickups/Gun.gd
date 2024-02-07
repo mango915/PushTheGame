@@ -3,21 +3,21 @@ extends Pickup
 var DisintegrateEffect: PackedScene = preload("res://pickups/DisintegrateEffect.tscn")
 var SparksEffect: PackedScene = preload("res://pickups/SparksEffect.tscn")
 
-export (PackedScene) var projectile_scene: PackedScene = preload("res://pickups/Projectile.tscn")
-export (float) var projectile_velocity := 1200.0
-export (float) var projectile_range := 400.0
-export (float) var cooldown_time := 0.3
-export (int) var max_ammo := 3
+@export (PackedScene) var projectile_scene: PackedScene = preload("res://pickups/Projectile.tscn")
+@export (float) var projectile_velocity := 1200.0
+@export (float) var projectile_range := 400.0
+@export (float) var cooldown_time := 0.3
+@export (int) var max_ammo := 3
 
-onready var projectile_position := $ProjectilePosition
-onready var sparks_position := $SparksPosition
-onready var dud_detector := $DudDetector
-onready var animation_player := $AnimationPlayer
-onready var cooldown_timer := $CooldownTimer
-onready var sounds := $Sounds
+@onready var projectile_position := $ProjectilePosition
+@onready var sparks_position := $SparksPosition
+@onready var dud_detector := $DudDetector
+@onready var animation_player := $AnimationPlayer
+@onready var cooldown_timer := $CooldownTimer
+@onready var sounds := $Sounds
 
 var allow_shoot := true
-onready var ammo := max_ammo
+@onready var ammo := max_ammo
 
 var use_by_player: Node = null
 
@@ -39,14 +39,14 @@ func use() -> void:
 	else:
 		_fire_projectile()
 
-remotesync func _start_use() -> void:
+@rpc("any_peer", "call_local") func _start_use() -> void:
 	# Account for a player throwing the gun before it actually fires.
 	use_by_player = player
 
 	animation_player.play("Shoot")
 
 func _fire_projectile() -> void:
-	if GameState.online_play and not use_by_player.is_network_master():
+	if GameState.online_play and not use_by_player.is_multiplayer_authority():
 		return
 
 	var projectile_name = Util.find_unique_name(original_parent, 'Projectile-')
@@ -58,17 +58,17 @@ func _fire_projectile() -> void:
 	else:
 		rpc("_do_fire_projectile", projectile_name, projectile_position.global_position, projectile_vector, projectile_range, projectile_dud)
 
-remotesync func _do_fire_projectile(_projectile_name: String, _projectile_position: Vector2, _projectile_vector: Vector2, _projectile_range: float, _projectile_dud: bool) -> void:
+@rpc("any_peer", "call_local") func _do_fire_projectile(_projectile_name: String, _projectile_position: Vector2, _projectile_vector: Vector2, _projectile_range: float, _projectile_dud: bool) -> void:
 	var projectile_parent = original_parent
 
 	if ammo <= 0:
-		var sparks = SparksEffect.instance()
+		var sparks = SparksEffect.instantiate()
 		sparks_position.add_child(sparks)
 		sounds.play("Empty")
 	else:
 		ammo -= 1
 
-		var projectile = projectile_scene.instance()
+		var projectile = projectile_scene.instantiate()
 		projectile.name = _projectile_name
 		projectile_parent.add_child(projectile)
 
@@ -82,10 +82,10 @@ func _on_throw_finished() -> void:
 		else:
 			rpc("_disintegrate")
 
-remotesync func _disintegrate() -> void:
+@rpc("any_peer", "call_local") func _disintegrate() -> void:
 	var parent = get_parent();
 	if parent:
-		var effect = DisintegrateEffect.instance()
+		var effect = DisintegrateEffect.instantiate()
 		parent.add_child(effect)
 		effect.global_position = global_position + Vector2(0, 10)
 

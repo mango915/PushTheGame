@@ -1,18 +1,18 @@
-extends KinematicBody2D
+extends CharacterBody2D
 class_name Pickup
 
-onready var held_position: Position2D = $HeldPosition
-onready var original_parent: Node2D = get_parent()
-onready var gravity: float = float(ProjectSettings.get_setting("physics/2d/default_gravity"))
-onready var linear_damp: float = float(ProjectSettings.get_setting("physics/2d/default_linear_damp"))
-onready var angular_damp: float = float(ProjectSettings.get_setting("physics/2d/default_angular_damp"))
+@onready var held_position: Marker2D = $HeldPosition
+@onready var original_parent: Node2D = get_parent()
+@onready var gravity: float = float(ProjectSettings.get_setting("physics/2d/default_gravity"))
+@onready var linear_damp: float = float(ProjectSettings.get_setting("physics/2d/default_linear_damp"))
+@onready var angular_damp: float = float(ProjectSettings.get_setting("physics/2d/default_angular_damp"))
 
 enum PickupPosition {
 	FRONT,
 	BACK,
 }
 
-export (PickupPosition) var pickup_position = PickupPosition.FRONT
+@export (PickupPosition) var pickup_position = PickupPosition.FRONT
 
 enum PickupState {
 	FREE = 0,
@@ -110,14 +110,14 @@ func _physics_process(delta: float) -> void:
 		move_and_collide(collision.normal * collision.remainder.length())
 
 	# Sleep the object if it gets below certain linear/angular velocity thresholds.
-	if not GameState.online_play or is_network_master():
+	if not GameState.online_play or is_multiplayer_authority():
 		if linear_velocity.length() < MIN_LINEAR_VELOCITY and angular_velocity < MIN_ANGULAR_VELOCITY:
 			if GameState.online_play:
 				rpc('_do_physics_finished', global_transform)
 			else:
 				_do_physics_finished(global_transform)
 
-remotesync func _do_physics_finished(_remote_transform = null) -> void:
+@rpc("any_peer", "call_local") func _do_physics_finished(_remote_transform = null) -> void:
 	if _remote_transform:
 		global_transform = _remote_transform
 
