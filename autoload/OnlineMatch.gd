@@ -88,11 +88,11 @@ func _set_nakama_socket(_nakama_socket: NakamaSocket) -> void:
 		return
 
 	if nakama_socket:
-		nakama_socket.disconnect("closed", Callable(self, "_on_nakama_socket_closed"))
+		nakama_socket.closed.disconnect(Callable(self, "_on_nakama_socket_closed"))
 
 	if nakama_multiplayer_bridge:
-		nakama_multiplayer_bridge.disconnect("match_joined", Callable(self, "_on_match_joined"))
-		nakama_multiplayer_bridge.disconnect("match_join_error", Callable(self, "_on_match_join_error"))
+		nakama_multiplayer_bridge.match_joined.disconnect(Callable(self, "_on_match_joined"))
+		nakama_multiplayer_bridge.match_join_error.disconnect(Callable(self, "_on_match_join_error"))
 		nakama_multiplayer_bridge.leave()
 		nakama_multiplayer_bridge = null
 		get_tree().network_peer = null
@@ -100,16 +100,17 @@ func _set_nakama_socket(_nakama_socket: NakamaSocket) -> void:
 	nakama_socket = _nakama_socket
 
 	if nakama_socket:
-		nakama_socket.connect("closed", Callable(self, "_on_nakama_socket_closed"))
+		nakama_socket.closed.connect(Callable(self, "_on_nakama_socket_closed"))
 		nakama_multiplayer_bridge = NakamaMultiplayerBridge.new(nakama_socket)
-		nakama_multiplayer_bridge.connect("match_joined", Callable(self, "_on_match_joined"))
-		nakama_multiplayer_bridge.connect("match_join_error", Callable(self, "_on_match_join_error"))
+		nakama_multiplayer_bridge.match_joined.connect(Callable(self, "_on_match_joined"))
+		nakama_multiplayer_bridge.match_join_error.connect(Callable(self, "_on_match_join_error"))
 		get_tree().network_peer = nakama_multiplayer_bridge.multiplayer_peer
 
 func _ready() -> void:
 	var tree = get_tree()
-	tree.connect("peer_connected", Callable(self, "_on_network_peer_connected"))
-	tree.connect("peer_disconnected", Callable(self, "_on_network_peer_disconnected"))
+	# FIXME
+	#tree.connect("peer_connected", Callable(self, "_on_network_peer_connected"))
+	#tree.connect("peer_disconnected", Callable(self, "_on_network_peer_disconnected"))
 
 func create_match(_nakama_socket: NakamaSocket) -> void:
 	leave()

@@ -5,9 +5,9 @@
 [ext_resource type="PackedScene" path="res://Game.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://main/screens/MatchScreen.tscn" id="4"]
 [ext_resource type="Script" path="res://main/UILayer.gd" id="5"]
-[ext_resource type="PackedScene" path="res://main/screens/ReadyScreen.tscn" id="6"]
-[ext_resource type="PackedScene" path="res://main/screens/TitleScreen.tscn" id="7"]
-[ext_resource type="FontFile" path="res://assets/fonts/monogram.tres" id="8"]
+[ext_resource type="PackedScene" uid="uid://cvr6o7834fy1t" path="res://main/screens/ReadyScreen.tscn" id="6"]
+[ext_resource type="PackedScene" uid="uid://u1fw537kl61p" path="res://main/screens/TitleScreen.tscn" id="7"]
+[ext_resource type="FontFile" uid="uid://dpsvmpxtgjnrg" path="res://assets/fonts/monogram.tres" id="8"]
 [ext_resource type="Script" path="res://main/Music.gd" id="9"]
 [ext_resource type="AudioStream" uid="uid://clhunui0oqjs2" path="res://assets/music/BUILD UP.ogg" id="10"]
 [ext_resource type="AudioStream" uid="uid://dpcvmn5wya6jo" path="res://assets/music/THEME #1.ogg" id="11"]
@@ -33,14 +33,20 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="TitleScreen" parent="UILayer/Screens" instance=ExtResource("7")]
 visible = false
 anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
 
 [node name="ConnectionScreen" parent="UILayer/Screens" instance=ExtResource("2")]
 visible = false
 anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
 
 [node name="MatchScreen" parent="UILayer/Screens" instance=ExtResource("4")]
 visible = false
@@ -49,6 +55,10 @@ anchors_preset = 0
 [node name="ReadyScreen" parent="UILayer/Screens" instance=ExtResource("6")]
 visible = false
 anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+grow_horizontal = 1
+grow_vertical = 1
 
 [node name="LeaderboardScreen" parent="UILayer/Screens" instance=ExtResource("14")]
 visible = false
@@ -63,6 +73,8 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 
 [node name="Message" type="Label" parent="UILayer/Overlay"]
@@ -119,17 +131,6 @@ bus = &"Music"
 stream = ExtResource("11")
 bus = &"Music"
 
-[node name="Tween" type="Tween" parent="Music"]
-_import_path = NodePath("")
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-editor_description = ""
-script = null
-
-[connection signal="player_dead" from="Game" to="." method="_on_Game_player_dead"]
 [connection signal="change_screen" from="UILayer" to="." method="_on_UILayer_change_screen"]
 [connection signal="ready_pressed" from="UILayer/Screens/ReadyScreen" to="." method="_on_ReadyScreen_ready_pressed"]
 [connection signal="pressed" from="UILayer/Overlay/BackButton" to="UILayer" method="_on_BackButton_pressed"]

@@ -6,7 +6,7 @@ class_name UILayer
 @onready var back_button = $Overlay/BackButton
 
 signal change_screen (name, screen)
-#signal back_button ()
+signal back_button_pressed ()
 
 var current_screen: Control = null: set = _set_readonly_variable
 var current_screen_name: String = '': get = get_current_screen_name, set = _set_readonly_variable
@@ -20,7 +20,7 @@ func _ready() -> void:
 	for screen in screens.get_children():
 		if screen.has_method('_setup_screen'):
 			screen._setup_screen(self)
-	
+
 	show_screen("TitleScreen")
 	_is_ready = true
 
@@ -31,6 +31,7 @@ func get_current_screen_name() -> String:
 
 func show_screen(name: String, info: Dictionary = {}) -> void:
 	var screen = screens.get_node(name)
+	print( screen )
 	if not screen:
 		return
 	
@@ -39,8 +40,10 @@ func show_screen(name: String, info: Dictionary = {}) -> void:
 	if screen.has_method("_show_screen"):
 		screen.callv("_show_screen", [info])
 	current_screen = screen
+	print( screen )
 	
 	if _is_ready:
+		print( "emitting" )
 		emit_signal("change_screen", name, screen)
 
 func hide_screen() -> void:
@@ -70,7 +73,7 @@ func hide_all() -> void:
 	hide_back_button()
 
 func _on_BackButton_pressed() -> void:
-	emit_signal("back_button")
+	emit_signal("back_button_pressed")
 
 func _on_MuteButton_toggled(button_pressed: bool) -> void:
 	AudioServer.set_bus_mute(0, button_pressed)

@@ -35,6 +35,7 @@ func _save_credentials() -> void:
 	file.close()
 
 func _show_screen(info: Dictionary = {}) -> void:
+
 	_reconnect = info.get('reconnect', false)
 	_next_screen = info.get('next_screen', 'MatchScreen')
 	
@@ -71,7 +72,7 @@ func do_login(save_credentials: bool = false) -> void:
 			_save_credentials()
 		Online.nakama_session = nakama_session
 		ui_layer.hide_message()
-		
+
 		if _next_screen:
 			ui_layer.show_screen(_next_screen)
 

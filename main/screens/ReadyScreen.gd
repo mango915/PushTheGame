@@ -12,10 +12,10 @@ signal ready_pressed ()
 func _ready() -> void:
 	clear_players()
 
-	OnlineMatch.connect("player_joined", Callable(self, "_on_OnlineMatch_player_joined"))
-	OnlineMatch.connect("player_left", Callable(self, "_on_OnlineMatch_player_left"))
-	OnlineMatch.connect("match_ready", Callable(self, "_on_OnlineMatch_match_ready"))
-	OnlineMatch.connect("match_not_ready", Callable(self, "_on_OnlineMatch_match_not_ready"))
+	OnlineMatch.player_joined.connect(Callable(self, "_on_OnlineMatch_player_joined"))
+	OnlineMatch.player_left.connect(Callable(self, "_on_OnlineMatch_player_left"))
+	OnlineMatch.match_ready.connect(Callable(self, "_on_OnlineMatch_match_ready"))
+	OnlineMatch.match_not_ready.connect(Callable(self, "_on_OnlineMatch_match_not_ready"))
 
 func _show_screen(info: Dictionary = {}) -> void:
 	var players: Dictionary = info.get("players", {})

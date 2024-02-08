@@ -5,8 +5,8 @@ extends Button
 @export var transparency : float = 0.75
 
 func _ready() -> void:
-	self.connect("mouse_entered", Callable(self, "_on_mouse_entered"))
-	self.connect("mouse_exited", Callable(self, "_on_mouse_exited"))
+	self.mouse_entered.connect(Callable(self, "_on_mouse_entered"))
+	self.mouse_exited.connect(Callable(self, "_on_mouse_exited"))
 	_on_mouse_exited()
 
 func _on_mouse_entered() -> void:

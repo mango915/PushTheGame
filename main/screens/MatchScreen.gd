@@ -4,11 +4,11 @@ extends "res://main/Screen.gd"
 @onready var join_match_id_control := $PanelContainer/VBoxContainer/JoinPanel/LineEdit
 
 func _ready() -> void:
-	$PanelContainer/VBoxContainer/MatchPanel/MatchButton.connect("pressed", Callable(self, "_on_match_button_pressed").bind(OnlineMatch.MatchMode.MATCHMAKER))
-	$PanelContainer/VBoxContainer/CreatePanel/CreateButton.connect("pressed", Callable(self, "_on_match_button_pressed").bind(OnlineMatch.MatchMode.CREATE))
-	$PanelContainer/VBoxContainer/JoinPanel/JoinButton.connect("pressed", Callable(self, "_on_match_button_pressed").bind(OnlineMatch.MatchMode.JOIN))
+	$PanelContainer/VBoxContainer/MatchPanel/MatchButton.pressed.connect(Callable(self, "_on_match_button_pressed").bind(OnlineMatch.MatchMode.MATCHMAKER))
+	$PanelContainer/VBoxContainer/CreatePanel/CreateButton.pressed.connect(Callable(self, "_on_match_button_pressed").bind(OnlineMatch.MatchMode.CREATE))
+	$PanelContainer/VBoxContainer/JoinPanel/JoinButton.pressed.connect(Callable(self, "_on_match_button_pressed").bind(OnlineMatch.MatchMode.JOIN))
 
-	OnlineMatch.connect("match_joined", Callable(self, "_on_OnlineMatch_joined"))
+	OnlineMatch.match_joined.connect(Callable(self, "_on_OnlineMatch_joined"))
 
 func _show_screen(_info: Dictionary = {}) -> void:
 	matchmaker_player_count_control.value = 2

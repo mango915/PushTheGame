@@ -13,10 +13,10 @@ var players_score := {}
 var match_started := false
 
 func _ready() -> void:
-	OnlineMatch.connect("error", Callable(self, "_on_OnlineMatch_error"))
-	OnlineMatch.connect("disconnected", Callable(self, "_on_OnlineMatch_disconnected"))
-	OnlineMatch.connect("player_joined", Callable(self, "_on_OnlineMatch_player_joined"))
-	OnlineMatch.connect("player_left", Callable(self, "_on_OnlineMatch_player_left"))
+	OnlineMatch.error.connect(Callable(self, "_on_OnlineMatch_error"))
+	OnlineMatch.disconnected.connect(Callable(self, "_on_OnlineMatch_disconnected"))
+	OnlineMatch.player_joined.connect(Callable(self, "_on_OnlineMatch_player_joined"))
+	OnlineMatch.player_left.connect(Callable(self, "_on_OnlineMatch_player_left"))
 
 	randomize()
 	music.play_random()

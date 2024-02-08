@@ -14,9 +14,9 @@ var game_over := false
 var players_alive := {}
 var players_setup := {}
 
-#signal game_started ()
+signal game_started_signal ()
 signal player_dead (peer_id)
-#signal game_over (peer_id)
+signal game_over_signal (peer_id)
 
 func game_start(players: Dictionary) -> void:
 	if GameState.online_play:
@@ -48,7 +48,7 @@ func game_start(players: Dictionary) -> void:
 		other_player.set_player_name(players[peer_id])
 		other_player.position = map.get_node("PlayerStartPositions/Player" + str(player_number)).position
 		other_player.rotation = map.get_node("PlayerStartPositions/Player" + str(player_number)).rotation
-		other_player.connect("player_dead", Callable(self, "_on_player_dead").bind(peer_id))
+		other_player.player_dead.connect(Callable(self, "_on_player_dead").bind(peer_id))
 
 		if not GameState.online_play:
 			other_player.player_controlled = true
@@ -79,7 +79,7 @@ func game_start(players: Dictionary) -> void:
 @rpc("any_peer", "call_local") func _do_game_start() -> void:
 	if map.has_method('map_start'):
 		map.map_start()
-	emit_signal("game_started")
+	emit_signal("game_started_signal")
 	get_tree().set_pause(false)
 
 func game_stop() -> void:
@@ -128,4 +128,4 @@ func _on_player_dead(peer_id) -> void:
 	if not game_over and players_alive.size() == 1:
 		game_over = true
 		var player_keys = players_alive.keys()
-		emit_signal("game_over", player_keys[0])
+		emit_signal("game_over_signal", player_keys[0])

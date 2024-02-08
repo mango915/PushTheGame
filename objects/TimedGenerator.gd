@@ -12,7 +12,7 @@ var current_pickup: Node2D
 
 func _ready() -> void:
 	animation_player.play("Glow")
-	timer.connect("timeout", Callable(self, "_do_generate"))
+	timer.timeout.connect(Callable(self, "_do_generate"))
 
 func _do_generate() -> void:
 	var pickup_parent = get_node(pickup_parent_path)
@@ -38,10 +38,10 @@ func _do_generate() -> void:
 	pickup_parent.add_child(current_pickup)
 	current_pickup.global_position = pickup_position.global_position
 
-	current_pickup.connect("picked_up", Callable(self, "_on_current_pickup_picked_up"))
+	current_pickup.picked_up.connect(Callable(self, "_on_current_pickup_picked_up"))
 
 func _on_current_pickup_picked_up() -> void:
-	current_pickup.disconnect("picked_up", Callable(self, "_on_current_pickup_picked_up"))
+	current_pickup.picked_up.disconnect(Callable(self, "_on_current_pickup_picked_up"))
 	current_pickup = null
 
 	if not GameState.online_play or is_multiplayer_authority():
