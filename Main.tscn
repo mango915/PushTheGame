@@ -1,7 +1,7 @@
 [gd_scene load_steps=19 format=3 uid="uid://bfhe2n4g71cu"]
 
 [ext_resource type="Script" path="res://Main.gd" id="1"]
-[ext_resource type="PackedScene" path="res://main/screens/ConnectionScreen.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://c1tbtdciosmlb" path="res://main/screens/ConnectionScreen.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://Game.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://main/screens/MatchScreen.tscn" id="4"]
 [ext_resource type="Script" path="res://main/UILayer.gd" id="5"]
@@ -38,37 +38,46 @@ grow_vertical = 2
 
 [node name="TitleScreen" parent="UILayer/Screens" instance=ExtResource("7")]
 visible = false
-anchors_preset = 0
-anchor_right = 0.0
-anchor_bottom = 0.0
+layout_mode = 1
 
 [node name="ConnectionScreen" parent="UILayer/Screens" instance=ExtResource("2")]
 visible = false
-anchors_preset = 0
-anchor_right = 0.0
-anchor_bottom = 0.0
+layout_mode = 1
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="MatchScreen" parent="UILayer/Screens" instance=ExtResource("4")]
 visible = false
-anchors_preset = 0
+layout_mode = 1
+anchors_preset = 15
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="ReadyScreen" parent="UILayer/Screens" instance=ExtResource("6")]
 visible = false
-anchors_preset = 0
-anchor_right = 0.0
-anchor_bottom = 0.0
-grow_horizontal = 1
-grow_vertical = 1
+layout_mode = 1
 
 [node name="LeaderboardScreen" parent="UILayer/Screens" instance=ExtResource("14")]
 visible = false
-anchors_preset = 0
+layout_mode = 1
+anchors_preset = 15
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="CreditsScreen" parent="UILayer/Screens" instance=ExtResource("15")]
 visible = false
 anchors_preset = 0
 
 [node name="Overlay" type="Control" parent="UILayer"]
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -87,7 +96,6 @@ theme_override_fonts/font = ExtResource("8")
 text = "Waiting for players..."
 
 [node name="BackButton" type="Button" parent="UILayer/Overlay"]
-visible = false
 layout_mode = 0
 anchor_left = 1.0
 anchor_right = 1.0
@@ -101,11 +109,9 @@ clip_text = true
 script = ExtResource("17")
 
 [node name="MuteButton" type="Button" parent="UILayer/Overlay"]
-layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 30.0
-offset_bottom = 30.0
+layout_mode = 1
+offset_right = 24.0
+offset_bottom = 24.0
 focus_mode = 0
 toggle_mode = true
 icon = ExtResource("18")

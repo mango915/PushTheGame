@@ -31,7 +31,6 @@ func get_current_screen_name() -> String:
 
 func show_screen(name: String, info: Dictionary = {}) -> void:
 	var screen = screens.get_node(name)
-	print( screen )
 	if not screen:
 		return
 	
@@ -40,10 +39,8 @@ func show_screen(name: String, info: Dictionary = {}) -> void:
 	if screen.has_method("_show_screen"):
 		screen.callv("_show_screen", [info])
 	current_screen = screen
-	print( screen )
 	
 	if _is_ready:
-		print( "emitting" )
 		emit_signal("change_screen", name, screen)
 
 func hide_screen() -> void:
