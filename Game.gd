@@ -49,8 +49,6 @@ func game_start(players: Dictionary) -> void:
 		other_player.position = map.get_node("PlayerStartPositions/Player" + str(player_number)).position
 		other_player.rotation = map.get_node("PlayerStartPositions/Player" + str(player_number)).rotation
 		other_player.player_dead.connect(Callable(self, "_on_player_dead").bind(peer_id))
-		
-		print( other_player.position )
 
 		if not GameState.online_play:
 			other_player.player_controlled = true
@@ -124,8 +122,6 @@ func kill_player(peer_id) -> void:
 			_on_player_dead(peer_id)
 
 func _on_player_dead(peer_id) -> void:
-	emit_signal("player_dead", peer_id)
-
 	players_alive.erase(peer_id)
 	if not game_over and players_alive.size() == 1:
 		game_over = true

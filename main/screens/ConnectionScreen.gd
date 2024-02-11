@@ -101,7 +101,7 @@ func _on_CreateAccountButton_pressed() -> void:
 	visible = false
 	ui_layer.show_message("Creating account...")
 
-	var nakama_session = await Online.nakama_client.authenticate_email_async(email, password, username, true)
+	var nakama_session = await Online.nakama_client.authenticate_email_async(username, password, email, true)
 	
 	if nakama_session.is_exception():
 		visible = true

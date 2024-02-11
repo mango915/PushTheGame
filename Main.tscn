@@ -144,6 +144,7 @@ bus = &"Music"
 [connection signal="player_dead" from="Game" to="." method="_on_player_dead"]
 [connection signal="change_screen" from="UILayer" to="." method="_on_UILayer_change_screen"]
 [connection signal="play_local" from="UILayer/Screens/TitleScreen" to="." method="_on_TitleScreen_play_local"]
+[connection signal="play_online" from="UILayer/Screens/TitleScreen" to="." method="_on_TitleScreen_play_online"]
 [connection signal="ready_pressed" from="UILayer/Screens/ReadyScreen" to="." method="_on_ReadyScreen_ready_pressed"]
 [connection signal="pressed" from="UILayer/Overlay/BackButton" to="UILayer" method="_on_BackButton_pressed"]
 [connection signal="toggled" from="UILayer/Overlay/MuteButton" to="UILayer" method="_on_MuteButton_toggled"]

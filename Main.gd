@@ -148,7 +148,7 @@ func _on_game_started_signal() -> void:
 		match_started = true
 		music.play_random()
 
-func _on_game_player_dead_signal(peer_id: int) -> void:
+func _on_player_dead(peer_id: int) -> void:
 	if GameState.online_play:
 		var my_id = get_tree().get_unique_id()
 		if peer_id == my_id:
@@ -204,6 +204,5 @@ func _on_Music_song_finished(song) -> void:
 	if not music.current_song.playing:
 		music.play_random()
 
-
-func _on_player_dead(peer_id):
+func _on_game_player_dead(peer_id):
 	pass # Replace with function body.
