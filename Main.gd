@@ -139,7 +139,7 @@ func restart_game() -> void:
 	stop_game()
 	start_game()
 
-func _on_Game_game_started() -> void:
+func _on_game_started_signal() -> void:
 	ui_layer.hide_screen()
 	ui_layer.hide_all()
 	ui_layer.show_back_button()
@@ -148,13 +148,13 @@ func _on_Game_game_started() -> void:
 		match_started = true
 		music.play_random()
 
-func _on_Game_player_dead(peer_id: int) -> void:
+func _on_game_player_dead_signal(peer_id: int) -> void:
 	if GameState.online_play:
 		var my_id = get_tree().get_unique_id()
 		if peer_id == my_id:
 			ui_layer.show_message("You lose!")
 
-func _on_Game_game_over(peer_id: int) -> void:
+func _on_game_over_signal(peer_id: int) -> void:
 	players_ready.clear()
 
 	if not GameState.online_play:
@@ -174,7 +174,7 @@ func update_wins_leaderboard() -> void:
 		# If our session has expired, then wait until a new session is setup.
 		await Online.session_connected
 
-	Online.nakama_client.write_leaderboard_record_async(Online.nakama_session, 'fish_game_wins', 1)
+	Online.nakama_client.write_leaderboard_record_async(Online.nakama_session, 'push_the_game_wins', 1)
 
 @rpc("any_peer", "call_local") func show_winner(name: String, peer_id: int = 0, score: int = 0, is_match: bool = false) -> void:
 	if is_match:
@@ -203,3 +203,7 @@ func update_wins_leaderboard() -> void:
 func _on_Music_song_finished(song) -> void:
 	if not music.current_song.playing:
 		music.play_random()
+
+
+func _on_player_dead(peer_id):
+	pass # Replace with function body.

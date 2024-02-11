@@ -23,6 +23,7 @@ func _do_generate() -> void:
 	if GameState.online_play:
 		rpc("generate", pickup_name)
 	else:
+		print( pickup_name )
 		generate(pickup_name)
 
 @rpc("any_peer", "call_local") func generate(pickup_name: String) -> void:
@@ -37,6 +38,7 @@ func _do_generate() -> void:
 	current_pickup.name = pickup_name
 	pickup_parent.add_child(current_pickup)
 	current_pickup.global_position = pickup_position.global_position
+	print( current_pickup.global_position )
 
 	current_pickup.picked_up.connect(Callable(self, "_on_current_pickup_picked_up"))
 
@@ -49,6 +51,7 @@ func _on_current_pickup_picked_up() -> void:
 
 func map_object_start() -> void:
 	if current_pickup == null and (not GameState.online_play or is_multiplayer_authority()):
+		print( "generating..." )
 		_do_generate()
 	timer.wait_time = regenerate_delay
 

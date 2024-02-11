@@ -1,4 +1,4 @@
-"Fish Game" for Godot
+"Push The Game" for Godot
 =====================
 
 **"Fish Game" for Godot** is a 2-4 player online game built in the

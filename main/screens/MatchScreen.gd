@@ -49,10 +49,10 @@ func _start_matchmaking() -> void:
 	var data = {
 		min_count = min_players,
 		string_properties = {
-			game = "fish_game",
+			game = "push_the_game",
 			engine = "godot",
 		},
-		query = "+properties.game:fish_game +properties.engine:godot",
+		query = "+properties.game:push_the_game +properties.engine:godot",
 	}
 
 	OnlineMatch.start_matchmaking(Online.nakama_socket, data)

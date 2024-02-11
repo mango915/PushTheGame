@@ -2,8 +2,8 @@
 extends Node
 
 @export_multiline var allowed_transitions : String = '' :
-	set(value):
-		set_allowed_transitions(value)
+	set(allowed_transitons):
+		set_allowed_transitions(allowed_transitions)
 	get:
 		return allowed_transitions
 

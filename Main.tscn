@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Main.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://c1tbtdciosmlb" path="res://main/screens/ConnectionScreen.tscn" id="2"]
-[ext_resource type="PackedScene" path="res://Game.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://cdyj7ly8lcdlv" path="res://Game.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://main/screens/MatchScreen.tscn" id="4"]
 [ext_resource type="Script" path="res://main/UILayer.gd" id="5"]
 [ext_resource type="PackedScene" uid="uid://cvr6o7834fy1t" path="res://main/screens/ReadyScreen.tscn" id="6"]
@@ -23,6 +23,7 @@
 script = ExtResource("1")
 
 [node name="Game" parent="." instance=ExtResource("3")]
+position = Vector2(-1, 0)
 
 [node name="UILayer" type="CanvasLayer" parent="."]
 process_mode = 3
@@ -38,6 +39,7 @@ grow_vertical = 2
 
 [node name="TitleScreen" parent="UILayer/Screens" instance=ExtResource("7")]
 visible = false
+custom_minimum_size = Vector2(1024, 620)
 layout_mode = 1
 
 [node name="ConnectionScreen" parent="UILayer/Screens" instance=ExtResource("2")]
@@ -137,7 +139,11 @@ bus = &"Music"
 stream = ExtResource("11")
 bus = &"Music"
 
+[connection signal="game_over_signal" from="Game" to="." method="_on_game_over_signal"]
+[connection signal="game_started_signal" from="Game" to="." method="_on_game_started_signal"]
+[connection signal="player_dead" from="Game" to="." method="_on_player_dead"]
 [connection signal="change_screen" from="UILayer" to="." method="_on_UILayer_change_screen"]
+[connection signal="play_local" from="UILayer/Screens/TitleScreen" to="." method="_on_TitleScreen_play_local"]
 [connection signal="ready_pressed" from="UILayer/Screens/ReadyScreen" to="." method="_on_ReadyScreen_ready_pressed"]
 [connection signal="pressed" from="UILayer/Overlay/BackButton" to="UILayer" method="_on_BackButton_pressed"]
 [connection signal="toggled" from="UILayer/Overlay/MuteButton" to="UILayer" method="_on_MuteButton_toggled"]
