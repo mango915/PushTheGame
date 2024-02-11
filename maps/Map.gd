@@ -16,4 +16,5 @@ func get_map_rect() -> Rect2:
 				rect = child.get_used_rect()
 			else:
 				rect = rect.merge(child.get_used_rect())
+	print( "posizione: ", rect.position, TILE_SIZE, rect.size )
 	return Rect2(rect.position * TILE_SIZE, rect.size * TILE_SIZE)
