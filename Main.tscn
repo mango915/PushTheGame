@@ -45,8 +45,6 @@ layout_mode = 1
 [node name="ConnectionScreen" parent="UILayer/Screens" instance=ExtResource("2")]
 visible = false
 layout_mode = 1
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="MatchScreen" parent="UILayer/Screens" instance=ExtResource("4")]
 visible = false

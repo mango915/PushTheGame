@@ -18,9 +18,10 @@ func _ready() -> void:
 		var test_json_conv = JSON.new()
 		test_json_conv.parse(file.get_as_text())
 		var result = test_json_conv.get_data()
-		if result.result is Dictionary:
-			email = result.result['email']
-			password = result.result['password']
+		print( result )
+		if result is Dictionary:
+			email = result['email']
+			password = result['password']
 			login_email_field.text = email
 			login_password_field.text = password
 		file.close()
@@ -53,7 +54,10 @@ func do_login(save_credentials: bool = false) -> void:
 	else:
 		ui_layer.show_message("Logging in...")
 	
+	print( Online.nakama_client )
 	var nakama_session = await Online.nakama_client.authenticate_email_async(email, password, null, false)
+	
+	print( nakama_session )
 	
 	if nakama_session.is_exception():
 		visible = true
@@ -79,14 +83,14 @@ func do_login(save_credentials: bool = false) -> void:
 func _on_LoginButton_pressed() -> void:
 	email = login_email_field.text.strip_edges()
 	password = login_password_field.text.strip_edges()
-	do_login($TabContainer/Login/GridContainer/SaveCheckBox.pressed)
+	do_login(true)#$TabContainer/Login/GridContainer/SaveCheckBox.pressed)
 
 func _on_CreateAccountButton_pressed() -> void:
 	email = $"TabContainer/Create Account/GridContainer/Email".text.strip_edges()
 	password = $"TabContainer/Create Account/GridContainer/Password".text.strip_edges()
 	
 	var username = $"TabContainer/Create Account/GridContainer/Username".text.strip_edges()
-	var save_credentials = $"TabContainer/Create Account/GridContainer/SaveCheckBox".pressed
+	var save_credentials = true #$"TabContainer/Create Account/GridContainer/SaveCheckBox".pressed
 	
 	if email == '':
 		ui_layer.show_message("Must provide email")
@@ -101,7 +105,9 @@ func _on_CreateAccountButton_pressed() -> void:
 	visible = false
 	ui_layer.show_message("Creating account...")
 
-	var nakama_session = await Online.nakama_client.authenticate_email_async(username, password, email, true)
+	var nakama_session = await Online.nakama_client.authenticate_email_async(email, password, null, true)
+	
+	print( nakama_session )
 	
 	if nakama_session.is_exception():
 		visible = true

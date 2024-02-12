@@ -4,12 +4,13 @@ extends Node
 #   Online.nakama_host = 'nakama.example.com'
 #   Online.nakama_scheme = 'https'
 var nakama_server_key: String = 'defaultkey'
-var nakama_host: String = 'localhost'
+var nakama_host: String = '127.0.0.1'
 var nakama_port: int = 7350
 var nakama_scheme: String = 'http'
 
 # For other scripts to access:
-var nakama_client: NakamaClient: get = get_nakama_client, set = _set_readonly_variable
+#var nakama_client: NakamaClient: get = get_nakama_client, set = _set_readonly_variable
+var nakama_client: NakamaClient
 var nakama_session: NakamaSession: set = set_nakama_session
 var nakama_socket: NakamaSocket: set = _set_readonly_variable
 
@@ -26,9 +27,19 @@ func _set_readonly_variable(_value) -> void:
 func _ready() -> void:
 	# Don't stop processing messages from Nakama when the game is paused.
 	Nakama.process_mode = Node.PROCESS_MODE_ALWAYS
+	if nakama_client == null:
+		nakama_client = Nakama.create_client(
+				nakama_server_key,
+				nakama_host,
+				nakama_port,
+				nakama_scheme,
+				Nakama.DEFAULT_TIMEOUT,
+				NakamaLogger.LOG_LEVEL.ERROR)
+	print( "nakama_client created", nakama_client )
 
 func get_nakama_client() -> NakamaClient:
 	if nakama_client == null:
+		print( "creating nakama_client" )
 		nakama_client = Nakama.create_client(
 			nakama_server_key,
 			nakama_host,
@@ -36,7 +47,7 @@ func get_nakama_client() -> NakamaClient:
 			nakama_scheme,
 			Nakama.DEFAULT_TIMEOUT,
 			NakamaLogger.LOG_LEVEL.ERROR)
-
+	print( "nakama_client created", nakama_client )
 	return nakama_client
 
 func set_nakama_session(_nakama_session: NakamaSession) -> void:
