@@ -43,7 +43,6 @@ custom_minimum_size = Vector2(1024, 620)
 layout_mode = 1
 
 [node name="ConnectionScreen" parent="UILayer/Screens" instance=ExtResource("2")]
-visible = false
 layout_mode = 1
 
 [node name="MatchScreen" parent="UILayer/Screens" instance=ExtResource("4")]

@@ -4,7 +4,7 @@ extends Node
 #   Online.nakama_host = 'nakama.example.com'
 #   Online.nakama_scheme = 'https'
 var nakama_server_key: String = 'defaultkey'
-var nakama_host: String = '127.0.0.1'
+var nakama_host: String = '54.37.12.116'
 var nakama_port: int = 7350
 var nakama_scheme: String = 'http'
 
@@ -12,7 +12,7 @@ var nakama_scheme: String = 'http'
 #var nakama_client: NakamaClient: get = get_nakama_client, set = _set_readonly_variable
 var nakama_client: NakamaClient
 var nakama_session: NakamaSession: set = set_nakama_session
-var nakama_socket: NakamaSocket: set = _set_readonly_variable
+var nakama_socket: NakamaSocket
 
 # Internal variable for initializing the socket.
 var _nakama_socket_connecting := false
@@ -35,11 +35,9 @@ func _ready() -> void:
 				nakama_scheme,
 				Nakama.DEFAULT_TIMEOUT,
 				NakamaLogger.LOG_LEVEL.ERROR)
-	print( "nakama_client created", nakama_client )
 
 func get_nakama_client() -> NakamaClient:
 	if nakama_client == null:
-		print( "creating nakama_client" )
 		nakama_client = Nakama.create_client(
 			nakama_server_key,
 			nakama_host,
@@ -47,7 +45,6 @@ func get_nakama_client() -> NakamaClient:
 			nakama_scheme,
 			Nakama.DEFAULT_TIMEOUT,
 			NakamaLogger.LOG_LEVEL.ERROR)
-	print( "nakama_client created", nakama_client )
 	return nakama_client
 
 func set_nakama_session(_nakama_session: NakamaSession) -> void:
@@ -64,10 +61,8 @@ func connect_nakama_socket() -> void:
 	if _nakama_socket_connecting:
 		return
 	_nakama_socket_connecting = true
-
-	var new_socket = Nakama.create_socket_from(nakama_client)
-	await new_socket.connect_async(nakama_session)
-	nakama_socket = new_socket
+	nakama_socket = Nakama.create_socket_from(nakama_client)
+	var connected : NakamaAsyncResult = await nakama_socket.connect_async(nakama_session)
 	_nakama_socket_connecting = false
 
 	emit_signal("socket_connected", nakama_socket)

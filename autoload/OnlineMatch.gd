@@ -7,12 +7,12 @@ var min_players := 2
 var max_players := 4
 var client_version := 'dev'
 
-var nakama_multiplayer_bridge: NakamaMultiplayerBridge: set = _set_readonly_variable
+var nakama_multiplayer_bridge: NakamaMultiplayerBridge
 
 # Nakama variables:
-var nakama_socket: NakamaSocket: set = _set_readonly_variable
 var match_id: String: get = get_match_id, set = _set_readonly_variable
 var matchmaker_ticket: String: set = _set_readonly_variable
+var nakama_socket: NakamaSocket: set = _set_nakama_socket
 
 var players: Dictionary: set = _set_readonly_variable
 
@@ -84,6 +84,7 @@ func _set_readonly_variable(_value) -> void:
 	pass
 
 func _set_nakama_socket(_nakama_socket: NakamaSocket) -> void:
+
 	if nakama_socket == _nakama_socket:
 		return
 
@@ -104,7 +105,7 @@ func _set_nakama_socket(_nakama_socket: NakamaSocket) -> void:
 		nakama_multiplayer_bridge = NakamaMultiplayerBridge.new(nakama_socket)
 		nakama_multiplayer_bridge.match_joined.connect(Callable(self, "_on_match_joined"))
 		nakama_multiplayer_bridge.match_join_error.connect(Callable(self, "_on_match_join_error"))
-		get_tree().network_peer = nakama_multiplayer_bridge.multiplayer_peer
+		#get_tree().network_peer = nakama_multiplayer_bridge.multiplayer_peer
 
 func _ready() -> void:
 	var tree = get_tree()
@@ -127,7 +128,8 @@ func join_match(_nakama_socket: NakamaSocket, _match_id: String) -> void:
 	nakama_multiplayer_bridge.join_match(_match_id)
 
 func start_matchmaking(_nakama_socket: NakamaSocket, data: Dictionary = {}) -> void:
-	leave()
+	#leave()
+
 	_set_nakama_socket(_nakama_socket)
 	match_mode = MatchMode.MATCHMAKER
 
