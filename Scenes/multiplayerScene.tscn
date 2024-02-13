@@ -12,47 +12,54 @@ grow_vertical = 2
 size_flags_horizontal = 4
 script = ExtResource("1_ma10q")
 
-[node name="Host" type="Button" parent="."]
-layout_mode = 0
-offset_left = 253.0
-offset_top = 420.0
-offset_right = 410.0
-offset_bottom = 503.0
-text = "Host
-"
-
-[node name="Join" type="Button" parent="."]
-layout_mode = 0
-offset_left = 493.0
-offset_top = 427.0
-offset_right = 650.0
-offset_bottom = 510.0
-text = "Join"
-
-[node name="StartGame" type="Button" parent="."]
-layout_mode = 0
-offset_left = 731.0
-offset_top = 428.0
-offset_right = 888.0
-offset_bottom = 511.0
-text = "Start Game
-"
-
 [node name="LineEdit" type="LineEdit" parent="."]
 layout_mode = 0
-offset_left = 431.0
-offset_top = 586.0
-offset_right = 689.0
-offset_bottom = 617.0
+offset_left = 961.0
+offset_top = 368.0
+offset_right = 1261.0
+offset_bottom = 445.0
+theme_override_font_sizes/font_size = 50
 
 [node name="Label" type="Label" parent="."]
 layout_mode = 0
-offset_left = 362.0
-offset_top = 588.0
-offset_right = 418.0
-offset_bottom = 614.0
+offset_left = 776.0
+offset_top = 372.0
+offset_right = 935.0
+offset_bottom = 441.0
+theme_override_font_sizes/font_size = 50
 text = "Name:"
 
-[connection signal="button_down" from="Host" to="." method="_on_host_button_down"]
+[node name="Join" type="Button" parent="."]
+layout_mode = 2
+offset_left = 1131.0
+offset_top = 684.0
+offset_right = 1412.0
+offset_bottom = 784.0
+theme_override_font_sizes/font_size = 50
+text = "Join"
+
+[node name="StartGame" type="Button" parent="."]
+layout_mode = 2
+offset_left = 1456.0
+offset_top = 685.0
+offset_right = 1737.0
+offset_bottom = 785.0
+theme_override_font_sizes/font_size = 50
+text = "Start Game
+"
+
+[node name="Host" type="Button" parent="."]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+offset_left = 856.0
+offset_top = 684.0
+offset_right = 1090.0
+offset_bottom = 790.0
+size_flags_horizontal = 0
+theme_override_font_sizes/font_size = 50
+text = "Host
+"
+
 [connection signal="button_down" from="Join" to="." method="_on_join_button_down"]
 [connection signal="button_down" from="StartGame" to="." method="_on_start_game_button_down"]
+[connection signal="button_down" from="Host" to="." method="_on_host_button_down"]

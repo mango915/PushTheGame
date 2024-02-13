@@ -190,6 +190,7 @@ properties/3/spawn = true
 properties/3/replication_mode = 1
 
 [node name="Player" type="CharacterBody2D"]
+scale = Vector2(2, 2)
 script = ExtResource("1_8g4cu")
 bullet = ExtResource("2_4yf1o")
 
@@ -209,12 +210,12 @@ position = Vector2(0, 8)
 
 [node name="Sprite2D" type="Sprite2D" parent="GunRotation"]
 texture_filter = 1
-position = Vector2(34, 1.90735e-06)
+position = Vector2(30, 2)
 scale = Vector2(0.634826, 0.634826)
 texture = ExtResource("2_do3dg")
 
 [node name="BulletSpawn" type="Node2D" parent="GunRotation"]
-position = Vector2(64, -3)
+position = Vector2(60.5, -0.5)
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_llmis")
@@ -225,3 +226,7 @@ offset_top = -43.0
 offset_right = 19.0
 offset_bottom = -20.0
 text = "Name"
+
+[node name="Camera2D" type="Camera2D" parent="."]
+visible = false
+zoom = Vector2(1.5, 1.5)
