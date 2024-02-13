@@ -26,10 +26,8 @@ func _on_match_button_pressed(mode) -> void:
 
 	# Connect socket to realtime Nakama API if not connected.
 	if not Online.is_nakama_socket_connected():
-		print( "here" )
 		Online.connect_nakama_socket()
 		await Online.socket_connected
-		print( "Connesso ", Online.nakama_socket )
 
 	ui_layer.hide_message()
 
@@ -56,7 +54,6 @@ func _start_matchmaking() -> void:
 		},
 		query = "+properties.game:push_the_game +properties.engine:godot",
 	}
-	print( "Prima ", Online.nakama_socket )
 	OnlineMatch.start_matchmaking(Online.nakama_socket, data)
 
 func _create_match() -> void:

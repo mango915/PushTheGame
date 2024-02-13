@@ -109,9 +109,8 @@ func _set_nakama_socket(_nakama_socket: NakamaSocket) -> void:
 
 func _ready() -> void:
 	var tree = get_tree()
-	# FIXME
-	#tree.connect("peer_connected", Callable(self, "_on_network_peer_connected"))
-	#tree.connect("peer_disconnected", Callable(self, "_on_network_peer_disconnected"))
+	tree.get_multiplayer().peer_connected.connect(Callable(self, "_on_network_peer_connected"))
+	tree.get_multiplayer().peer_disconnected.connect(Callable(self, "_on_network_peer_disconnected"))
 
 func create_match(_nakama_socket: NakamaSocket) -> void:
 	leave()
@@ -214,7 +213,7 @@ func _check_enough_players() -> void:
 		emit_signal("match_not_ready")
 
 func _on_match_joined() -> void:
-	var my_peer_id = get_tree().get_unique_id()
+	var my_peer_id = get_tree().get_multiplayer().get_unique_id()
 	var presence: NakamaRTAPI.UserPresence = nakama_multiplayer_bridge.get_user_presence_for_peer(my_peer_id)
 	var player = Player.from_presence(presence, my_peer_id)
 	players[my_peer_id] = player

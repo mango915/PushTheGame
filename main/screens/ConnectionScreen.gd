@@ -18,7 +18,6 @@ func _ready() -> void:
 		var test_json_conv = JSON.new()
 		test_json_conv.parse(file.get_as_text())
 		var result = test_json_conv.get_data()
-		print( result )
 		if result is Dictionary:
 			email = result['email']
 			password = result['password']
@@ -54,10 +53,7 @@ func do_login(save_credentials: bool = false) -> void:
 	else:
 		ui_layer.show_message("Logging in...")
 	
-	print( Online.nakama_client )
 	var nakama_session = await Online.nakama_client.authenticate_email_async(email, password, null, false)
-	
-	print( nakama_session )
 	
 	if nakama_session.is_exception():
 		visible = true
@@ -106,8 +102,6 @@ func _on_CreateAccountButton_pressed() -> void:
 	ui_layer.show_message("Creating account...")
 
 	var nakama_session = await Online.nakama_client.authenticate_email_async(email, password, null, true)
-	
-	print( nakama_session )
 	
 	if nakama_session.is_exception():
 		visible = true
