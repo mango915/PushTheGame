@@ -1,11 +1,11 @@
 extends CharacterBody2D
 
 
-const SPEED = 300.0
-const JUMP_VELOCITY = -400.0
+const SPEED = 400.0
+const JUMP_VELOCITY = -1000.0
 
 # Get the gravity from the project settings to be synced with RigidBody nodes.
-var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
+var gravity = 2000 #ProjectSettings.get_setting("physics/2d/default_gravity")
 
 @export var bullet : PackedScene
 
@@ -18,12 +18,22 @@ func _ready():
 
 func _physics_process(delta):
 	if $MultiplayerSynchronizer.get_multiplayer_authority() != multiplayer.get_unique_id():
+		$Camera2D.enabled = false
 		return
+		$Camera2D.enabled = true
 	# Add the gravity.
 	if not is_on_floor():
 		velocity.y += gravity * delta
 
 	$GunRotation.look_at(get_viewport().get_mouse_position())
+	
+	var mouse_position = get_global_mouse_position()
+
+	if mouse_position.x > position.x:
+		$GunRotation/Sprite2D.flip_v = false
+	elif mouse_position.x < position.x:
+		$GunRotation/Sprite2D.flip_v = true
+		
 	# Handle jump.
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
