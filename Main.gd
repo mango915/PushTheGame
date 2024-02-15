@@ -68,7 +68,7 @@ func _on_UILayer_back_button() -> void:
 		ui_layer.show_screen("MatchScreen")
 
 func _on_ReadyScreen_ready_pressed() -> void:
-	rpc("player_ready", get_tree().get_unique_id())
+	rpc("player_ready", get_tree().get_multiplayer().get_unique_id())
 
 #####
 # OnlineMatch callbacks
@@ -96,7 +96,7 @@ func _on_OnlineMatch_player_left(player) -> void:
 		ui_layer.show_message(player.username + " has left")
 
 func _on_OnlineMatch_player_joined(player) -> void:
-	if get_tree().is_server():
+	if get_tree().get_multiplayer().is_server():
 		# Tell this new player about all the other players that are already ready.
 		for player_ready in players_ready.values():
 			rpc_id(player_ready.peer_id, "player_ready", player_ready.peer_id)
@@ -108,7 +108,7 @@ func _on_OnlineMatch_player_joined(player) -> void:
 @rpc("any_peer", "call_local") func player_ready(peer_id: int) -> void:
 	ready_screen.set_status(peer_id, "READY!")
 
-	if get_tree().is_server() and not players_ready.has(peer_id):
+	if get_tree().get_multiplayer().is_server() and not players_ready.has(peer_id):
 		players_ready[peer_id] = true
 		if players_ready.size() == OnlineMatch.players.size():
 			if OnlineMatch.match_state != OnlineMatch.MatchState.PLAYING:
@@ -159,7 +159,7 @@ func _on_game_over_signal(peer_id: int) -> void:
 
 	if not GameState.online_play:
 		show_winner(players[peer_id])
-	elif get_tree().is_server():
+	elif get_tree().get_multiplayer( ).is_server():
 		if not players_score.has(peer_id):
 			players_score[peer_id] = 1
 		else:
