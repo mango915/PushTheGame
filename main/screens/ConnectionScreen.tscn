@@ -16,6 +16,50 @@ cache/0/16/0/underline_position = 0.0
 cache/0/16/0/underline_thickness = 0.0
 cache/0/16/0/scale = 1.0
 cache/0/16/0/kerning_overrides/16/0 = Vector2(0, 0)
+cache/0/16/0/kerning_overrides/2/0 = Vector2(0, 0)
+cache/0/16/0/kerning_overrides/20/0 = Vector2(0, 0)
+cache/0/16/0/kerning_overrides/40/0 = Vector2(0, 0)
+cache/0/16/0/kerning_overrides/30/0 = Vector2(0, 0)
+cache/0/2/0/ascent = 0.0
+cache/0/2/0/descent = 0.0
+cache/0/2/0/underline_position = 0.0
+cache/0/2/0/underline_thickness = 0.0
+cache/0/2/0/scale = 1.0
+cache/0/2/0/kerning_overrides/16/0 = Vector2(0, 0)
+cache/0/2/0/kerning_overrides/2/0 = Vector2(0, 0)
+cache/0/2/0/kerning_overrides/20/0 = Vector2(0, 0)
+cache/0/2/0/kerning_overrides/40/0 = Vector2(0, 0)
+cache/0/2/0/kerning_overrides/30/0 = Vector2(0, 0)
+cache/0/20/0/ascent = 0.0
+cache/0/20/0/descent = 0.0
+cache/0/20/0/underline_position = 0.0
+cache/0/20/0/underline_thickness = 0.0
+cache/0/20/0/scale = 1.0
+cache/0/20/0/kerning_overrides/16/0 = Vector2(0, 0)
+cache/0/20/0/kerning_overrides/2/0 = Vector2(0, 0)
+cache/0/20/0/kerning_overrides/20/0 = Vector2(0, 0)
+cache/0/20/0/kerning_overrides/40/0 = Vector2(0, 0)
+cache/0/20/0/kerning_overrides/30/0 = Vector2(0, 0)
+cache/0/40/0/ascent = 0.0
+cache/0/40/0/descent = 0.0
+cache/0/40/0/underline_position = 0.0
+cache/0/40/0/underline_thickness = 0.0
+cache/0/40/0/scale = 1.0
+cache/0/40/0/kerning_overrides/16/0 = Vector2(0, 0)
+cache/0/40/0/kerning_overrides/2/0 = Vector2(0, 0)
+cache/0/40/0/kerning_overrides/20/0 = Vector2(0, 0)
+cache/0/40/0/kerning_overrides/40/0 = Vector2(0, 0)
+cache/0/40/0/kerning_overrides/30/0 = Vector2(0, 0)
+cache/0/30/0/ascent = 0.0
+cache/0/30/0/descent = 0.0
+cache/0/30/0/underline_position = 0.0
+cache/0/30/0/underline_thickness = 0.0
+cache/0/30/0/scale = 1.0
+cache/0/30/0/kerning_overrides/16/0 = Vector2(0, 0)
+cache/0/30/0/kerning_overrides/2/0 = Vector2(0, 0)
+cache/0/30/0/kerning_overrides/20/0 = Vector2(0, 0)
+cache/0/30/0/kerning_overrides/40/0 = Vector2(0, 0)
+cache/0/30/0/kerning_overrides/30/0 = Vector2(0, 0)
 
 [node name="ConnectionScreen" type="Control"]
 layout_mode = 3
@@ -54,6 +98,7 @@ columns = 2
 [node name="EmailLabel" type="Label" parent="TabContainer/Login/GridContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3")
+theme_override_font_sizes/font_size = 30
 text = "E-mail:"
 
 [node name="Email" type="LineEdit" parent="TabContainer/Login/GridContainer"]
@@ -65,6 +110,7 @@ caret_blink = true
 [node name="PasswordLabel" type="Label" parent="TabContainer/Login/GridContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3")
+theme_override_font_sizes/font_size = 30
 text = "Password:"
 
 [node name="Password" type="LineEdit" parent="TabContainer/Login/GridContainer"]
@@ -80,6 +126,7 @@ layout_mode = 2
 [node name="SaveCheckBox" type="CheckBox" parent="TabContainer/Login/GridContainer"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("1")
+theme_override_font_sizes/font_size = 30
 text = "Save email and password"
 
 [node name="LoginButton" type="Button" parent="TabContainer/Login"]

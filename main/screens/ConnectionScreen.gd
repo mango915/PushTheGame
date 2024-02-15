@@ -13,6 +13,7 @@ var _reconnect: bool = false
 var _next_screen
 
 func _ready() -> void:
+	return
 	if FileAccess.file_exists(CREDENTIALS_FILENAME):
 		var file = FileAccess.open(CREDENTIALS_FILENAME, FileAccess.READ)
 		var test_json_conv = JSON.new()
