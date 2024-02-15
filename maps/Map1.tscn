@@ -1378,7 +1378,7 @@ position = Vector2(120, -480)
 pickup_scene = ExtResource("3")
 
 [node name="TimedGenerator5" parent="Objects" instance=ExtResource("9")]
-position = Vector2(1260, -450)
+position = Vector2(1011.83, -143.589)
 pickup_scene = ExtResource("3")
 
 [node name="TimedGenerator6" parent="Objects" instance=ExtResource("9")]
@@ -1393,13 +1393,13 @@ pickup_scene = ExtResource("3")
 position = Vector2(606.953, -16.3366)
 
 [node name="Seaweed2" parent="Objects" instance=ExtResource("4")]
-position = Vector2(375, -330)
+position = Vector2(334.593, -143.589)
 
 [node name="Seaweed3" parent="Objects" instance=ExtResource("4")]
-position = Vector2(600, -510)
+position = Vector2(976.688, -144.449)
 
 [node name="Seaweed4" parent="Objects" instance=ExtResource("4")]
-position = Vector2(1155, -120)
+position = Vector2(575.47, -241.608)
 
 [node name="Seaweed5" parent="Objects" instance=ExtResource("4")]
 position = Vector2(75, -180)
@@ -1411,7 +1411,7 @@ position = Vector2(75, -510)
 position = Vector2(767.293, -592.413)
 
 [node name="Seaweed8" parent="Objects" instance=ExtResource("4")]
-position = Vector2(1305, -450)
+position = Vector2(792.187, -241.608)
 
 [node name="Seaweed9" parent="Objects" instance=ExtResource("4")]
 position = Vector2(1065, -630)
