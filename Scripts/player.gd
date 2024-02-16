@@ -71,15 +71,20 @@ func fire(direction):
 @rpc("any_peer","call_local")
 func take_damage():
 	if health > 0:
-		health -= 30
-	if health < 0:
+		health -= 10
+		print("total_health = ",health)
+		$ProgressBar.value = health
+		
+	if health <= 0:
 		is_dead = true
 		GameManager.players[$MultiplayerSynchronizer.get_multiplayer_authority()].alive = false
 		$AnimationPlayer.play("die")
-	
 		health_depleted.emit()
-	print("total_health = ",health)
-	$ProgressBar.value = (health)
+		$ProgressBar.value = 0
+	if multiplayer.is_server():
+		for i in GameManager.players:
+			if i != 1:
+				self.take_damage.rpc_id(i)
 
 
 func _on_timer_timeout():
