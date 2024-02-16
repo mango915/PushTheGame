@@ -1,19 +1,22 @@
 extends CharacterBody2D
 
+var dir: Vector2 = Vector2.ZERO
+var speed: float = 1200.0
+var gravity: float = 1000.0
 
-const SPEED = 500.0
+func _ready() -> void:
+	velocity = dir.normalized() * speed
+	rotation = velocity.angle()
 
-# Get the gravity from the project settings to be synced with RigidBody nodes.
-var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
-var direction : Vector2
-
-func _ready():
-	direction = Vector2(1,0).rotated(rotation)
-
-func _physics_process(delta):
-
-	velocity = SPEED * direction
-	if not is_on_floor():
-		velocity.y += gravity * delta
-
-	move_and_slide()
+		
+func _physics_process(delta: float) -> void:
+	rotation = velocity.angle()
+	velocity.y += gravity * delta
+	
+	var collision = move_and_collide(velocity * delta)
+	if not collision: return
+	if collision.get_collider().has_method("take_damage"):
+		collision.get_collider().take_damage.rpc()
+	
+	queue_free()
+	#velocity = velocity.bounce(collision.get_normal()) * 0.6

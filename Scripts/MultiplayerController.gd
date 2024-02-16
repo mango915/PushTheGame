@@ -52,7 +52,7 @@ func send_player_information(name, id):
 
 @rpc("any_peer","call_local")
 func start_game():
-	var scene = load("res://Scenes/test_scene.tscn").instantiate()
+	var scene = load("res://Scenes/test_scene_2.tscn").instantiate()
 	get_tree().root.add_child(scene)
 	self.hide()
 
