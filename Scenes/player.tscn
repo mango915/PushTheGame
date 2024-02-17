@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://c8s2cf0y7ipjp"]
+[gd_scene load_steps=15 format=3 uid="uid://c8s2cf0y7ipjp"]
 
 [ext_resource type="Script" path="res://Scripts/player.gd" id="1_8g4cu"]
 [ext_resource type="PackedScene" uid="uid://du8if47y1yxax" path="res://Scenes/arrow.tscn" id="2_mbyvi"]
@@ -27,6 +27,10 @@ height = 127.0
 atlas = ExtResource("4_xeffk")
 region = Rect2(1152, 1152, 128, 128)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_aau8f"]
+atlas = ExtResource("4_xeffk")
+region = Rect2(1024, 512, 128, 128)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_vt6dd"]
 atlas = ExtResource("4_xeffk")
 region = Rect2(896, 1280, 128, 128)
@@ -35,33 +39,6 @@ region = Rect2(896, 1280, 128, 128)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ojeda"]
 bg_color = Color(1, 1, 1, 1)
-
-[sub_resource type="Animation" id="Animation_6h3jw"]
-resource_name = "die"
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1),
-"transitions": PackedFloat32Array(1, 1),
-"update": 0,
-"values": [Vector2(0, 0), Vector2(2.08165e-12, 30)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Sprite2D:rotation")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.2),
-"transitions": PackedFloat32Array(1, 1),
-"update": 0,
-"values": [0.0, 1.5708]
-}
 
 [sub_resource type="Animation" id="Animation_7o873"]
 length = 0.001
@@ -90,6 +67,33 @@ tracks/1/keys = {
 "values": [0.0]
 }
 
+[sub_resource type="Animation" id="Animation_6h3jw"]
+resource_name = "die"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(2.08165e-12, 30)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite2D:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 1.5708]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_j0jnl"]
 _data = {
 "RESET": SubResource("Animation_7o873"),
@@ -112,6 +116,9 @@ offset_left = -37.0
 offset_top = -95.0
 offset_right = 10.0
 offset_bottom = -72.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 15
 text = "Name"
 
 [node name="Camera2D" type="Camera2D" parent="."]
@@ -125,6 +132,10 @@ texture = ExtResource("3_yqxub")
 [node name="Hand1" type="Sprite2D" parent="HandPivot"]
 position = Vector2(68, 23)
 texture = SubResource("AtlasTexture_srvpx")
+
+[node name="ArrowVisual" type="Sprite2D" parent="HandPivot"]
+position = Vector2(99, -5)
+texture = SubResource("AtlasTexture_aau8f")
 
 [node name="Sprite2D" type="Sprite2D" parent="HandPivot"]
 position = Vector2(80, -2)

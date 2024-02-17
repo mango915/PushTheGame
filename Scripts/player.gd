@@ -11,6 +11,7 @@ const JUMP_VELOCITY = -1000.0
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity = 2000 #ProjectSettings.get_setting("physics/2d/default_gravity")
 var can_shoot = false
+var shooting_force = 0
 
 @export var bullet : PackedScene
 
@@ -43,9 +44,12 @@ func _physics_process(delta):
 	# Handle jump.
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
-	if Input.is_action_just_pressed("fire") and can_shoot:
-		fire.rpc(get_global_mouse_position())
-
+	if Input.is_action_pressed("fire") and can_shoot:
+		shooting_force += 50
+	if Input.is_action_just_released("fire") and can_shoot:
+		print("shooting_force = ",shooting_force)
+		fire.rpc(get_global_mouse_position(),shooting_force)
+		shooting_force = 0
 	# Get the input direction and handle the movement/deceleration.
 	# As good practice, you should replace UI actions with custom gameplay actions.
 	var direction = Input.get_axis("ui_left", "ui_right")
@@ -62,16 +66,17 @@ func _physics_process(delta):
 	#%ProgressBar.value = health
 
 @rpc("any_peer","call_local")
-func fire(direction):
+func fire(direction, shooting_force):
 	var bullet = bullet.instantiate()
 	bullet.global_position = $HandPivot/ArrowSpawn.global_position
 	bullet.dir = direction - $HandPivot/ArrowSpawn.global_position
+	bullet.speed = shooting_force
 	get_tree().root.add_child(bullet)
 
 @rpc("any_peer","call_local")
 func take_damage():
 	if health > 0:
-		health -= 10
+		health -= 100
 		print("total_health = ",health)
 		$ProgressBar.value = health
 		
