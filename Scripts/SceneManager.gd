@@ -3,12 +3,15 @@ extends Node2D
 @export var player_scene : PackedScene
 @export var textures : Resource
 var alive_players = 0
+var players = {}
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	var index = 0
 	for i in GameManager.players:
 		var current_player = player_scene.instantiate()
 		current_player.name = str(GameManager.players[i].id)
+		players[GameManager.players[i].id] = current_player
 		#current_player.get_node("Sprite2D").texture = textures
 		add_child(current_player)
 		current_player.health_depleted.connect(_on_player_died)
@@ -30,6 +33,7 @@ func _on_player_died():
 		print("Finished the round!")
 		%GameOver.visible = true
 		if GameManager.players[multiplayer.get_unique_id()].alive:
+			players[multiplayer.get_unique_id()].can_shoot = false
 			GameManager.players[multiplayer.get_unique_id()].score += 1
 			%GameOver/Label.text = "You Win! \n current score : " + str(GameManager.players[multiplayer.get_unique_id()].score)
 		#get_tree().paused = true

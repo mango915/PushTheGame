@@ -1,9 +1,14 @@
-[gd_scene load_steps=15 format=3 uid="uid://c8s2cf0y7ipjp"]
+[gd_scene load_steps=20 format=3 uid="uid://c8s2cf0y7ipjp"]
 
 [ext_resource type="Script" path="res://Scripts/player.gd" id="1_8g4cu"]
 [ext_resource type="PackedScene" uid="uid://du8if47y1yxax" path="res://Scenes/arrow.tscn" id="2_mbyvi"]
 [ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Scenes/red_player.tres" id="3_yqxub"]
 [ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/spritesheet_retina.png" id="4_xeffk"]
+[ext_resource type="Script" path="res://Scripts/fsm.gd" id="5_7n17n"]
+[ext_resource type="Script" path="res://Scripts/States/idle.gd" id="6_v5l3r"]
+[ext_resource type="Script" path="res://Scripts/States/run.gd" id="7_ec1ms"]
+[ext_resource type="Script" path="res://Scripts/States/fall.gd" id="8_fdv54"]
+[ext_resource type="Script" path="res://Scripts/States/jump.gd" id="9_k3kr2"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_llmis"]
 properties/0/path = NodePath(".:position")
@@ -167,5 +172,28 @@ libraries = {
 wait_time = 0.5
 one_shot = true
 autostart = true
+
+[node name="FSM" type="Node" parent="."]
+script = ExtResource("5_7n17n")
+
+[node name="Idle" type="Node" parent="FSM"]
+script = ExtResource("6_v5l3r")
+
+[node name="Run" type="Node" parent="FSM"]
+script = ExtResource("7_ec1ms")
+
+[node name="Fall" type="Node" parent="FSM"]
+script = ExtResource("8_fdv54")
+
+[node name="CoyoteTimer" type="Timer" parent="FSM/Fall"]
+wait_time = 0.1
+one_shot = true
+
+[node name="Jump" type="Node" parent="FSM"]
+script = ExtResource("9_k3kr2")
+
+[node name="JumpBufferTimer" type="Timer" parent="."]
+wait_time = 0.1
+one_shot = true
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

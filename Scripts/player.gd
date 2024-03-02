@@ -1,15 +1,31 @@
 extends CharacterBody2D
+class_name Player_FSM_new
+
+const ACCELERATION = 5000.0
+const MAX_SPEED = 500.0
+const JUMP_SPEED = -1800.0
+
+const GRAVITY = 4500
+const FALL_GRAVITY = 2300
+const TERMINAL_VELOCITY = 900
+
+const AIR_MULTIPLIER = 0.5
+
+@onready var fsm = $FSM
+@onready var ap = $AnimationPlayer
+@onready var s = $Sprite2D
+@onready var jump_buffer_timer = $JumpBufferTimer
 
 var health = 100.0
 var is_dead = false
 
 signal health_depleted
 
-const SPEED = 400.0
-const JUMP_VELOCITY = -1000.0
+#const SPEED = 400.0
+#const JUMP_VELOCITY = -1000.0
 
 # Get the gravity from the project settings to be synced with RigidBody nodes.
-var gravity = 2000 #ProjectSettings.get_setting("physics/2d/default_gravity")
+#var gravity = 2000 #ProjectSettings.get_setting("physics/2d/default_gravity")
 var can_shoot = false
 var shooting_force = 0
 
@@ -27,43 +43,33 @@ func _ready():
 	else:
 		$Camera2D.enabled = true
 	
-	GameManager.players[$MultiplayerSynchronizer.get_multiplayer_authority()].alive = true 
+	GameManager.players[$MultiplayerSynchronizer.get_multiplayer_authority()].alive = true
+	
+	fsm.change_state("idle") 
 
 func _physics_process(delta):
+	
 	if $MultiplayerSynchronizer.get_multiplayer_authority() != multiplayer.get_unique_id():
 		return
 		
 	if is_dead:
 		return
-	# Add the gravity.
-	if not is_on_floor():
-		velocity.y += gravity * delta
-
+		
+	if get_jump_input():
+		jump_buffer_timer.start()
+	sync_direction()
+	fsm.physics_update(delta)
+	
+	# Handle shooting
 	$HandPivot.look_at(get_global_mouse_position())
 	
-	# Handle jump.
-	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
-		velocity.y = JUMP_VELOCITY
 	if Input.is_action_pressed("fire") and can_shoot:
 		shooting_force += 50
+		
 	if Input.is_action_just_released("fire") and can_shoot:
 		print("shooting_force = ",shooting_force)
 		fire.rpc(get_global_mouse_position(),shooting_force)
 		shooting_force = 0
-	# Get the input direction and handle the movement/deceleration.
-	# As good practice, you should replace UI actions with custom gameplay actions.
-	var direction = Input.get_axis("ui_left", "ui_right")
-	if direction:
-		velocity.x = direction * SPEED
-		if  velocity.x<0:
-			$Sprite2D.flip_h = true
-		else:
-			$Sprite2D.flip_h = false
-	else:
-		velocity.x = move_toward(velocity.x, 0, SPEED)
-
-	move_and_slide()
-	#%ProgressBar.value = health
 
 @rpc("any_peer","call_local")
 func fire(direction, shooting_force):
@@ -82,6 +88,7 @@ func take_damage():
 		
 	if health <= 0:
 		is_dead = true
+		can_shoot = false
 		GameManager.players[$MultiplayerSynchronizer.get_multiplayer_authority()].alive = false
 		$AnimationPlayer.play("die")
 		health_depleted.emit()
@@ -90,6 +97,35 @@ func take_damage():
 		for i in GameManager.players:
 			if i != 1:
 				self.take_damage.rpc_id(i)
+
+
+func sync_direction():
+	var input_x = get_input_x()
+	if input_x == 0: return
+	s.flip_h = input_x == -1
+
+func update_velocity(delta):
+	velocity.y = move_toward(velocity.y, TERMINAL_VELOCITY, (GRAVITY if fsm.current_state == "jump" else FALL_GRAVITY) * delta)
+	velocity.x = move_toward(velocity.x, get_input_x() * MAX_SPEED, (1 if is_on_floor() else AIR_MULTIPLIER) * ACCELERATION * delta)
+	print("player velocity: %s" % velocity)
+
+func play(anim):
+	ap.play(anim)
+
+func queue(anim):
+	ap.queue(anim)
+
+func clear_queue():
+	ap.clear_queue()
+
+func get_input_x():
+	return Input.get_axis("ui_left", "ui_right")
+
+func get_jump_input():
+	return Input.is_action_just_pressed("ui_accept")
+
+func get_jump_hold():
+	return Input.is_action_pressed("ui_accept")
 
 
 func _on_timer_timeout():
