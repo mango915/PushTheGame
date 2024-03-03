@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://dwlw0cvwd1ki8"]
+[gd_scene load_steps=3 format=3 uid="uid://dwlw0cvwd1ki8"]
 
 [ext_resource type="Script" path="res://Scripts/MultiplayerController.gd" id="1_ma10q"]
+[ext_resource type="TileSet" uid="uid://csl8myge1effy" path="res://Scenes/tileset.tres" id="2_bucej"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -59,6 +60,25 @@ size_flags_horizontal = 0
 theme_override_font_sizes/font_size = 50
 text = "Host
 "
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+color = Color(0.901961, 0.901961, 0.901961, 1)
+
+[node name="TileMap3" type="TileMap" parent="CanvasLayer"]
+position = Vector2(73, 30)
+tile_set = ExtResource("2_bucej")
+format = 2
+layer_0/name = "Background"
+layer_0/tile_data = PackedInt32Array(196611, 0, 0, 327688, 0, 0, 196620, 0, 0, 196615, 0, 1, 65537, 0, 1, 458757, 0, 2)
 
 [connection signal="button_down" from="Join" to="." method="_on_join_button_down"]
 [connection signal="button_down" from="StartGame" to="." method="_on_start_game_button_down"]
