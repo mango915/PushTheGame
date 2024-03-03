@@ -1,28 +1,15 @@
-[gd_scene load_steps=23 format=3 uid="uid://c8s2cf0y7ipjp"]
+[gd_scene load_steps=24 format=3 uid="uid://c8s2cf0y7ipjp"]
 
 [ext_resource type="Script" path="res://Scripts/player.gd" id="1_8g4cu"]
 [ext_resource type="PackedScene" uid="uid://du8if47y1yxax" path="res://Scenes/arrow.tscn" id="2_mbyvi"]
 [ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Scenes/red_player.tres" id="3_yqxub"]
+[ext_resource type="Script" path="res://Scripts/bow.gd" id="4_dwu3o"]
 [ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/spritesheet_retina.png" id="4_xeffk"]
 [ext_resource type="Script" path="res://Scripts/fsm.gd" id="5_7n17n"]
 [ext_resource type="Script" path="res://Scripts/States/idle.gd" id="6_v5l3r"]
 [ext_resource type="Script" path="res://Scripts/States/run.gd" id="7_ec1ms"]
 [ext_resource type="Script" path="res://Scripts/States/fall.gd" id="8_fdv54"]
 [ext_resource type="Script" path="res://Scripts/States/jump.gd" id="9_k3kr2"]
-
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_llmis"]
-properties/0/path = NodePath(".:position")
-properties/0/spawn = true
-properties/0/replication_mode = 1
-properties/1/path = NodePath("HandPivot:rotation")
-properties/1/spawn = true
-properties/1/replication_mode = 1
-properties/2/path = NodePath("ProgressBar:value")
-properties/2/spawn = true
-properties/2/replication_mode = 1
-properties/3/path = NodePath("Sprite2D:flip_h")
-properties/3/spawn = true
-properties/3/replication_mode = 1
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_nlme1"]
 radius = 41.75
@@ -188,15 +175,25 @@ _data = {
 }
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_w0xy0"]
-radius = 32.0
-height = 64.0
+radius = 40.0
+height = 124.0
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_vc7ay"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath("Bow:rotation")
+properties/2/spawn = true
+properties/2/replication_mode = 1
+properties/3/path = NodePath("Sprite2D:flip_h")
+properties/3/spawn = true
+properties/3/replication_mode = 1
 
 [node name="Player" type="CharacterBody2D"]
 script = ExtResource("1_8g4cu")
-bullet = ExtResource("2_mbyvi")
-
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_llmis")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(1.25, -1)
@@ -218,25 +215,27 @@ visible = false
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("3_yqxub")
 
-[node name="HandPivot" type="Node2D" parent="."]
+[node name="Bow" type="Node2D" parent="."]
+script = ExtResource("4_dwu3o")
+arrow = ExtResource("2_mbyvi")
 
-[node name="Hand1" type="Sprite2D" parent="HandPivot"]
+[node name="Hand1" type="Sprite2D" parent="Bow"]
 position = Vector2(68, 23)
 texture = SubResource("AtlasTexture_srvpx")
 
-[node name="ArrowVisual" type="Sprite2D" parent="HandPivot"]
+[node name="ArrowVisual" type="Sprite2D" parent="Bow"]
 position = Vector2(99, -5)
 texture = SubResource("AtlasTexture_aau8f")
 
-[node name="Sprite2D" type="Sprite2D" parent="HandPivot"]
+[node name="Sprite2D" type="Sprite2D" parent="Bow"]
 position = Vector2(80, -2)
 texture = SubResource("AtlasTexture_vt6dd")
 
-[node name="Hand2" type="Sprite2D" parent="HandPivot"]
+[node name="Hand2" type="Sprite2D" parent="Bow"]
 position = Vector2(78, -30)
 texture = SubResource("AtlasTexture_srvpx")
 
-[node name="ArrowSpawn" type="Node2D" parent="HandPivot"]
+[node name="ArrowSpawn" type="Node2D" parent="Bow"]
 position = Vector2(120, 0)
 
 [node name="ProgressBar" type="ProgressBar" parent="."]
@@ -287,9 +286,12 @@ collision_layer = 2
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HurtBox"]
-position = Vector2(0, 29)
+position = Vector2(1, 0)
 shape = SubResource("CapsuleShape2D_w0xy0")
 debug_color = Color(0.858824, 0.337255, 0.352941, 0.419608)
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_vc7ay")
 
 [connection signal="timeout" from="ShootingTimer" to="." method="_on_timer_timeout"]
 [connection signal="body_entered" from="HurtBox" to="." method="_on_hurt_box_body_entered"]

@@ -27,9 +27,9 @@ signal health_depleted
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 #var gravity = 2000 #ProjectSettings.get_setting("physics/2d/default_gravity")
 var can_shoot = false
-var shooting_force = 0
+#var shooting_force = 0
 
-@export var bullet : PackedScene
+#@export var bullet : PackedScene
 
 func _ready():
 	$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
@@ -61,28 +61,28 @@ func _physics_process(delta):
 	fsm.physics_update(delta)
 	
 	# Handle shooting
-	$HandPivot.look_at(get_global_mouse_position())
+	#$HandPivot.look_at(get_global_mouse_position())
 	
-	if Input.is_action_pressed("fire") and can_shoot:
-		shooting_force += 50
+	#if Input.is_action_pressed("fire") and can_shoot:
+	#	shooting_force += 50
 		
-	if Input.is_action_just_released("fire") and can_shoot:
-		print("shooting_force = ",shooting_force)
-		fire.rpc(get_global_mouse_position(),shooting_force)
-		shooting_force = 0
+	#if Input.is_action_just_released("fire") and can_shoot:
+	#	print("shooting_force = ",shooting_force)
+	#	fire.rpc(get_global_mouse_position(),shooting_force)
+	#	shooting_force = 0
 
-@rpc("any_peer","call_local")
-func fire(direction, shooting_force):
-	var bullet = bullet.instantiate()
-	bullet.global_position = $HandPivot/ArrowSpawn.global_position
-	bullet.dir = direction - $HandPivot/ArrowSpawn.global_position
-	bullet.speed = shooting_force
-	get_tree().root.add_child(bullet)
+#@rpc("any_peer","call_local")
+#func fire(direction, shooting_force):
+#	var bullet = bullet.instantiate()
+#	bullet.global_position = $HandPivot/ArrowSpawn.global_position
+#	bullet.dir = direction - $HandPivot/ArrowSpawn.global_position
+#	bullet.speed = shooting_force
+#	get_tree().root.add_child(bullet)
 
 @rpc("any_peer","call_local")
 func take_damage():
 	if health > 0:
-		health -= 100
+		health -= 20
 		print("total_health = ",health)
 		$ProgressBar.value = health
 		
