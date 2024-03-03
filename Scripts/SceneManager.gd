@@ -48,7 +48,7 @@ func _on_button_button_down():
 
 @rpc("any_peer","call_local")
 func start_next_game():
-	var scene = load("res://Scenes/test_scene_2.tscn").instantiate()
+	var scene = load("res://Scenes/test_scene_3.tscn").instantiate()
 	get_tree().root.add_child(scene)
 	self.queue_free()
 	#self.hide()

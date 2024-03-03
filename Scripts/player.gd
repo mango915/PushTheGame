@@ -6,7 +6,7 @@ const MAX_SPEED = 500.0
 const JUMP_SPEED = -1800.0
 
 const GRAVITY = 4500
-const FALL_GRAVITY = 2300
+const FALL_GRAVITY = 2000
 const TERMINAL_VELOCITY = 900
 
 const AIR_MULTIPLIER = 0.5
@@ -107,7 +107,7 @@ func sync_direction():
 func update_velocity(delta):
 	velocity.y = move_toward(velocity.y, TERMINAL_VELOCITY, (GRAVITY if fsm.current_state == "jump" else FALL_GRAVITY) * delta)
 	velocity.x = move_toward(velocity.x, get_input_x() * MAX_SPEED, (1 if is_on_floor() else AIR_MULTIPLIER) * ACCELERATION * delta)
-	print("player velocity: %s" % velocity)
+	#print("player velocity: %s" % velocity)
 
 func play(anim):
 	ap.play(anim)
@@ -130,3 +130,8 @@ func get_jump_hold():
 
 func _on_timer_timeout():
 	can_shoot = true
+
+
+func _on_hurt_box_body_entered(body):
+	if multiplayer.is_server():
+		self.take_damage()

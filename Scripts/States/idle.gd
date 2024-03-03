@@ -4,8 +4,8 @@ func enter():
 	if fsm.previous_state == "fall":
 		#obj.play("ground")
 		obj.queue("idle")
-	#else:
-		#obj.play("idle")
+	else:
+		obj.play("idle")
 
 func physics_update(delta):
 	obj.update_velocity(delta)
