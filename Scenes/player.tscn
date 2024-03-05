@@ -1,10 +1,8 @@
-[gd_scene load_steps=24 format=3 uid="uid://c8s2cf0y7ipjp"]
+[gd_scene load_steps=19 format=3 uid="uid://c8s2cf0y7ipjp"]
 
 [ext_resource type="Script" path="res://Scripts/player.gd" id="1_8g4cu"]
-[ext_resource type="PackedScene" uid="uid://du8if47y1yxax" path="res://Scenes/arrow.tscn" id="2_mbyvi"]
+[ext_resource type="PackedScene" uid="uid://tws83rui873a" path="res://Scenes/gun.tscn" id="3_33yfx"]
 [ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Scenes/red_player.tres" id="3_yqxub"]
-[ext_resource type="Script" path="res://Scripts/bow.gd" id="4_dwu3o"]
-[ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/spritesheet_retina.png" id="4_xeffk"]
 [ext_resource type="Script" path="res://Scripts/fsm.gd" id="5_7n17n"]
 [ext_resource type="Script" path="res://Scripts/States/idle.gd" id="6_v5l3r"]
 [ext_resource type="Script" path="res://Scripts/States/run.gd" id="7_ec1ms"]
@@ -14,18 +12,6 @@
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_nlme1"]
 radius = 41.75
 height = 127.0
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_srvpx"]
-atlas = ExtResource("4_xeffk")
-region = Rect2(1152, 1152, 128, 128)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_aau8f"]
-atlas = ExtResource("4_xeffk")
-region = Rect2(1024, 512, 128, 128)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_vt6dd"]
-atlas = ExtResource("4_xeffk")
-region = Rect2(896, 1280, 128, 128)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_q078h"]
 
@@ -129,6 +115,7 @@ tracks/1/keys = {
 
 [sub_resource type="Animation" id="Animation_bxwbl"]
 resource_name = "run"
+loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -160,10 +147,10 @@ tracks/2/path = NodePath("Sprite2D:skew")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.2),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0, 0.2, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [0.0, 0.120428]
+"values": [0.0, 0.120428, -0.181514]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_j0jnl"]
@@ -215,29 +202,6 @@ visible = false
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("3_yqxub")
 
-[node name="Bow" type="Node2D" parent="."]
-script = ExtResource("4_dwu3o")
-arrow = ExtResource("2_mbyvi")
-
-[node name="Hand1" type="Sprite2D" parent="Bow"]
-position = Vector2(68, 23)
-texture = SubResource("AtlasTexture_srvpx")
-
-[node name="ArrowVisual" type="Sprite2D" parent="Bow"]
-position = Vector2(99, -5)
-texture = SubResource("AtlasTexture_aau8f")
-
-[node name="Sprite2D" type="Sprite2D" parent="Bow"]
-position = Vector2(80, -2)
-texture = SubResource("AtlasTexture_vt6dd")
-
-[node name="Hand2" type="Sprite2D" parent="Bow"]
-position = Vector2(78, -30)
-texture = SubResource("AtlasTexture_srvpx")
-
-[node name="ArrowSpawn" type="Node2D" parent="Bow"]
-position = Vector2(120, 0)
-
 [node name="ProgressBar" type="ProgressBar" parent="."]
 offset_left = -38.0
 offset_top = -113.0
@@ -252,6 +216,8 @@ show_percentage = false
 libraries = {
 "": SubResource("AnimationLibrary_j0jnl")
 }
+
+[node name="Gun" parent="." instance=ExtResource("3_33yfx")]
 
 [node name="FSM" type="Node" parent="."]
 script = ExtResource("5_7n17n")

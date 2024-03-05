@@ -9,7 +9,6 @@ var velocity
 func _ready() -> void:
 	velocity = dir.normalized() * speed
 	rotation = velocity.angle()
-
 		
 func _physics_process(delta: float) -> void:
 	rotation = velocity.angle()

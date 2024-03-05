@@ -26,6 +26,7 @@ func _physics_process(delta):
 		
 	if Input.is_action_just_released("fire") and get_parent().can_shoot:
 		print("shooting_force = ",shooting_force)
+		#get_parent().velocity.x -= 500
 		fire.rpc(get_global_mouse_position(),shooting_force)
 		shooting_force = 0
 

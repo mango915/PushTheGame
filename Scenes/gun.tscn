@@ -1,0 +1,28 @@
+[gd_scene load_steps=6 format=3 uid="uid://tws83rui873a"]
+
+[ext_resource type="Script" path="res://Scenes/gun.gd" id="1_s016p"]
+[ext_resource type="PackedScene" uid="uid://du8if47y1yxax" path="res://Scenes/arrow.tscn" id="2_k3wg5"]
+[ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/spritesheet_retina.png" id="3_lv3ai"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6xo67"]
+atlas = ExtResource("3_lv3ai")
+region = Rect2(1152, 1152, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_524bf"]
+atlas = ExtResource("3_lv3ai")
+region = Rect2(1024, 384, 128, 128)
+
+[node name="Gun" type="Node2D" groups=["Weapon"]]
+script = ExtResource("1_s016p")
+bullet_scene = ExtResource("2_k3wg5")
+
+[node name="Hand1" type="Sprite2D" parent="."]
+position = Vector2(68, 23)
+texture = SubResource("AtlasTexture_6xo67")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(104, -5)
+texture = SubResource("AtlasTexture_524bf")
+
+[node name="BulletSpawn" type="Marker2D" parent="."]
+position = Vector2(139, -8)
