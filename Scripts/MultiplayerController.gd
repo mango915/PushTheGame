@@ -14,7 +14,6 @@ func _ready():
 	
 	pass # Replace with function body.
 
-
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pass
@@ -32,11 +31,10 @@ func peer_disconnected(id):
 	
 func connected_to_server():
 	print("Connected to server!")
-	send_player_information.rpc_id(1,$LineEdit.text, multiplayer.get_unique_id())
+	send_player_information.rpc_id(1, $LineEdit.text, multiplayer.get_unique_id())
 
 func connection_failed():
 	print("Connection failed!")
-
 
 @rpc("any_peer")
 func send_player_information(name, id):
@@ -48,11 +46,11 @@ func send_player_information(name, id):
 		}
 	if multiplayer.is_server():
 		for i in GameManager.players:
-			send_player_information.rpc(GameManager.players[i].name, i)
+			send_player_information. rpc (GameManager.players[i].name, i)
 
-@rpc("any_peer","call_local")
+@rpc("any_peer", "call_local")
 func start_game():
-	var scene = load("res://Scenes/test_scene_3.tscn").instantiate()
+	var scene = load("res://Scenes/Levels/test_scene_4.tscn").instantiate()
 	get_tree().root.add_child(scene)
 	self.hide()
 
@@ -61,7 +59,7 @@ func _on_host_button_down():
 	var error = peer.create_server(port, 6)
 	
 	if error != OK:
-		print("cannot host: "+ error)
+		print("cannot host: " + error)
 		return
 		
 	peer.get_host().compress(ENetConnection.COMPRESS_RANGE_CODER)
@@ -72,17 +70,15 @@ func _on_host_button_down():
 	
 	pass # Replace with function body.
 
-
 func _on_join_button_down():
 	peer = ENetMultiplayerPeer.new()
-	peer.create_client(address,port)
+	peer.create_client(address, port)
 	peer.get_host().compress(ENetConnection.COMPRESS_RANGE_CODER)
 	multiplayer.set_multiplayer_peer(peer)
 	
 	pass # Replace with function body.
 
-
 func _on_start_game_button_down():
-	start_game.rpc()
+	start_game. rpc ()
 	
 	pass # Replace with function body.

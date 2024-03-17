@@ -1,17 +1,17 @@
 [gd_scene load_steps=5 format=3 uid="uid://du8if47y1yxax"]
 
-[ext_resource type="Script" path="res://Scripts/Bullet.gd" id="1_e58e2"]
-[ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/spritesheet_retina.png" id="2_2n4b0"]
+[ext_resource type="Script" path="res://Scripts/arrow.gd" id="1_eabph"]
+[ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/spritesheet_retina.png" id="2_0f82i"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ux4vv"]
-atlas = ExtResource("2_2n4b0")
+atlas = ExtResource("2_0f82i")
 region = Rect2(1024, 512, 128, 128)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mn5s6"]
 size = Vector2(20, 15)
 
 [node name="Arrow" type="Area2D"]
-script = ExtResource("1_e58e2")
+script = ExtResource("1_eabph")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(2.08165e-12, 2.08165e-12)

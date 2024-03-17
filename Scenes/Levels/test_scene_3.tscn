@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" path="res://Scripts/SceneManager.gd" id="1_ai3a2"]
 [ext_resource type="PackedScene" uid="uid://c8s2cf0y7ipjp" path="res://Scenes/player.tscn" id="2_vhrys"]
-[ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Scenes/red_player.tres" id="3_q04v1"]
-[ext_resource type="TileSet" uid="uid://csl8myge1effy" path="res://Scenes/tileset.tres" id="4_faeoc"]
+[ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/red_player.tres" id="3_q04v1"]
+[ext_resource type="TileSet" uid="uid://csl8myge1effy" path="res://Assets/tileset.tres" id="4_faeoc"]
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_ai3a2")

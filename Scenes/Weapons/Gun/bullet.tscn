@@ -1,0 +1,24 @@
+[gd_scene load_steps=5 format=3 uid="uid://bq7db8r82sw47"]
+
+[ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/spritesheet_retina.png" id="1_5p8ml"]
+[ext_resource type="Script" path="res://Scripts/bullet.gd" id="1_nambr"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5qno2"]
+atlas = ExtResource("1_5p8ml")
+region = Rect2(0, 512, 128, 128)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1woro"]
+size = Vector2(25, 27)
+
+[node name="Bullet" type="Area2D"]
+script = ExtResource("1_nambr")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(0, -23)
+texture = SubResource("AtlasTexture_5qno2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0.5, 0.5)
+shape = SubResource("RectangleShape2D_1woro")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

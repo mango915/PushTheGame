@@ -2,11 +2,11 @@
 
 [ext_resource type="Script" path="res://Scripts/SceneManager.gd" id="1_dafey"]
 [ext_resource type="PackedScene" uid="uid://c8s2cf0y7ipjp" path="res://Scenes/player.tscn" id="2_fjxj5"]
-[ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Scenes/red_player.tres" id="3_h54g6"]
-[ext_resource type="Texture2D" uid="uid://c8rvw2y55p36i" path="res://Assets/Backgrounds/bg-1.png" id="4_f3cgk"]
-[ext_resource type="Texture2D" uid="uid://svqy6iwenaee" path="res://Assets/banners.png" id="5_48m0l"]
-[ext_resource type="Texture2D" uid="uid://d2b42ql48528x" path="res://Assets/Backgrounds/bg-2.png" id="5_l4cgr"]
-[ext_resource type="Texture2D" uid="uid://dvjlerongwkdk" path="res://Assets/Backgrounds/tileset.png" id="6_38e2y"]
+[ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/red_player.tres" id="3_h54g6"]
+[ext_resource type="Texture2D" path="res://Assets/Backgrounds/bg-1.png" id="4_f3cgk"]
+[ext_resource type="Texture2D" path="res://Assets/banners.png" id="5_48m0l"]
+[ext_resource type="Texture2D" path="res://Assets/Backgrounds/bg-2.png" id="5_l4cgr"]
+[ext_resource type="Texture2D" path="res://Assets/Backgrounds/tileset.png" id="6_38e2y"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_gkqo4"]
 texture = ExtResource("6_38e2y")

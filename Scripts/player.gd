@@ -19,6 +19,10 @@ const AIR_MULTIPLIER = 0.5
 var health = 100.0
 var is_dead = false
 
+var weapon = null
+var weapon_scale = Vector2(1, 1)
+var weapon_rotation = 0
+
 signal health_depleted
 
 #const SPEED = 400.0
@@ -45,11 +49,13 @@ func _ready():
 	
 	GameManager.players[$MultiplayerSynchronizer.get_multiplayer_authority()].alive = true
 	
-	fsm.change_state("idle") 
+	fsm.change_state("idle")
 
 func _physics_process(delta):
 	
 	if $MultiplayerSynchronizer.get_multiplayer_authority() != multiplayer.get_unique_id():
+		$WeaponAttach.get_child(0).scale = weapon_scale
+		$WeaponAttach.get_child(0).rotation = weapon_rotation
 		return
 		
 	if is_dead:
@@ -59,6 +65,9 @@ func _physics_process(delta):
 		jump_buffer_timer.start()
 	sync_direction()
 	fsm.physics_update(delta)
+
+	weapon_scale = $WeaponAttach.get_child(0).scale
+	weapon_rotation = $WeaponAttach.get_child(0).rotation
 	
 	# Handle shooting
 	#$HandPivot.look_at(get_global_mouse_position())
@@ -79,11 +88,11 @@ func _physics_process(delta):
 #	bullet.speed = shooting_force
 #	get_tree().root.add_child(bullet)
 
-@rpc("any_peer","call_local")
+@rpc("any_peer", "call_local")
 func take_damage():
 	if health > 0:
 		health -= 20
-		print("total_health = ",health)
+		print("total_health = ", health)
 		$ProgressBar.value = health
 		
 	if health <= 0:
@@ -98,11 +107,10 @@ func take_damage():
 			if i != 1:
 				self.take_damage.rpc_id(i)
 
-
 func sync_direction():
 	var input_x = get_input_x()
 	if input_x == 0: return
-	s.flip_h = input_x == -1
+	s.flip_h = input_x == - 1
 
 func update_velocity(delta):
 	velocity.y = move_toward(velocity.y, TERMINAL_VELOCITY, (GRAVITY if fsm.current_state == "jump" else FALL_GRAVITY) * delta)
@@ -127,11 +135,15 @@ func get_jump_input():
 func get_jump_hold():
 	return Input.is_action_pressed("ui_accept")
 
-
 func _on_timer_timeout():
 	can_shoot = true
-
 
 func _on_hurt_box_body_entered(body):
 	if multiplayer.is_server():
 		self.take_damage()
+
+func attach_weapon(weapon):
+	$WeaponAttach.add_child(weapon)
+	#weapon.global_position = Vector2(0, 0)
+	#weapon_scale = $WeaponAttach.scale
+	#weapon_rotation = $WeaponAttach.rotation

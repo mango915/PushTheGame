@@ -9,10 +9,10 @@ func _ready():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta):
 	
-	if get_parent().get_node("MultiplayerSynchronizer").get_multiplayer_authority() != multiplayer.get_unique_id():
+	if get_parent().get_parent().get_node("MultiplayerSynchronizer").get_multiplayer_authority() != multiplayer.get_unique_id():
 		return
 		
-	if get_parent().is_dead:
+	if get_parent().get_parent().is_dead:
 		return
 		
 	# look left or right horizontally depending on mouse position
@@ -22,7 +22,7 @@ func _physics_process(delta):
 	else:
 		scale = Vector2(1, 1)
 
-	if Input.is_action_just_pressed("fire") and get_parent().can_shoot:
+	if Input.is_action_just_pressed("fire") and get_parent().get_parent().can_shoot:
 		fire.rpc(get_global_mouse_position())
 
 @rpc("any_peer", "call_local")
@@ -36,5 +36,5 @@ func fire(direction):
 	bullet.global_rotation = dir.angle()
 	bullet.dir = dir
 
-	bullet.speed = 10000
+	bullet.speed = 5000
 	get_tree().root.add_child(bullet)

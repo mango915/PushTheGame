@@ -12,7 +12,7 @@ func _ready() -> void:
 		
 func _physics_process(delta: float) -> void:
 	rotation = velocity.angle()
-	#velocity.y += gravity * delta
+	velocity.y += gravity * delta
 	
 	position += velocity * delta
 	

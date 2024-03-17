@@ -1,24 +1,24 @@
 [gd_scene load_steps=7 format=3 uid="uid://o62inw4r1ln4"]
 
-[ext_resource type="Script" path="res://Scripts/bow.gd" id="1_mksce"]
-[ext_resource type="PackedScene" uid="uid://du8if47y1yxax" path="res://Scenes/arrow.tscn" id="2_yh027"]
-[ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/spritesheet_retina.png" id="3_2v7p3"]
+[ext_resource type="Script" path="res://Scripts/bow.gd" id="1_dxwbo"]
+[ext_resource type="PackedScene" uid="uid://du8if47y1yxax" path="res://Scenes/Weapons/Bow/arrow.tscn" id="2_84nlv"]
+[ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/spritesheet_retina.png" id="3_ag7re"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_srvpx"]
-atlas = ExtResource("3_2v7p3")
+atlas = ExtResource("3_ag7re")
 region = Rect2(1152, 1152, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_aau8f"]
-atlas = ExtResource("3_2v7p3")
+atlas = ExtResource("3_ag7re")
 region = Rect2(1024, 512, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_vt6dd"]
-atlas = ExtResource("3_2v7p3")
+atlas = ExtResource("3_ag7re")
 region = Rect2(896, 1280, 128, 128)
 
 [node name="Bow" type="Node2D" groups=["Weapon"]]
-script = ExtResource("1_mksce")
-arrow = ExtResource("2_yh027")
+script = ExtResource("1_dxwbo")
+arrow = ExtResource("2_84nlv")
 
 [node name="Hand1" type="Sprite2D" parent="."]
 position = Vector2(68, 23)

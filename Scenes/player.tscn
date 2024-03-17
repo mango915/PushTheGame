@@ -1,8 +1,7 @@
-[gd_scene load_steps=19 format=3 uid="uid://c8s2cf0y7ipjp"]
+[gd_scene load_steps=18 format=3 uid="uid://c8s2cf0y7ipjp"]
 
 [ext_resource type="Script" path="res://Scripts/player.gd" id="1_8g4cu"]
-[ext_resource type="PackedScene" uid="uid://tws83rui873a" path="res://Scenes/gun.tscn" id="3_33yfx"]
-[ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Scenes/red_player.tres" id="3_yqxub"]
+[ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/red_player.tres" id="3_yqxub"]
 [ext_resource type="Script" path="res://Scripts/fsm.gd" id="5_7n17n"]
 [ext_resource type="Script" path="res://Scripts/States/idle.gd" id="6_v5l3r"]
 [ext_resource type="Script" path="res://Scripts/States/run.gd" id="7_ec1ms"]
@@ -165,19 +164,22 @@ _data = {
 radius = 40.0
 height = 124.0
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_vc7ay"]
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_ek0q8"]
 properties/0/path = NodePath(".:position")
 properties/0/spawn = true
 properties/0/replication_mode = 1
 properties/1/path = NodePath(".:rotation")
 properties/1/spawn = true
 properties/1/replication_mode = 1
-properties/2/path = NodePath("Bow:rotation")
+properties/2/path = NodePath("Sprite2D:flip_h")
 properties/2/spawn = true
 properties/2/replication_mode = 1
-properties/3/path = NodePath("Sprite2D:flip_h")
+properties/3/path = NodePath(".:weapon_scale")
 properties/3/spawn = true
 properties/3/replication_mode = 1
+properties/4/path = NodePath(".:weapon_rotation")
+properties/4/spawn = true
+properties/4/replication_mode = 1
 
 [node name="Player" type="CharacterBody2D"]
 script = ExtResource("1_8g4cu")
@@ -217,8 +219,6 @@ libraries = {
 "": SubResource("AnimationLibrary_j0jnl")
 }
 
-[node name="Gun" parent="." instance=ExtResource("3_33yfx")]
-
 [node name="FSM" type="Node" parent="."]
 script = ExtResource("5_7n17n")
 
@@ -256,8 +256,10 @@ position = Vector2(1, 0)
 shape = SubResource("CapsuleShape2D_w0xy0")
 debug_color = Color(0.858824, 0.337255, 0.352941, 0.419608)
 
+[node name="WeaponAttach" type="Node2D" parent="."]
+
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_vc7ay")
+replication_config = SubResource("SceneReplicationConfig_ek0q8")
 
 [connection signal="timeout" from="ShootingTimer" to="." method="_on_timer_timeout"]
 [connection signal="body_entered" from="HurtBox" to="." method="_on_hurt_box_body_entered"]

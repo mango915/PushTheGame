@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://dwlw0cvwd1ki8"]
 
 [ext_resource type="Script" path="res://Scripts/MultiplayerController.gd" id="1_ma10q"]
-[ext_resource type="TileSet" uid="uid://csl8myge1effy" path="res://Scenes/tileset.tres" id="2_bucej"]
+[ext_resource type="TileSet" uid="uid://csl8myge1effy" path="res://Assets/tileset.tres" id="2_bucej"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
