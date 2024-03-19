@@ -2,6 +2,7 @@ extends Node2D
 
 @export var player_scene: PackedScene
 @export var weapon_scene: PackedScene
+@export var alternate_weapon_scene: PackedScene
 @export var textures: Resource
 var alive_players = 0
 var players = {}
@@ -11,7 +12,10 @@ func _ready():
 	var index = 0
 	for i in GameManager.players:
 		var current_player = player_scene.instantiate()
-		current_player.attach_weapon(weapon_scene.instantiate())
+		if index == 0:
+			current_player.attach_weapon(alternate_weapon_scene.instantiate())
+		else:
+			current_player.attach_weapon(weapon_scene.instantiate())
 		current_player.name = str(GameManager.players[i].id)
 		players[GameManager.players[i].id] = current_player
 		#current_player.get_node("Sprite2D").texture = textures
@@ -41,7 +45,7 @@ func _on_player_died():
 
 func _on_button_button_down():
 	print("game should restart")
-	start_next_game. rpc ()
+	start_next_game.rpc()
 
 @rpc("any_peer", "call_local")
 func start_next_game():
