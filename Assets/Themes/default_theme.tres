@@ -1,0 +1,25 @@
+[gd_resource type="Theme" load_steps=7 format=3 uid="uid://bybbedfkdrq7s"]
+
+[ext_resource type="FontFile" uid="uid://dvxp167vylqw6" path="res://Assets/Power Smash.ttf" id="1_jnil0"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mheqt"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_l1x82"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_j5wit"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_o1evb"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3bnrp"]
+
+[resource]
+default_font = ExtResource("1_jnil0")
+default_font_size = 32
+Button/colors/font_focus_color = Color(0.294118, 0.643137, 0.690196, 1)
+Button/colors/font_hover_color = Color(0.298039, 0.615686, 0.686275, 1)
+Button/colors/font_pressed_color = Color(0.270588, 0.635294, 0.698039, 1)
+Button/styles/disabled = SubResource("StyleBoxEmpty_mheqt")
+Button/styles/focus = SubResource("StyleBoxEmpty_l1x82")
+Button/styles/hover = SubResource("StyleBoxEmpty_j5wit")
+Button/styles/normal = SubResource("StyleBoxEmpty_o1evb")
+Button/styles/pressed = SubResource("StyleBoxEmpty_3bnrp")

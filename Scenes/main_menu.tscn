@@ -1,0 +1,196 @@
+[gd_scene load_steps=3 format=3 uid="uid://c46jwdq74ilpo"]
+
+[ext_resource type="Theme" uid="uid://bybbedfkdrq7s" path="res://Assets/Themes/default_theme.tres" id="1_juq3s"]
+[ext_resource type="Script" path="res://Scenes/main_menu.gd" id="2_qnsno"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_juq3s")
+script = ExtResource("2_qnsno")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.141176, 0.145098, 0.172549, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 64
+theme_override_constants/margin_top = 64
+theme_override_constants/margin_right = 64
+theme_override_constants/margin_bottom = 64
+
+[node name="MainMenu" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="MarginContainer/MainMenu"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 128
+text = "Main Menu"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ButtonsVBox" type="VBoxContainer" parent="MarginContainer/MainMenu"]
+layout_mode = 2
+size_flags_vertical = 10
+
+[node name="HostGameButton" type="Button" parent="MarginContainer/MainMenu/ButtonsVBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 32
+text = "Host Game"
+
+[node name="JoinGameButton" type="Button" parent="MarginContainer/MainMenu/ButtonsVBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 32
+text = "Join Game"
+
+[node name="SettingsButton" type="Button" parent="MarginContainer/MainMenu/ButtonsVBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 32
+text = "Settings"
+
+[node name="ExitButton" type="Button" parent="MarginContainer/MainMenu/ButtonsVBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 32
+text = "Exit"
+
+[node name="HostScreen" type="VBoxContainer" parent="MarginContainer"]
+visible = false
+layout_mode = 2
+alignment = 1
+
+[node name="GridContainer" type="GridContainer" parent="MarginContainer/HostScreen"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+columns = 2
+
+[node name="Label" type="Label" parent="MarginContainer/HostScreen/GridContainer"]
+layout_mode = 2
+text = "Name:"
+
+[node name="HostPlayerLineEdit" type="LineEdit" parent="MarginContainer/HostScreen/GridContainer"]
+custom_minimum_size = Vector2(150, 2.08165e-12)
+layout_mode = 2
+text = "Host"
+
+[node name="Label2" type="Label" parent="MarginContainer/HostScreen/GridContainer"]
+layout_mode = 2
+text = "Port"
+
+[node name="PortLineEdit" type="LineEdit" parent="MarginContainer/HostScreen/GridContainer"]
+custom_minimum_size = Vector2(150, 2.08165e-12)
+layout_mode = 2
+text = "8910"
+
+[node name="HostButton" type="Button" parent="MarginContainer/HostScreen"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = "Host.."
+
+[node name="JoinScreen" type="VBoxContainer" parent="MarginContainer"]
+visible = false
+layout_mode = 2
+alignment = 1
+
+[node name="GridContainer" type="GridContainer" parent="MarginContainer/JoinScreen"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+columns = 2
+
+[node name="Label" type="Label" parent="MarginContainer/JoinScreen/GridContainer"]
+layout_mode = 2
+text = "Name:"
+
+[node name="JoinPlayerLineEdit" type="LineEdit" parent="MarginContainer/JoinScreen/GridContainer"]
+custom_minimum_size = Vector2(150, 2.08165e-12)
+layout_mode = 2
+text = "Peer"
+
+[node name="Label2" type="Label" parent="MarginContainer/JoinScreen/GridContainer"]
+layout_mode = 2
+text = "Ip"
+
+[node name="IpLineEdit" type="LineEdit" parent="MarginContainer/JoinScreen/GridContainer"]
+custom_minimum_size = Vector2(150, 2.08165e-12)
+layout_mode = 2
+text = "127.0.0.1"
+
+[node name="Label3" type="Label" parent="MarginContainer/JoinScreen/GridContainer"]
+layout_mode = 2
+text = "Port"
+
+[node name="PortLineEdit" type="LineEdit" parent="MarginContainer/JoinScreen/GridContainer"]
+custom_minimum_size = Vector2(150, 2.08165e-12)
+layout_mode = 2
+text = "8910"
+
+[node name="JoinButton" type="Button" parent="MarginContainer/JoinScreen"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = "Join.."
+
+[node name="LobbyScreen" type="HBoxContainer" parent="MarginContainer"]
+visible = false
+layout_mode = 2
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/LobbyScreen"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+alignment = 1
+
+[node name="Label" type="Label" parent="MarginContainer/LobbyScreen/VBoxContainer"]
+layout_mode = 2
+text = "Connected players..."
+
+[node name="TextEdit" type="TextEdit" parent="MarginContainer/LobbyScreen/VBoxContainer"]
+custom_minimum_size = Vector2(2.08165e-12, 500)
+layout_mode = 2
+text = "Compa
+fdewuh
+iuhscd"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/LobbyScreen"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 2
+
+[node name="StartGameButton" type="Button" parent="MarginContainer/LobbyScreen/VBoxContainer2"]
+layout_mode = 2
+text = "Start game"
+
+[connection signal="pressed" from="MarginContainer/MainMenu/ButtonsVBox/HostGameButton" to="." method="_on_host_game_button_pressed"]
+[connection signal="pressed" from="MarginContainer/MainMenu/ButtonsVBox/JoinGameButton" to="." method="_on_join_game_button_pressed"]
+[connection signal="pressed" from="MarginContainer/MainMenu/ButtonsVBox/ExitButton" to="." method="_on_exit_button_pressed"]
+[connection signal="pressed" from="MarginContainer/HostScreen/HostButton" to="." method="_on_host_button_pressed"]
+[connection signal="pressed" from="MarginContainer/JoinScreen/JoinButton" to="." method="_on_join_button_pressed"]
+[connection signal="pressed" from="MarginContainer/LobbyScreen/VBoxContainer2/StartGameButton" to="." method="_on_start_game_button_pressed"]

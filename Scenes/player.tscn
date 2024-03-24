@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://c8s2cf0y7ipjp"]
+[gd_scene load_steps=17 format=3 uid="uid://c8s2cf0y7ipjp"]
 
 [ext_resource type="Script" path="res://Scripts/player.gd" id="1_8g4cu"]
 [ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/red_player.tres" id="3_yqxub"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://Scripts/States/idle.gd" id="6_v5l3r"]
 [ext_resource type="Script" path="res://Scripts/States/run.gd" id="7_ec1ms"]
 [ext_resource type="Script" path="res://Scripts/States/fall.gd" id="8_fdv54"]
+[ext_resource type="Script" path="res://Scripts/States/double_jump.gd" id="8_rxbkg"]
 [ext_resource type="Script" path="res://Scripts/States/jump.gd" id="9_k3kr2"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_nlme1"]
@@ -83,81 +84,10 @@ tracks/1/keys = {
 "values": [0.0, 1.5708]
 }
 
-[sub_resource type="Animation" id="Animation_t7ko4"]
-resource_name = "idle"
-length = 0.8
-loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.2, 0.5, 0.8),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 0,
-"values": [Vector2(0, 0), Vector2(4, 1), Vector2(-1, 2), Vector2(0, 0)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Sprite2D:rotation")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.2, 0.5, 0.8),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 0,
-"values": [0.0, 0.0802851, -0.120428, 0.0]
-}
-
-[sub_resource type="Animation" id="Animation_bxwbl"]
-resource_name = "run"
-loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(0, 0)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Sprite2D:rotation")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [0.0]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Sprite2D:skew")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.2, 0.5),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [0.0, 0.120428, -0.181514]
-}
-
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_j0jnl"]
 _data = {
 "RESET": SubResource("Animation_7o873"),
-"die": SubResource("Animation_6h3jw"),
-"idle": SubResource("Animation_t7ko4"),
-"run": SubResource("Animation_bxwbl")
+"die": SubResource("Animation_6h3jw")
 }
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_w0xy0"]
@@ -200,6 +130,7 @@ text = "Name"
 
 [node name="Camera2D" type="Camera2D" parent="."]
 visible = false
+zoom = Vector2(0.5, 0.5)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("3_yqxub")
@@ -237,6 +168,9 @@ one_shot = true
 
 [node name="Jump" type="Node" parent="FSM"]
 script = ExtResource("9_k3kr2")
+
+[node name="DoubleJump" type="Node" parent="FSM"]
+script = ExtResource("8_rxbkg")
 
 [node name="ShootingTimer" type="Timer" parent="."]
 wait_time = 0.5
