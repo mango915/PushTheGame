@@ -27,7 +27,7 @@ func _physics_process(delta):
 		print("shooting_force = ", shooting_force)
 		#get_parent().velocity.x -= 500
 		fire. rpc (get_global_mouse_position(), shooting_force)
-		shooting_force = 0
+		shooting_force = 300
 
 @rpc("any_peer", "call_local")
 func fire(direction, shooting_force):
