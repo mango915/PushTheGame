@@ -10,13 +10,14 @@ const FALL_GRAVITY = 2000
 const TERMINAL_VELOCITY = 900
 
 const AIR_MULTIPLIER = 0.5
+const MAX_HEALTH = 100
 
 @onready var fsm = $FSM
 @onready var ap = $AnimationPlayer
 @onready var s = $Sprite2D
 @onready var jump_buffer_timer = $JumpBufferTimer
 
-var health = 100.0
+var health = MAX_HEALTH
 var is_dead = false
 
 var weapon = null
@@ -94,6 +95,18 @@ func take_damage():
 			if i != 1:
 				self.take_damage.rpc_id(i)
 
+@rpc("any_peer", "call_local")
+func heal_damage():
+	if health < MAX_HEALTH:
+		health = min(health + 50, MAX_HEALTH)
+		print("total_health = ", health)
+		$ProgressBar.value = health
+		
+	if multiplayer.is_server():
+		for i in GameManager.players:
+			if i != 1:
+				self.heal_damage.rpc_id(i)
+
 func sync_direction():
 	var input_x = get_input_x()
 	if input_x == 0: return
@@ -125,12 +138,12 @@ func get_jump_hold():
 func _on_timer_timeout():
 	can_shoot = true
 
-func _on_hurt_box_body_entered(body):
+func _on_hurt_box_body_entered(_body):
 	if multiplayer.is_server():
 		self.take_damage()
 
-func attach_weapon(weapon):
-	$WeaponAttach.add_child(weapon)
+func attach_weapon(new_weapon):
+	$WeaponAttach.add_child(new_weapon)
 	#weapon.global_position = Vector2(0, 0)
 	#weapon_scale = $WeaponAttach.scale
 	#weapon_rotation = $WeaponAttach.rotation
