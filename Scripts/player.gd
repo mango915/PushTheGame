@@ -69,24 +69,11 @@ func _physics_process(delta):
 	weapon_scale = $WeaponAttach.get_child(0).scale
 	weapon_rotation = $WeaponAttach.get_child(0).rotation
 	
-	# Handle shooting
-	#$HandPivot.look_at(get_global_mouse_position())
-	
-	#if Input.is_action_pressed("fire") and can_shoot:
-	#	shooting_force += 50
-		
-	#if Input.is_action_just_released("fire") and can_shoot:
-	#	print("shooting_force = ",shooting_force)
-	#	fire.rpc(get_global_mouse_position(),shooting_force)
-	#	shooting_force = 0
-
-#@rpc("any_peer","call_local")
-#func fire(direction, shooting_force):
-#	var bullet = bullet.instantiate()
-#	bullet.global_position = $HandPivot/ArrowSpawn.global_position
-#	bullet.dir = direction - $HandPivot/ArrowSpawn.global_position
-#	bullet.speed = shooting_force
-#	get_tree().root.add_child(bullet)
+func _input(event):
+	if $MultiplayerSynchronizer.get_multiplayer_authority() != multiplayer.get_unique_id():
+		return
+	if event.is_action_pressed("ui_down"):
+		position.y += 1
 
 @rpc("any_peer", "call_local")
 func take_damage():
