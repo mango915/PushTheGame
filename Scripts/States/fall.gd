@@ -5,7 +5,7 @@ var can_double_jump = false
 
 func enter():
 	#obj.play("fall")
-	if fsm.previous_state != "jump":
+	if fsm.previous_state != "jump" and fsm.previous_state != "doublejump":
 		coyote_timer.start()
 		can_double_jump = true
 	elif fsm.previous_state == "jump":
