@@ -6,7 +6,7 @@ extends Control
 @onready var lobby_screen = $MarginContainer/LobbyScreen
 @onready var host_player_name_line_edit = $MarginContainer/HostScreen/GridContainer/HostPlayerLineEdit
 @onready var join_player_name_line_edit = $MarginContainer/JoinScreen/GridContainer/JoinPlayerLineEdit
-
+@onready var hobby_player_list = $MarginContainer/LobbyScreen/VBoxContainer/TextEdit
 @export var address = "127.0.0.1"
 @export var port = 8910
 
@@ -21,6 +21,9 @@ func _ready():
 
 func peer_connected(id):
 	print("Player Connected: " + str(id))
+	#if multiplayer.is_server():
+		#send_player_information.rpc(GameManager.players[id].name, id)
+	#	hobby_player_list.text += GameManager.players[id].name + "\n"
 
 func peer_disconnected(id):
 	print("Player disconnected: " + str(id))
@@ -32,6 +35,7 @@ func peer_disconnected(id):
 	
 func connected_to_server():
 	print("Connected to server!")
+	hobby_player_list.text = ""
 	send_player_information.rpc_id(1, join_player_name_line_edit.text, multiplayer.get_unique_id())
 
 func connection_failed():
@@ -45,6 +49,7 @@ func send_player_information(name, id):
 			"id": id,
 			"score": 0
 		}
+		hobby_player_list.text += GameManager.players[id].name + "\n"
 	if multiplayer.is_server():
 		for i in GameManager.players:
 			send_player_information.rpc(GameManager.players[i].name, i)
@@ -76,8 +81,9 @@ func _on_host_button_pressed():
 	multiplayer.set_multiplayer_peer(peer)
 	print("Waiting For Players")
 	send_player_information(host_player_name_line_edit.text, multiplayer.get_unique_id())
-	
+
 	lobby_screen.show()
+	hobby_player_list.text = host_player_name_line_edit.text + "\n"
 	host_screen.hide()
 
 func _on_join_button_pressed():
