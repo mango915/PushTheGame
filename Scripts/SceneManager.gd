@@ -34,9 +34,16 @@ func _process(delta):
 	
 func _on_player_died():
 	alive_players -= 1
+	if not GameManager.players[multiplayer.get_unique_id()].alive:
+		%GameOver.visible = true
+		players[multiplayer.get_unique_id()].can_shoot = false
+		%GameOver/Label.text = "You Lose! \n current score : " + str(GameManager.players[multiplayer.get_unique_id()].score)
+		# disable %GameOver/Button
+		%GameOver/Button.disabled = true
 	if alive_players == 1:
 		print("Finished the round!")
 		%GameOver.visible = true
+		%GameOver/Button.disabled = false
 		if GameManager.players[multiplayer.get_unique_id()].alive:
 			players[multiplayer.get_unique_id()].can_shoot = false
 			GameManager.players[multiplayer.get_unique_id()].score += 1
@@ -45,7 +52,7 @@ func _on_player_died():
 
 func _on_button_button_down():
 	print("game should restart")
-	start_next_game.rpc()
+	start_next_game. rpc ()
 
 @rpc("any_peer", "call_local")
 func start_next_game():
