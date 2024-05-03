@@ -6,7 +6,7 @@ extends Control
 @onready var lobby_screen = $MarginContainer/LobbyScreen
 @onready var host_player_name_line_edit = $MarginContainer/HostScreen/GridContainer/HostPlayerLineEdit
 @onready var join_player_name_line_edit = $MarginContainer/JoinScreen/GridContainer/JoinPlayerLineEdit
-@onready var hobby_player_list = $MarginContainer/LobbyScreen/VBoxContainer/TextEdit
+@onready var hobby_player_list = $MarginContainer/LobbyScreen/VBoxContainer/HBoxContainer/TextEdit
 @onready var color_selection_texture_rect = $MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer/TextureRect
 @onready var texture_atlas = load("res://Assets/spritesheet_retina.png")
 
@@ -127,6 +127,23 @@ func _on_left_color_button_pressed():
 		color = "green"
 		print("green")
 		color_selection_texture_rect.texture = green_player_texture
+		update_players_color.rpc(multiplayer.get_unique_id(), color)
+	else:
+		color = "red"
+		print("red")
+		color_selection_texture_rect.texture = red_player_texture
+		update_players_color.rpc(multiplayer.get_unique_id(), color)
+
+func _on_right_color_button_pressed():
+	if color == "red":
+		color = "green"
+		print("green")
+		color_selection_texture_rect.texture = green_player_texture
+		update_players_color.rpc(multiplayer.get_unique_id(), color)
+	elif color == "green":
+		color = "yellow"
+		print("yellow")
+		color_selection_texture_rect.texture = yellow_player_texture
 		update_players_color.rpc(multiplayer.get_unique_id(), color)
 	else:
 		color = "red"

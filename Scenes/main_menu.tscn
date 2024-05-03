@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://c46jwdq74ilpo"]
+[gd_scene load_steps=5 format=3 uid="uid://c46jwdq74ilpo"]
 
 [ext_resource type="Theme" uid="uid://bybbedfkdrq7s" path="res://Assets/Themes/default_theme.tres" id="1_juq3s"]
 [ext_resource type="Script" path="res://Scenes/main_menu.gd" id="2_qnsno"]
+[ext_resource type="Texture2D" uid="uid://b8ytrbdgk3anc" path="res://Assets/red_hand.tres" id="3_8rnf0"]
 [ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/red_player.tres" id="3_p6in7"]
 
 [node name="Control" type="Control"]
@@ -187,9 +188,35 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 70
 text = "Connected players..."
 
-[node name="TextEdit" type="TextEdit" parent="MarginContainer/LobbyScreen/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/LobbyScreen/VBoxContainer"]
+layout_mode = 2
+size_flags_stretch_ratio = 0.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/LobbyScreen/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="PlayerOneColor" type="TextureRect" parent="MarginContainer/LobbyScreen/VBoxContainer/HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+texture = ExtResource("3_8rnf0")
+expand_mode = 1
+
+[node name="PlayerTwoColor" type="TextureRect" parent="MarginContainer/LobbyScreen/VBoxContainer/HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+texture = ExtResource("3_8rnf0")
+expand_mode = 1
+
+[node name="PlayerThreeColor" type="TextureRect" parent="MarginContainer/LobbyScreen/VBoxContainer/HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+texture = ExtResource("3_8rnf0")
+expand_mode = 1
+
+[node name="TextEdit" type="TextEdit" parent="MarginContainer/LobbyScreen/VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(2.08165e-12, 500)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 50
 text = "Compa
 fdewuh
@@ -246,4 +273,5 @@ text = "Start game"
 [connection signal="pressed" from="MarginContainer/HostScreen/HostButton" to="." method="_on_host_button_pressed"]
 [connection signal="pressed" from="MarginContainer/JoinScreen/JoinButton" to="." method="_on_join_button_pressed"]
 [connection signal="pressed" from="MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer/LeftColorButton" to="." method="_on_left_color_button_pressed"]
+[connection signal="pressed" from="MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer/RightColorButton" to="." method="_on_right_color_button_pressed"]
 [connection signal="pressed" from="MarginContainer/LobbyScreen/VBoxContainer2/StartGameButton" to="." method="_on_start_game_button_pressed"]
