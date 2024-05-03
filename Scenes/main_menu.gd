@@ -7,10 +7,18 @@ extends Control
 @onready var host_player_name_line_edit = $MarginContainer/HostScreen/GridContainer/HostPlayerLineEdit
 @onready var join_player_name_line_edit = $MarginContainer/JoinScreen/GridContainer/JoinPlayerLineEdit
 @onready var hobby_player_list = $MarginContainer/LobbyScreen/VBoxContainer/TextEdit
+@onready var color_selection_texture_rect = $MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer/TextureRect
+@onready var texture_atlas = load("res://Assets/spritesheet_retina.png")
+
 @export var address = "127.0.0.1"
 @export var port = 8910
 
 var peer
+var color = "red"
+
+const red_player_texture = preload ("res://Assets/red_player.tres")
+const yellow_player_texture = preload ("res://Assets/yellow_player.tres")
+const green_player_texture = preload ("res://Assets/green_player.tres")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -47,7 +55,8 @@ func send_player_information(name, id):
 		GameManager.players[id] = {
 			"name": name,
 			"id": id,
-			"score": 0
+			"score": 0,
+			"color": "red"
 		}
 		hobby_player_list.text += GameManager.players[id].name + "\n"
 	if multiplayer.is_server():
@@ -107,3 +116,26 @@ func _on_exit_button_pressed():
 func _on_join_game_button_pressed():
 	main_menu.hide()
 	join_screen.show()
+
+func _on_left_color_button_pressed():
+	if color == "red":
+		color = "yellow"
+		print("yellow")
+		color_selection_texture_rect.texture = yellow_player_texture
+		update_players_color.rpc(multiplayer.get_unique_id(), color)
+	elif color == "yellow":
+		color = "green"
+		print("green")
+		color_selection_texture_rect.texture = green_player_texture
+		update_players_color.rpc(multiplayer.get_unique_id(), color)
+	else:
+		color = "red"
+		print("red")
+		color_selection_texture_rect.texture = red_player_texture
+		update_players_color.rpc(multiplayer.get_unique_id(), color)
+
+@rpc("any_peer", "call_local")
+func update_players_color(id, colors):
+	print("Updating player ", id, " color to ", colors)
+	GameManager.players[id].color = colors
+	

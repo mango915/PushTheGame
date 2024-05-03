@@ -24,6 +24,8 @@ var weapon = null
 var weapon_scale = Vector2(1, 1)
 var weapon_rotation = 0
 
+var color = "red"
+
 signal health_depleted
 
 #const SPEED = 400.0
@@ -143,6 +145,7 @@ func _on_hurt_box_body_entered(_body):
 		self.take_damage()
 
 func attach_weapon(new_weapon):
+	new_weapon.set_color(color)
 	$WeaponAttach.add_child(new_weapon)
 	#weapon.global_position = Vector2(0, 0)
 	#weapon_scale = $WeaponAttach.scale

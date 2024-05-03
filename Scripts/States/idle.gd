@@ -1,9 +1,10 @@
 extends State
 
 func enter():
-	if fsm.previous_state == "fall":
+	pass
+	#if fsm.previous_state == "fall":
 		#obj.play("ground")
-		obj.queue("idle")
+		#obj.queue("idle")
 	#else:
 		#obj.play("idle")
 

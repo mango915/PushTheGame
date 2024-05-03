@@ -1,8 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://2ihflsuv6jdd"]
+[gd_scene load_steps=7 format=3 uid="uid://2ihflsuv6jdd"]
 
 [ext_resource type="Script" path="res://Scripts/SceneManager.gd" id="1_7wg3y"]
 [ext_resource type="PackedScene" uid="uid://c8s2cf0y7ipjp" path="res://Scenes/player.tscn" id="2_4xj1r"]
-[ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/red_player.tres" id="3_f507s"]
 [ext_resource type="PackedScene" uid="uid://tws83rui873a" path="res://Scenes/Weapons/Gun/gun.tscn" id="3_jc17y"]
 [ext_resource type="PackedScene" uid="uid://o62inw4r1ln4" path="res://Scenes/Weapons/Bow/bow.tscn" id="4_2bb6l"]
 [ext_resource type="TileSet" uid="uid://csl8myge1effy" path="res://Assets/tileset.tres" id="4_c1c2s"]
@@ -13,7 +12,6 @@ script = ExtResource("1_7wg3y")
 player_scene = ExtResource("2_4xj1r")
 weapon_scene = ExtResource("3_jc17y")
 alternate_weapon_scene = ExtResource("4_2bb6l")
-textures = ExtResource("3_f507s")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 layer = -1

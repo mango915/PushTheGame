@@ -1,12 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://c46jwdq74ilpo"]
+[gd_scene load_steps=4 format=3 uid="uid://c46jwdq74ilpo"]
 
 [ext_resource type="Theme" uid="uid://bybbedfkdrq7s" path="res://Assets/Themes/default_theme.tres" id="1_juq3s"]
 [ext_resource type="Script" path="res://Scenes/main_menu.gd" id="2_qnsno"]
-[ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/spritesheet_retina.png" id="3_tm0oy"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_tp65v"]
-atlas = ExtResource("3_tm0oy")
-region = Rect2(1152, 640, 128, 128)
+[ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/red_player.tres" id="3_p6in7"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -60,28 +56,28 @@ size_flags_vertical = 10
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 50
 text = "Host Game"
 
 [node name="JoinGameButton" type="Button" parent="MarginContainer/MainMenu/ButtonsVBox"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 50
 text = "Join Game"
 
 [node name="SettingsButton" type="Button" parent="MarginContainer/MainMenu/ButtonsVBox"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 50
 text = "Settings"
 
 [node name="ExitButton" type="Button" parent="MarginContainer/MainMenu/ButtonsVBox"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 50
 text = "Exit"
 
 [node name="HostScreen" type="VBoxContainer" parent="MarginContainer"]
@@ -97,26 +93,31 @@ columns = 2
 
 [node name="Label" type="Label" parent="MarginContainer/HostScreen/GridContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 50
 text = "Name:"
 
 [node name="HostPlayerLineEdit" type="LineEdit" parent="MarginContainer/HostScreen/GridContainer"]
-custom_minimum_size = Vector2(150, 2.08165e-12)
+custom_minimum_size = Vector2(200, 2.08165e-12)
 layout_mode = 2
+theme_override_font_sizes/font_size = 50
 text = "Host"
 
 [node name="Label2" type="Label" parent="MarginContainer/HostScreen/GridContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 50
 text = "Port"
 
 [node name="PortLineEdit" type="LineEdit" parent="MarginContainer/HostScreen/GridContainer"]
 custom_minimum_size = Vector2(150, 2.08165e-12)
 layout_mode = 2
+theme_override_font_sizes/font_size = 50
 text = "8910"
 
 [node name="HostButton" type="Button" parent="MarginContainer/HostScreen"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
+theme_override_font_sizes/font_size = 50
 text = "Host.."
 
 [node name="JoinScreen" type="VBoxContainer" parent="MarginContainer"]
@@ -132,35 +133,42 @@ columns = 2
 
 [node name="Label" type="Label" parent="MarginContainer/JoinScreen/GridContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 50
 text = "Name:"
 
 [node name="JoinPlayerLineEdit" type="LineEdit" parent="MarginContainer/JoinScreen/GridContainer"]
-custom_minimum_size = Vector2(150, 2.08165e-12)
+custom_minimum_size = Vector2(200, 2.08165e-12)
 layout_mode = 2
+theme_override_font_sizes/font_size = 50
 text = "Peer"
 
 [node name="Label2" type="Label" parent="MarginContainer/JoinScreen/GridContainer"]
 layout_mode = 2
-text = "Ip"
+theme_override_font_sizes/font_size = 50
+text = "Ip:"
 
 [node name="IpLineEdit" type="LineEdit" parent="MarginContainer/JoinScreen/GridContainer"]
 custom_minimum_size = Vector2(150, 2.08165e-12)
 layout_mode = 2
+theme_override_font_sizes/font_size = 50
 text = "127.0.0.1"
 
 [node name="Label3" type="Label" parent="MarginContainer/JoinScreen/GridContainer"]
 layout_mode = 2
-text = "Port"
+theme_override_font_sizes/font_size = 50
+text = "Port:"
 
 [node name="PortLineEdit" type="LineEdit" parent="MarginContainer/JoinScreen/GridContainer"]
 custom_minimum_size = Vector2(150, 2.08165e-12)
 layout_mode = 2
+theme_override_font_sizes/font_size = 50
 text = "8910"
 
 [node name="JoinButton" type="Button" parent="MarginContainer/JoinScreen"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
+theme_override_font_sizes/font_size = 50
 text = "Join.."
 
 [node name="LobbyScreen" type="HBoxContainer" parent="MarginContainer"]
@@ -213,16 +221,16 @@ text = "Color select:   "
 layout_mode = 2
 columns = 3
 
-[node name="Button" type="Button" parent="MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer"]
+[node name="LeftColorButton" type="Button" parent="MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 100
 text = "<"
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
-texture = SubResource("AtlasTexture_tp65v")
+texture = ExtResource("3_p6in7")
 
-[node name="Button3" type="Button" parent="MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer"]
+[node name="RightColorButton" type="Button" parent="MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 100
 text = ">"
@@ -237,4 +245,5 @@ text = "Start game"
 [connection signal="pressed" from="MarginContainer/MainMenu/ButtonsVBox/ExitButton" to="." method="_on_exit_button_pressed"]
 [connection signal="pressed" from="MarginContainer/HostScreen/HostButton" to="." method="_on_host_button_pressed"]
 [connection signal="pressed" from="MarginContainer/JoinScreen/JoinButton" to="." method="_on_join_button_pressed"]
+[connection signal="pressed" from="MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer/LeftColorButton" to="." method="_on_left_color_button_pressed"]
 [connection signal="pressed" from="MarginContainer/LobbyScreen/VBoxContainer2/StartGameButton" to="." method="_on_start_game_button_pressed"]

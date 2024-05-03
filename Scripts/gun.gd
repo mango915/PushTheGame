@@ -2,6 +2,10 @@ extends Node2D
 
 @export var bullet_scene: PackedScene
 
+const red_hand = preload("res://Assets/red_hand.tres")
+const yellow_hand = preload("res://Assets/yellow_hand.tres")
+const green_hand = preload("res://Assets/green_hand.tres")
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	pass # Replace with function body.
@@ -38,3 +42,11 @@ func fire(direction):
 
 	bullet.speed = 5000
 	get_tree().root.add_child(bullet)
+
+func set_color(color):
+	if color == "red":
+		$Hand1.texture = red_hand
+	elif color == "yellow":
+		$Hand1.texture = yellow_hand
+	elif color == "green":
+		$Hand1.texture = green_hand

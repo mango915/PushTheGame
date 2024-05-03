@@ -5,6 +5,10 @@ var shooting_force = 0
 
 @export var arrow: PackedScene
 
+const red_hand = preload("res://Assets/red_hand.tres")
+const yellow_hand = preload("res://Assets/yellow_hand.tres")
+const green_hand = preload("res://Assets/green_hand.tres")
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	pass # Replace with function body.
@@ -36,3 +40,14 @@ func fire(direction, shooting_force):
 	arrow.dir = direction - $ArrowSpawn.global_position
 	arrow.speed = shooting_force
 	get_tree().root.add_child(arrow)
+
+func set_color(color):
+	if color == "red":
+		$Hand1.texture = red_hand
+		$Hand2.texture = red_hand
+	elif color == "yellow":
+		$Hand1.texture = yellow_hand
+		$Hand2.texture = yellow_hand
+	elif color == "green":
+		$Hand1.texture = green_hand
+		$Hand2.texture = green_hand

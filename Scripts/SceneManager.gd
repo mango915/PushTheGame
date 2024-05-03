@@ -3,7 +3,12 @@ extends Node2D
 @export var player_scene: PackedScene
 @export var weapon_scene: PackedScene
 @export var alternate_weapon_scene: PackedScene
-@export var textures: Resource
+
+
+const red_player_texture = preload ("res://Assets/red_player.tres")
+const yellow_player_texture = preload ("res://Assets/yellow_player.tres")
+const green_player_texture = preload ("res://Assets/green_player.tres")
+
 var alive_players = 0
 var players = {}
 
@@ -12,13 +17,27 @@ func _ready():
 	var index = 0
 	for i in GameManager.players:
 		var current_player = player_scene.instantiate()
+
+		current_player.name = str(GameManager.players[i].id)
+		players[GameManager.players[i].id] = current_player
+
+		print("player color: " + GameManager.players[i].color)
+		if GameManager.players[i].color == "red":
+			current_player.color = "red"
+			current_player.get_node("Sprite2D").texture = red_player_texture
+		elif GameManager.players[i].color == "yellow":
+			current_player.color = "yellow"
+			current_player.get_node("Sprite2D").texture = yellow_player_texture
+		elif GameManager.players[i].color == "green":
+			current_player.color = "green"
+			current_player.get_node("Sprite2D").texture = green_player_texture
+
 		if index == 0:
 			current_player.attach_weapon(alternate_weapon_scene.instantiate())
 		else:
 			current_player.attach_weapon(weapon_scene.instantiate())
-		current_player.name = str(GameManager.players[i].id)
-		players[GameManager.players[i].id] = current_player
-		#current_player.get_node("Sprite2D").texture = textures
+
+
 		add_child(current_player)
 		current_player.health_depleted.connect(_on_player_died)
 		for spawn in get_tree().get_nodes_in_group("PlayerSpawnPoint"):
@@ -46,13 +65,14 @@ func _on_player_died():
 		%GameOver/Button.disabled = false
 		if GameManager.players[multiplayer.get_unique_id()].alive:
 			players[multiplayer.get_unique_id()].can_shoot = false
-			GameManager.players[multiplayer.get_unique_id()].score += 1
+			update_players_score.rpc(multiplayer.get_unique_id())
+			#GameManager.players[multiplayer.get_unique_id()].score += 1
 			%GameOver/Label.text = "You Win! \n current score : " + str(GameManager.players[multiplayer.get_unique_id()].score)
 		#get_tree().paused = true
 
 func _on_button_button_down():
 	print("game should restart")
-	start_next_game. rpc ()
+	start_next_game.rpc()
 
 @rpc("any_peer", "call_local")
 func start_next_game():
@@ -60,3 +80,8 @@ func start_next_game():
 	get_tree().root.add_child(scene)
 	self.queue_free()
 	#self.hide()
+
+@rpc("any_peer", "call_local")
+func update_players_score(id):
+	GameManager.players[id].score += 1
+	
