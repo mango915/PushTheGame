@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://c46jwdq74ilpo"]
+[gd_scene load_steps=7 format=3 uid="uid://c46jwdq74ilpo"]
 
 [ext_resource type="Theme" uid="uid://bybbedfkdrq7s" path="res://Assets/Themes/default_theme.tres" id="1_juq3s"]
 [ext_resource type="Script" path="res://Scenes/main_menu.gd" id="2_qnsno"]
 [ext_resource type="Texture2D" uid="uid://b8ytrbdgk3anc" path="res://Assets/Players/Hands/red_hand.tres" id="3_8rnf0"]
+[ext_resource type="Texture2D" uid="uid://carfsgi0hgvfl" path="res://Assets/splash_screen.png" id="3_jbqe5"]
 [ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/Players/Bodies/red_player.tres" id="3_p6in7"]
 [ext_resource type="AudioStream" uid="uid://dg76w3ksbi7wv" path="res://Assets/Music/bensound-lofinerdbassbuzzer.mp3" id="5_wfcmi"]
 
@@ -23,7 +24,16 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.141176, 0.145098, 0.172549, 1)
+color = Color(0.933333, 0.466667, 0.470588, 1)
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_jbqe5")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -44,6 +54,8 @@ alignment = 1
 [node name="Label" type="Label" parent="MarginContainer/MainMenu"]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 20
 theme_override_font_sizes/font_size = 200
 text = "Push 
 the game"
@@ -95,6 +107,8 @@ columns = 2
 
 [node name="Label" type="Label" parent="MarginContainer/HostScreen/GridContainer"]
 layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 15
 theme_override_font_sizes/font_size = 50
 text = "Name:"
 
@@ -106,6 +120,8 @@ text = "Host"
 
 [node name="Label2" type="Label" parent="MarginContainer/HostScreen/GridContainer"]
 layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 15
 theme_override_font_sizes/font_size = 50
 text = "Port"
 
@@ -135,6 +151,8 @@ columns = 2
 
 [node name="Label" type="Label" parent="MarginContainer/JoinScreen/GridContainer"]
 layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 15
 theme_override_font_sizes/font_size = 50
 text = "Name:"
 
@@ -146,6 +164,8 @@ text = "Peer"
 
 [node name="Label2" type="Label" parent="MarginContainer/JoinScreen/GridContainer"]
 layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 15
 theme_override_font_sizes/font_size = 50
 text = "Ip:"
 
@@ -157,6 +177,8 @@ text = "127.0.0.1"
 
 [node name="Label3" type="Label" parent="MarginContainer/JoinScreen/GridContainer"]
 layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 15
 theme_override_font_sizes/font_size = 50
 text = "Port:"
 
@@ -186,6 +208,8 @@ alignment = 1
 
 [node name="Label" type="Label" parent="MarginContainer/LobbyScreen/VBoxContainer"]
 layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 15
 theme_override_font_sizes/font_size = 70
 text = "Connected players..."
 
@@ -242,6 +266,8 @@ alignment = 1
 
 [node name="Label" type="Label" parent="MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 15
 theme_override_font_sizes/font_size = 70
 text = "Color select:   "
 
@@ -288,6 +314,8 @@ columns = 2
 
 [node name="MusicLabel" type="Label" parent="MarginContainer/SettingsScreen/MarginContainer/GridContainer"]
 layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 15
 theme_override_font_sizes/font_size = 50
 text = "Music  
 "
@@ -302,6 +330,8 @@ value = 1.0
 
 [node name="SFXLabel" type="Label" parent="MarginContainer/SettingsScreen/MarginContainer/GridContainer"]
 layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 15
 theme_override_font_sizes/font_size = 50
 text = "SFX  "
 

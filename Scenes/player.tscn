@@ -111,7 +111,7 @@ properties/4/path = NodePath(".:weapon_rotation")
 properties/4/spawn = true
 properties/4/replication_mode = 1
 
-[node name="Player" type="CharacterBody2D"]
+[node name="Player" type="CharacterBody2D" groups=["Player"]]
 script = ExtResource("1_8g4cu")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

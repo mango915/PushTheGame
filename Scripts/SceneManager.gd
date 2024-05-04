@@ -15,6 +15,9 @@ var players = {}
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	var index = 0
+
+	multiplayer.peer_disconnected.connect(peer_disconnected)
+
 	for i in GameManager.players:
 		var current_player = player_scene.instantiate()
 
@@ -45,12 +48,19 @@ func _ready():
 				current_player.global_position = spawn.global_position
 		index += 1
 		alive_players += 1
-	pass # Replace with function body.
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pass
+
+
+func peer_disconnected(id):
+	print("Player disconnected: " + str(id))
+	players[id].queue_free()
+	GameManager.players.erase(id)
 	
+
+
 func _on_player_died():
 	alive_players -= 1
 	if not GameManager.players[multiplayer.get_unique_id()].alive:
