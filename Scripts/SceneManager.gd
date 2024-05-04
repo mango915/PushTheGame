@@ -5,9 +5,9 @@ extends Node2D
 @export var alternate_weapon_scene: PackedScene
 
 
-const red_player_texture = preload ("res://Assets/red_player.tres")
-const yellow_player_texture = preload ("res://Assets/yellow_player.tres")
-const green_player_texture = preload ("res://Assets/green_player.tres")
+const red_player_texture = preload ("res://Assets/Players/Bodies/red_player.tres")
+const yellow_player_texture = preload ("res://Assets/Players/Bodies/yellow_player.tres")
+const green_player_texture = preload ("res://Assets/Players/Bodies/green_player.tres")
 
 var alive_players = 0
 var players = {}

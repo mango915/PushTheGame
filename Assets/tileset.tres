@@ -1,9 +1,9 @@
 [gd_resource type="TileSet" load_steps=3 format=3 uid="uid://csl8myge1effy"]
 
-[ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/spritesheet_retina.png" id="1_5kvpp"]
+[ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/Tilemaps/spritesheet_retina.png" id="1_88uwr"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fksmv"]
-texture = ExtResource("1_5kvpp")
+texture = ExtResource("1_88uwr")
 texture_region_size = Vector2i(128, 128)
 0:0/size_in_atlas = Vector2i(2, 1)
 0:0/0 = 0

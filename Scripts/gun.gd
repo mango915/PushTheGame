@@ -1,10 +1,12 @@
 extends Node2D
 
+
+@onready var audio_player = $AudioStreamPlayer2D
 @export var bullet_scene: PackedScene
 
-const red_hand = preload("res://Assets/red_hand.tres")
-const yellow_hand = preload("res://Assets/yellow_hand.tres")
-const green_hand = preload("res://Assets/green_hand.tres")
+const red_hand = preload("res://Assets/Players/Hands/red_hand.tres")
+const yellow_hand = preload("res://Assets/Players/Hands/yellow_hand.tres")
+const green_hand = preload("res://Assets/Players/Hands/green_hand.tres")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -31,6 +33,7 @@ func _physics_process(delta):
 
 @rpc("any_peer", "call_local")
 func fire(direction):
+	audio_player.play()
 	var bullet = bullet_scene.instantiate()
 	bullet.global_position = $BulletSpawn.global_position
 	# shoot bullet parallel to ground depending on mouse position

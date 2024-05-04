@@ -4,11 +4,11 @@ extends Control
 @onready var host_screen = $MarginContainer/HostScreen
 @onready var join_screen = $MarginContainer/JoinScreen
 @onready var lobby_screen = $MarginContainer/LobbyScreen
+@onready var settings_screen = $MarginContainer/SettingsScreen
 @onready var host_player_name_line_edit = $MarginContainer/HostScreen/GridContainer/HostPlayerLineEdit
 @onready var join_player_name_line_edit = $MarginContainer/JoinScreen/GridContainer/JoinPlayerLineEdit
 @onready var hobby_player_list = $MarginContainer/LobbyScreen/VBoxContainer/HBoxContainer/TextEdit
 @onready var color_selection_texture_rect = $MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer/TextureRect
-@onready var texture_atlas = load("res://Assets/spritesheet_retina.png")
 
 @export var address = "127.0.0.1"
 @export var port = 8910
@@ -16,9 +16,9 @@ extends Control
 var peer
 var color = "red"
 
-const red_player_texture = preload ("res://Assets/red_player.tres")
-const yellow_player_texture = preload ("res://Assets/yellow_player.tres")
-const green_player_texture = preload ("res://Assets/green_player.tres")
+const red_player_texture = preload ("res://Assets/Players/Bodies/red_player.tres")
+const yellow_player_texture = preload ("res://Assets/Players/Bodies/yellow_player.tres")
+const green_player_texture = preload ("res://Assets/Players/Bodies/green_player.tres")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -156,3 +156,23 @@ func update_players_color(id, colors):
 	print("Updating player ", id, " color to ", colors)
 	GameManager.players[id].color = colors
 	
+
+
+func _on_settings_button_pressed():
+	main_menu.hide()
+	settings_screen.show()
+
+func _on_back_button_pressed():
+	main_menu.show()
+	settings_screen.hide()
+
+
+func _on_sfx_slider_value_changed(value:float):
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("SFX"), linear_to_db(value))
+	AudioServer.set_bus_mute(AudioServer.get_bus_index("SFX"), value < 0.05)
+
+func _on_music_slider_value_changed(value:float):
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Music"), linear_to_db(value))
+	AudioServer.set_bus_mute(AudioServer.get_bus_index("Music"), value < 0.05)
+
+

@@ -1,6 +1,6 @@
 [gd_resource type="Theme" load_steps=7 format=3 uid="uid://bybbedfkdrq7s"]
 
-[ext_resource type="FontFile" uid="uid://dvxp167vylqw6" path="res://Assets/Power Smash.ttf" id="1_jnil0"]
+[ext_resource type="FontFile" uid="uid://dvxp167vylqw6" path="res://Assets/Fonts/Power Smash.ttf" id="1_jnil0"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mheqt"]
 

@@ -4,10 +4,11 @@ extends Node2D
 var shooting_force = 0
 
 @export var arrow: PackedScene
+@onready var audio_player = $AudioStreamPlayer2D
 
-const red_hand = preload("res://Assets/red_hand.tres")
-const yellow_hand = preload("res://Assets/yellow_hand.tres")
-const green_hand = preload("res://Assets/green_hand.tres")
+const red_hand = preload("res://Assets/Players/Hands/red_hand.tres")
+const yellow_hand = preload("res://Assets/Players/Hands/yellow_hand.tres")
+const green_hand = preload("res://Assets/Players/Hands/green_hand.tres")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -35,6 +36,7 @@ func _physics_process(delta):
 
 @rpc("any_peer", "call_local")
 func fire(direction, shooting_force):
+	audio_player.play()
 	var arrow = arrow.instantiate()
 	arrow.global_position = $ArrowSpawn.global_position
 	arrow.dir = direction - $ArrowSpawn.global_position

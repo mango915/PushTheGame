@@ -1,7 +1,7 @@
 [gd_scene load_steps=17 format=3 uid="uid://c8s2cf0y7ipjp"]
 
 [ext_resource type="Script" path="res://Scripts/player.gd" id="1_8g4cu"]
-[ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/red_player.tres" id="3_yqxub"]
+[ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/Players/Bodies/red_player.tres" id="2_ithuv"]
 [ext_resource type="Script" path="res://Scripts/fsm.gd" id="5_7n17n"]
 [ext_resource type="Script" path="res://Scripts/States/idle.gd" id="6_v5l3r"]
 [ext_resource type="Script" path="res://Scripts/States/run.gd" id="7_ec1ms"]
@@ -133,7 +133,7 @@ visible = false
 zoom = Vector2(0.5, 0.5)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("3_yqxub")
+texture = ExtResource("2_ithuv")
 
 [node name="ProgressBar" type="ProgressBar" parent="."]
 offset_left = -38.0

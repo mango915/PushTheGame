@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://bq7db8r82sw47"]
 
-[ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/spritesheet_retina.png" id="1_5p8ml"]
+[ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/Tilemaps/spritesheet_retina.png" id="1_5p8ml"]
 [ext_resource type="Script" path="res://Scripts/bullet.gd" id="1_nambr"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_5qno2"]
