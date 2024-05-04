@@ -35,12 +35,11 @@ func peer_connected(id):
 
 func peer_disconnected(id):
 	print("Player disconnected: " + str(id))
-	var players = get_tree().get_nodes_in_group("Player")
-	for i in players:
-		if i.name == GameManager.players[id].name:
-			i.queue_free()
-	
-	GameManager.players.erase(id)
+	#GameManager.players.erase(id)
+	#var players = get_tree().get_nodes_in_group("Player")
+	#for i in players:
+	#	if i.name ==GameManager.players[id].name:
+	#		i.queue_free()
 	
 func connected_to_server():
 	print("Connected to server!")
@@ -176,4 +175,5 @@ func _on_music_slider_value_changed(value:float):
 	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Music"), linear_to_db(value))
 	AudioServer.set_bus_mute(AudioServer.get_bus_index("Music"), value < 0.05)
 
-
+func _on_audio_stream_player_2d_finished():
+	$AudioStreamPlayer2D.play()
