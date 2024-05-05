@@ -19,10 +19,10 @@ func _on_body_entered(body: Node2D):
 
 #@rpc("any_peer","call_local")
 func attach_weapon():
-		player_inside.get_node("WeaponAttach").get_child(0).queue_free()
-		# create new weapon
-		var bow = bow_scene.instantiate()
-		player_inside.attach_weapon(bow)
+	player_inside.get_node("WeaponAttach").get_child(0).queue_free()
+	# create new weapon
+	var bow = bow_scene.instantiate()
+	player_inside.attach_weapon(bow)
 
-		queue_free()
+	queue_free()
 
