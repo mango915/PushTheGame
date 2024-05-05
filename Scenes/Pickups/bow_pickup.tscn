@@ -1,0 +1,33 @@
+[gd_scene load_steps=7 format=3 uid="uid://twtt6qjuty6w"]
+
+[ext_resource type="Script" path="res://bow_pickup.gd" id="1_kcc1o"]
+[ext_resource type="PackedScene" uid="uid://o62inw4r1ln4" path="res://Scenes/Weapons/Bow/bow.tscn" id="2_m4vwf"]
+[ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/Tilemaps/spritesheet_retina.png" id="2_rbrx1"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mphp3"]
+size = Vector2(122, 134)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oq418"]
+atlas = ExtResource("2_rbrx1")
+region = Rect2(1024, 512, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6mpm6"]
+atlas = ExtResource("2_rbrx1")
+region = Rect2(896, 1280, 128, 128)
+
+[node name="BowPickup" type="Area2D"]
+script = ExtResource("1_kcc1o")
+bow_scene = ExtResource("2_m4vwf")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_mphp3")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(0.5, -1.5)
+scale = Vector2(1.00781, 0.976562)
+texture = SubResource("AtlasTexture_oq418")
+
+[node name="Sprite2D2" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_6mpm6")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

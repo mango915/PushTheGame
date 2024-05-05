@@ -71,6 +71,8 @@ layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 focus_neighbor_bottom = NodePath("../JoinGameButton")
+theme = ExtResource("1_juq3s")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 50
 text = "Host Game"
 
@@ -80,6 +82,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 focus_neighbor_top = NodePath("../HostGameButton")
 focus_neighbor_bottom = NodePath("../SettingsButton")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 50
 text = "Join Game"
 
@@ -89,6 +92,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 focus_neighbor_top = NodePath("../JoinGameButton")
 focus_neighbor_bottom = NodePath("../ExitButton")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 50
 text = "Settings"
 
@@ -96,6 +100,7 @@ text = "Settings"
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 50
 text = "Exit"
 
@@ -350,6 +355,7 @@ value = 1.0
 
 [node name="BackButton" type="Button" parent="MarginContainer/SettingsScreen"]
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 50
 text = "Back"
 

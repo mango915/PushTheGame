@@ -10,6 +10,6 @@ func _process(delta):
 	pass
 
 func _on_body_entered(body: Node2D):
-	queue_free()
-	if body.has_method("heal_damage") and multiplayer.is_server():
+	if body.has_method("heal_damage"):
 		body.heal_damage()
+		queue_free()
