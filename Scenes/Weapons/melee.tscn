@@ -1,10 +1,38 @@
-[gd_scene load_steps=7 format=3 uid="uid://boebn64dynffy"]
+[gd_scene load_steps=8 format=3 uid="uid://boebn64dynffy"]
 
 [ext_resource type="Script" path="res://Scripts/melee.gd" id="1_pqv4r"]
 [ext_resource type="Texture2D" uid="uid://b8ytrbdgk3anc" path="res://Assets/Players/Hands/red_hand.tres" id="2_i3lix"]
+[ext_resource type="AudioStream" uid="uid://u77cavjrp4a8" path="res://Assets/Music/hitHurt-2.wav" id="3_auwdm"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_166as"]
 radius = 17.0294
+
+[sub_resource type="Animation" id="Animation_ej6o3"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Hand:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(44, 29)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Hand/Area2D/CollisionShape2D:disabled")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
 
 [sub_resource type="Animation" id="Animation_6xem1"]
 resource_name = "punch"
@@ -34,33 +62,6 @@ tracks/1/keys = {
 "values": [true, false, true]
 }
 
-[sub_resource type="Animation" id="Animation_ej6o3"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Hand:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(44, 29)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Hand/Area2D/CollisionShape2D:disabled")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [true]
-}
-
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_xv080"]
 _data = {
 "RESET": SubResource("Animation_ej6o3"),
@@ -85,5 +86,8 @@ disabled = true
 libraries = {
 "": SubResource("AnimationLibrary_xv080")
 }
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_auwdm")
 
 [connection signal="body_entered" from="Hand/Area2D" to="." method="_on_area_2d_body_entered"]

@@ -1,6 +1,7 @@
 extends Node2D
 
 @onready var animation_player = $AnimationPlayer
+@onready var audio_player = $AudioStreamPlayer2D
 
 const red_hand = preload("res://Assets/Players/Hands/red_hand.tres")
 const yellow_hand = preload("res://Assets/Players/Hands/yellow_hand.tres")
@@ -31,6 +32,7 @@ func _physics_process(delta):
 
 @rpc("any_peer", "call_local")
 func punch():
+	audio_player.play()
 	animation_player.play("punch")
 
 
