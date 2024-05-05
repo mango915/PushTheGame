@@ -1,0 +1,89 @@
+[gd_scene load_steps=7 format=3 uid="uid://boebn64dynffy"]
+
+[ext_resource type="Script" path="res://Scripts/melee.gd" id="1_pqv4r"]
+[ext_resource type="Texture2D" uid="uid://b8ytrbdgk3anc" path="res://Assets/Players/Hands/red_hand.tres" id="2_i3lix"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_166as"]
+radius = 17.0294
+
+[sub_resource type="Animation" id="Animation_6xem1"]
+resource_name = "punch"
+length = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Hand:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(44, 29), Vector2(120, 15), Vector2(44, 29)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Hand/Area2D/CollisionShape2D:disabled")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.01, 0.1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [true, false, true]
+}
+
+[sub_resource type="Animation" id="Animation_ej6o3"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Hand:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(44, 29)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Hand/Area2D/CollisionShape2D:disabled")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_xv080"]
+_data = {
+"RESET": SubResource("Animation_ej6o3"),
+"punch": SubResource("Animation_6xem1")
+}
+
+[node name="Melee" type="Node2D" groups=["Weapon"]]
+script = ExtResource("1_pqv4r")
+
+[node name="Hand" type="Sprite2D" parent="."]
+position = Vector2(44, 29)
+texture = ExtResource("2_i3lix")
+
+[node name="Area2D" type="Area2D" parent="Hand"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hand/Area2D"]
+position = Vector2(0, 2)
+shape = SubResource("CircleShape2D_166as")
+disabled = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_xv080")
+}
+
+[connection signal="body_entered" from="Hand/Area2D" to="." method="_on_area_2d_body_entered"]
