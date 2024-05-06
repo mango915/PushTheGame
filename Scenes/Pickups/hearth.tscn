@@ -1,7 +1,7 @@
 [gd_scene load_steps=8 format=3 uid="uid://ffgn4ls8ajgb"]
 
 [ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/Tilemaps/spritesheet_retina.png" id="1_mokt2"]
-[ext_resource type="Script" path="res://Scenes/hearth.gd" id="1_xyoh8"]
+[ext_resource type="Script" path="res://Scenes/Pickups/hearth.gd" id="1_xyoh8"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_2u4mq"]
 size = Vector2(75, 67)

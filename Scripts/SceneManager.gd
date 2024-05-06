@@ -2,7 +2,6 @@ extends Node2D
 
 @export var player_scene: PackedScene
 @export var weapon_scene: PackedScene
-@export var alternate_weapon_scene: PackedScene
 
 
 const red_player_texture = preload ("res://Assets/Players/Bodies/red_player.tres")
@@ -35,10 +34,7 @@ func _ready():
 			current_player.color = "green"
 			current_player.get_node("Sprite2D").texture = green_player_texture
 
-		if index == 0:
-			current_player.attach_weapon(alternate_weapon_scene.instantiate())
-		else:
-			current_player.attach_weapon(weapon_scene.instantiate())
+		current_player.attach_weapon(weapon_scene.instantiate())
 
 
 		add_child(current_player)

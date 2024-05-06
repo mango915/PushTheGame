@@ -1,6 +1,6 @@
 extends Area2D
 
-const bow_scene = preload("res://Scenes/Weapons/Bow/bow.tscn")
+const bow_scene = preload("res://Scenes/Weapons/Gun/gun.tscn")
 var player_inside
 
 # Called when the node enters the scene tree for the first time.
@@ -12,17 +12,10 @@ func _ready():
 func _process(delta):
 	pass
 
-func _on_body_entered(body: Node2D):
-	print("body entered")
-	player_inside = body
-	attach_weapon()
+func pickup(player):
 
-#@rpc("any_peer","call_local")
-func attach_weapon():
-	player_inside.get_node("WeaponAttach").get_child(0).queue_free()
-	# create new weapon
+	player.get_node("WeaponAttach").get_child(0).queue_free()
 	var bow = bow_scene.instantiate()
-	player_inside.attach_weapon(bow)
+	player.attach_weapon(bow)
 
 	queue_free()
-

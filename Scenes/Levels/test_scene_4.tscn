@@ -2,17 +2,16 @@
 
 [ext_resource type="Script" path="res://Scripts/SceneManager.gd" id="1_7wg3y"]
 [ext_resource type="PackedScene" uid="uid://c8s2cf0y7ipjp" path="res://Scenes/player.tscn" id="2_4xj1r"]
-[ext_resource type="PackedScene" uid="uid://tws83rui873a" path="res://Scenes/Weapons/Gun/gun.tscn" id="3_jc17y"]
 [ext_resource type="TileSet" uid="uid://csl8myge1effy" path="res://Assets/tileset.tres" id="4_c1c2s"]
 [ext_resource type="PackedScene" uid="uid://boebn64dynffy" path="res://Scenes/Weapons/melee.tscn" id="4_ybtob"]
-[ext_resource type="PackedScene" uid="uid://ffgn4ls8ajgb" path="res://Scenes/hearth.tscn" id="7_itwsn"]
+[ext_resource type="PackedScene" uid="uid://ffgn4ls8ajgb" path="res://Scenes/Pickups/hearth.tscn" id="7_itwsn"]
 [ext_resource type="PackedScene" uid="uid://twtt6qjuty6w" path="res://Scenes/Pickups/bow_pickup.tscn" id="7_vbgib"]
+[ext_resource type="PackedScene" uid="uid://d0mt5ttq0mdq6" path="res://Scenes/Pickups/gun_pickup.tscn" id="7_vrpg5"]
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_7wg3y")
 player_scene = ExtResource("2_4xj1r")
-weapon_scene = ExtResource("3_jc17y")
-alternate_weapon_scene = ExtResource("4_ybtob")
+weapon_scene = ExtResource("4_ybtob")
 
 [node name="ParallaxBackground" type="ParallaxBackground" parent="."]
 layer = -10
@@ -105,6 +104,9 @@ position = Vector2(484, 561)
 position = Vector2(165, 57)
 
 [node name="BowPickup" parent="." instance=ExtResource("7_vbgib")]
-position = Vector2(1346, 777)
+position = Vector2(1643, -83)
+
+[node name="GunPickup" parent="." instance=ExtResource("7_vrpg5")]
+position = Vector2(435, -80)
 
 [connection signal="button_down" from="GameOver/Button" to="." method="_on_button_button_down"]

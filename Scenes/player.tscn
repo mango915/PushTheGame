@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://c8s2cf0y7ipjp"]
+[gd_scene load_steps=18 format=3 uid="uid://c8s2cf0y7ipjp"]
 
 [ext_resource type="Script" path="res://Scripts/player.gd" id="1_8g4cu"]
 [ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/Players/Bodies/red_player.tres" id="2_ithuv"]
@@ -111,6 +111,9 @@ properties/4/path = NodePath(".:weapon_rotation")
 properties/4/spawn = true
 properties/4/replication_mode = 1
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_pilf8"]
+radius = 133.0
+
 [node name="Player" type="CharacterBody2D" groups=["Player"]]
 script = ExtResource("1_8g4cu")
 
@@ -194,6 +197,12 @@ debug_color = Color(0.858824, 0.337255, 0.352941, 0.419608)
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_ek0q8")
+
+[node name="InteractionArea" type="Area2D" parent="."]
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea"]
+shape = SubResource("CircleShape2D_pilf8")
 
 [connection signal="timeout" from="ShootingTimer" to="." method="_on_timer_timeout"]
 [connection signal="body_entered" from="HurtBox" to="." method="_on_hurt_box_body_entered"]

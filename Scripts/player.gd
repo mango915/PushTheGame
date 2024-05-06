@@ -77,6 +77,9 @@ func _input(event):
 		return
 	if event.is_action_pressed("ui_down"):
 		position.y += 1
+	if event.is_action_pressed("pickup"):
+		print("pickup")
+		try_to_pickup_object.rpc_id(1)
 
 @rpc("any_peer", "call_local")
 func take_damage():
@@ -150,3 +153,16 @@ func attach_weapon(new_weapon):
 	#weapon.global_position = Vector2(0, 0)
 	#weapon_scale = $WeaponAttach.scale
 	#weapon_rotation = $WeaponAttach.rotation
+
+@rpc("any_peer", "call_local")
+func try_to_pickup_object():
+	var bodies = $InteractionArea.get_overlapping_areas()
+	for body in bodies:
+		print("body = ", body)
+		if body.has_method("pickup"):
+			body.pickup(self)
+	if multiplayer.is_server():
+		for i in GameManager.players:
+			if i != 1:
+				self.try_to_pickup_object.rpc_id(i)
+			
