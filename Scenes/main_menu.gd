@@ -17,7 +17,7 @@ extends Control
 var peer
 var color = "red"
 
-var connected_players = 1
+var connected_players = 0
 
 const red_player_texture = preload ("res://Assets/Players/Bodies/red_player.tres")
 const yellow_player_texture = preload ("res://Assets/Players/Bodies/yellow_player.tres")

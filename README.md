@@ -1,3 +1,9 @@
-### COMPA DEMO
+### PUSH THE GAME
+## playable multiplayer game
 
-- Try the most useless multiplayer demo ever.
+
+
+- Feel the push.
+- Three playable stage and three incredible weapons, including your own punches.
+- Git gud in four different colors
+- Very annoying music and SFX!
