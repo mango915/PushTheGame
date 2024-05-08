@@ -1,6 +1,10 @@
 ### PUSH THE GAME
 ## playable multiplayer game
 
+![screenshot](https://github.com/mango915/PushTheGame/blob/compa_dev/Screenshots/screenshot_3.png)
+![screenshot](https://github.com/mango915/PushTheGame/blob/compa_dev/Screenshots/screenshot_1.png)
+![screenshot](https://github.com/mango915/PushTheGame/blob/compa_dev/Screenshots/screenshot_2.png)
+
 
 
 - Feel the push.
