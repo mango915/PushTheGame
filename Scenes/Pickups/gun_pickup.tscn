@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://d0mt5ttq0mdq6"]
+[gd_scene load_steps=8 format=3 uid="uid://d0mt5ttq0mdq6"]
 
 [ext_resource type="Script" path="res://Scripts/gun_pickup.gd" id="1_07ukx"]
 [ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/Tilemaps/spritesheet_retina.png" id="2_w603w"]
@@ -9,6 +9,44 @@ size = Vector2(122, 134)
 [sub_resource type="AtlasTexture" id="AtlasTexture_oq418"]
 atlas = ExtResource("2_w603w")
 region = Rect2(1024, 384, 128, 128)
+
+[sub_resource type="Animation" id="Animation_0l1jw"]
+resource_name = "default_animation"
+length = 2.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1, 2),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(0.5, -1.5), Vector2(0.5, -15), Vector2(0.5, -1.5)]
+}
+
+[sub_resource type="Animation" id="Animation_6ihnv"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0.5, -1.5)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_5e77h"]
+_data = {
+"RESET": SubResource("Animation_6ihnv"),
+"default_animation": SubResource("Animation_0l1jw")
+}
 
 [node name="GunPickup" type="Area2D"]
 collision_layer = 4
@@ -21,3 +59,8 @@ shape = SubResource("RectangleShape2D_mphp3")
 position = Vector2(0.5, -1.5)
 scale = Vector2(1.00781, 0.976562)
 texture = SubResource("AtlasTexture_oq418")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_5e77h")
+}

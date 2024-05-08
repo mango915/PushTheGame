@@ -1,11 +1,19 @@
-[gd_scene load_steps=7 format=3 uid="uid://c46jwdq74ilpo"]
+[gd_scene load_steps=9 format=3 uid="uid://c46jwdq74ilpo"]
 
 [ext_resource type="Theme" uid="uid://bybbedfkdrq7s" path="res://Assets/Themes/default_theme.tres" id="1_juq3s"]
 [ext_resource type="Script" path="res://Scenes/main_menu.gd" id="2_qnsno"]
 [ext_resource type="Texture2D" uid="uid://b8ytrbdgk3anc" path="res://Assets/Players/Hands/red_hand.tres" id="3_8rnf0"]
 [ext_resource type="Texture2D" uid="uid://carfsgi0hgvfl" path="res://Assets/splash_screen.png" id="3_jbqe5"]
+[ext_resource type="Shader" path="res://Scenes/main_menu.gdshader" id="3_lssoq"]
 [ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/Players/Bodies/red_player.tres" id="3_p6in7"]
 [ext_resource type="AudioStream" uid="uid://dg76w3ksbi7wv" path="res://Assets/Music/bensound-lofinerdbassbuzzer.mp3" id="5_wfcmi"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_o2e07"]
+shader = ExtResource("3_lssoq")
+shader_parameter/wiggle = 0.24
+shader_parameter/wiggle_speed = 25.0
+shader_parameter/smear = 0.858
+shader_parameter/blur_samples = 15
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -17,15 +25,6 @@ grow_vertical = 2
 theme = ExtResource("1_juq3s")
 script = ExtResource("2_qnsno")
 
-[node name="ColorRect" type="ColorRect" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.933333, 0.466667, 0.470588, 1)
-
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -34,6 +33,18 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("3_jbqe5")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_o2e07")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.933333, 0.466667, 0.470588, 1)
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -221,7 +232,7 @@ layout_mode = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 15
 theme_override_font_sizes/font_size = 70
-text = "Connected players..."
+text = "Connected players (1/4)..."
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/LobbyScreen/VBoxContainer"]
 layout_mode = 2
@@ -253,9 +264,8 @@ custom_minimum_size = Vector2(2.08165e-12, 500)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 50
-text = "Compa
-fdewuh
-iuhscd"
+text = "Waiting for 
+other players..."
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/LobbyScreen"]
 layout_mode = 2
@@ -361,6 +371,7 @@ text = "Back"
 
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("5_wfcmi")
+volume_db = -10.0
 bus = &"Music"
 
 [connection signal="pressed" from="MarginContainer/MainMenu/ButtonsVBox/HostGameButton" to="." method="_on_host_game_button_pressed"]

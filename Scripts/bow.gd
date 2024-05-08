@@ -9,6 +9,7 @@ var shooting_force = 0
 const red_hand = preload("res://Assets/Players/Hands/red_hand.tres")
 const yellow_hand = preload("res://Assets/Players/Hands/yellow_hand.tres")
 const green_hand = preload("res://Assets/Players/Hands/green_hand.tres")
+const purple_hand = preload("res://Assets/Players/Hands/purple_hand.tres")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -53,3 +54,6 @@ func set_color(color):
 	elif color == "green":
 		$Hand1.texture = green_hand
 		$Hand2.texture = green_hand
+	elif color == "purple":
+		$Hand1.texture = purple_hand
+		$Hand2.texture = purple_hand

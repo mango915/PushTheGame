@@ -1,17 +1,27 @@
-[gd_scene load_steps=8 format=3 uid="uid://2ihflsuv6jdd"]
+[gd_scene load_steps=11 format=3 uid="uid://2ihflsuv6jdd"]
 
 [ext_resource type="Script" path="res://Scripts/SceneManager.gd" id="1_7wg3y"]
 [ext_resource type="PackedScene" uid="uid://c8s2cf0y7ipjp" path="res://Scenes/player.tscn" id="2_4xj1r"]
 [ext_resource type="TileSet" uid="uid://csl8myge1effy" path="res://Assets/tileset.tres" id="4_c1c2s"]
+[ext_resource type="PackedScene" uid="uid://bwv8x853by7ui" path="res://Scenes/Levels/test_scene_3.tscn" id="4_sdf5w"]
 [ext_resource type="PackedScene" uid="uid://boebn64dynffy" path="res://Scenes/Weapons/melee.tscn" id="4_ybtob"]
 [ext_resource type="PackedScene" uid="uid://ffgn4ls8ajgb" path="res://Scenes/Pickups/hearth.tscn" id="7_itwsn"]
 [ext_resource type="PackedScene" uid="uid://twtt6qjuty6w" path="res://Scenes/Pickups/bow_pickup.tscn" id="7_vbgib"]
 [ext_resource type="PackedScene" uid="uid://d0mt5ttq0mdq6" path="res://Scenes/Pickups/gun_pickup.tscn" id="7_vrpg5"]
+[ext_resource type="Shader" path="res://Scenes/main_menu.gdshader" id="8_y3ksa"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gl7ke"]
+shader = ExtResource("8_y3ksa")
+shader_parameter/wiggle = 0.03
+shader_parameter/wiggle_speed = 25.0
+shader_parameter/smear = 0.335
+shader_parameter/blur_samples = 15
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_7wg3y")
 player_scene = ExtResource("2_4xj1r")
 weapon_scene = ExtResource("4_ybtob")
+next_scene = ExtResource("4_sdf5w")
 
 [node name="ParallaxBackground" type="ParallaxBackground" parent="."]
 layer = -10
@@ -51,7 +61,10 @@ position = Vector2(-211, 669)
 position = Vector2(2335, 689)
 
 [node name="2" type="Node2D" parent="SpawnLocation" groups=["PlayerSpawnPoint"]]
-position = Vector2(1832, -50)
+position = Vector2(1521, 362)
+
+[node name="3" type="Node2D" parent="SpawnLocation" groups=["PlayerSpawnPoint"]]
+position = Vector2(668, 648)
 
 [node name="TileMap2" type="TileMap" parent="."]
 position = Vector2(0, 2)
@@ -108,5 +121,16 @@ position = Vector2(1643, -83)
 
 [node name="GunPickup" parent="." instance=ExtResource("7_vrpg5")]
 position = Vector2(435, -80)
+
+[node name="CanvasLayer2" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer2"]
+material = SubResource("ShaderMaterial_gl7ke")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [connection signal="button_down" from="GameOver/Button" to="." method="_on_button_button_down"]

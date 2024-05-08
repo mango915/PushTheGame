@@ -8,6 +8,7 @@ extends Control
 @onready var host_player_name_line_edit = $MarginContainer/HostScreen/GridContainer/HostPlayerLineEdit
 @onready var join_player_name_line_edit = $MarginContainer/JoinScreen/GridContainer/JoinPlayerLineEdit
 @onready var hobby_player_list = $MarginContainer/LobbyScreen/VBoxContainer/HBoxContainer/TextEdit
+@onready var hobby_label = $MarginContainer/LobbyScreen/VBoxContainer/Label
 @onready var color_selection_texture_rect = $MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer/TextureRect
 
 @export var address = "127.0.0.1"
@@ -16,9 +17,12 @@ extends Control
 var peer
 var color = "red"
 
+var connected_players = 1
+
 const red_player_texture = preload ("res://Assets/Players/Bodies/red_player.tres")
 const yellow_player_texture = preload ("res://Assets/Players/Bodies/yellow_player.tres")
 const green_player_texture = preload ("res://Assets/Players/Bodies/green_player.tres")
+const purple_player_texture = preload ("res://Assets/Players/Bodies/purple_player.tres")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -43,25 +47,28 @@ func peer_disconnected(id):
 	
 func connected_to_server():
 	print("Connected to server!")
+	#if connected_players < 4:
 	hobby_player_list.text = ""
-	send_player_information.rpc_id(1, join_player_name_line_edit.text, multiplayer.get_unique_id())
+	send_player_information.rpc_id(1, join_player_name_line_edit.text, multiplayer.get_unique_id(), color)
 
 func connection_failed():
 	print("Connection failed!")
 
 @rpc("any_peer")
-func send_player_information(name, id):
+func send_player_information(name, id, color):
 	if !GameManager.players.has(id):
 		GameManager.players[id] = {
 			"name": name,
 			"id": id,
 			"score": 0,
-			"color": "red"
+			"color": color
 		}
 		hobby_player_list.text += GameManager.players[id].name + "\n"
+		connected_players += 1
+		hobby_label.text = "Connected Players (" + str(connected_players) + "/4) ..."
 	if multiplayer.is_server():
 		for i in GameManager.players:
-			send_player_information.rpc(GameManager.players[i].name, i)
+			send_player_information.rpc(GameManager.players[i].name, i, GameManager.players[i].color)
 
 @rpc("any_peer", "call_local")
 func start_game():
@@ -89,7 +96,7 @@ func _on_host_button_pressed():
 	
 	multiplayer.set_multiplayer_peer(peer)
 	print("Waiting For Players")
-	send_player_information(host_player_name_line_edit.text, multiplayer.get_unique_id())
+	send_player_information(host_player_name_line_edit.text, multiplayer.get_unique_id(), color)
 
 	lobby_screen.show()
 	hobby_player_list.text = host_player_name_line_edit.text + "\n"
@@ -128,6 +135,11 @@ func _on_left_color_button_pressed():
 		print("green")
 		color_selection_texture_rect.texture = green_player_texture
 		update_players_color.rpc(multiplayer.get_unique_id(), color)
+	elif color == "green":
+		color = "purple"
+		print("purple")
+		color_selection_texture_rect.texture = purple_player_texture
+		update_players_color.rpc(multiplayer.get_unique_id(), color)
 	else:
 		color = "red"
 		print("red")
@@ -136,6 +148,11 @@ func _on_left_color_button_pressed():
 
 func _on_right_color_button_pressed():
 	if color == "red":
+		color = "purple"
+		print("purple")
+		color_selection_texture_rect.texture = purple_player_texture
+		update_players_color.rpc(multiplayer.get_unique_id(), color)
+	elif color == "purple":
 		color = "green"
 		print("green")
 		color_selection_texture_rect.texture = green_player_texture

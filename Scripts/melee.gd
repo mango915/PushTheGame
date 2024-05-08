@@ -6,6 +6,7 @@ extends Node2D
 const red_hand = preload("res://Assets/Players/Hands/red_hand.tres")
 const yellow_hand = preload("res://Assets/Players/Hands/yellow_hand.tres")
 const green_hand = preload("res://Assets/Players/Hands/green_hand.tres")
+const purple_hand = preload("res://Assets/Players/Hands/purple_hand.tres")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -48,3 +49,5 @@ func set_color(color):
 		$Hand.texture = yellow_hand
 	elif color == "green":
 		$Hand.texture = green_hand
+	elif color == "purple":
+		$Hand.texture = purple_hand

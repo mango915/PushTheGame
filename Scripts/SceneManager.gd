@@ -2,11 +2,13 @@ extends Node2D
 
 @export var player_scene: PackedScene
 @export var weapon_scene: PackedScene
+@export var next_scene: PackedScene
 
 
 const red_player_texture = preload ("res://Assets/Players/Bodies/red_player.tres")
 const yellow_player_texture = preload ("res://Assets/Players/Bodies/yellow_player.tres")
 const green_player_texture = preload ("res://Assets/Players/Bodies/green_player.tres")
+const purple_player_texture = preload ("res://Assets/Players/Bodies/purple_player.tres")
 
 var alive_players = 0
 var players = {}
@@ -33,6 +35,9 @@ func _ready():
 		elif GameManager.players[i].color == "green":
 			current_player.color = "green"
 			current_player.get_node("Sprite2D").texture = green_player_texture
+		elif GameManager.players[i].color == "purple":
+			current_player.color = "purple"
+			current_player.get_node("Sprite2D").texture = purple_player_texture
 
 		current_player.attach_weapon(weapon_scene.instantiate())
 
@@ -78,11 +83,12 @@ func _on_player_died():
 
 func _on_button_button_down():
 	print("game should restart")
-	start_next_game.rpc()
+	start_next_game.rpc(randi_range(2, 4))
 
 @rpc("any_peer", "call_local")
-func start_next_game():
-	var scene = load("res://Scenes/Levels/test_scene_4.tscn").instantiate()
+func start_next_game(scene_number):
+	var scene_str = "res://Scenes/Levels/test_scene_"+str(scene_number)+".tscn"
+	var scene = load(scene_str).instantiate()
 	get_tree().root.add_child(scene)
 	self.queue_free()
 	#self.hide()

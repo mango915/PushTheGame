@@ -1,17 +1,35 @@
-[gd_scene load_steps=5 format=3 uid="uid://bbd8clmxegxfj"]
+[gd_scene load_steps=7 format=3 uid="uid://bbd8clmxegxfj"]
 
 [ext_resource type="Script" path="res://Scripts/SceneManager.gd" id="1_kyi1j"]
 [ext_resource type="PackedScene" uid="uid://c8s2cf0y7ipjp" path="res://Scenes/player.tscn" id="2_ivjl2"]
-[ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/Players/Bodies/red_player.tres" id="3_yut5r"]
+[ext_resource type="PackedScene" uid="uid://boebn64dynffy" path="res://Scenes/Weapons/melee.tscn" id="3_s84hy"]
+[ext_resource type="PackedScene" uid="uid://bwv8x853by7ui" path="res://Scenes/Levels/test_scene_3.tscn" id="4_at2by"]
 [ext_resource type="TileSet" uid="uid://csl8myge1effy" path="res://Assets/tileset.tres" id="4_pcljq"]
+[ext_resource type="PackedScene" uid="uid://d0mt5ttq0mdq6" path="res://Scenes/Pickups/gun_pickup.tscn" id="6_10tu1"]
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_kyi1j")
 player_scene = ExtResource("2_ivjl2")
-textures = ExtResource("3_yut5r")
+weapon_scene = ExtResource("3_s84hy")
+next_scene = ExtResource("4_at2by")
+
+[node name="ParallaxBackground" type="ParallaxBackground" parent="."]
+layer = -10
+follow_viewport_enabled = true
+scroll_ignore_camera_zoom = true
+
+[node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0.1, 0.1)
+
+[node name="TileMap3" type="TileMap" parent="ParallaxBackground/ParallaxLayer"]
+position = Vector2(73, 30)
+tile_set = ExtResource("4_pcljq")
+format = 2
+layer_0/name = "Background"
+layer_0/tile_data = PackedInt32Array(196611, 0, 0, 327688, 0, 0, 196620, 0, 0, 196615, 0, 1, 65537, 0, 1, 458757, 0, 2, 393212, 0, 1, 458771, 0, 1, 65553, 0, 1, 26, 0, 1, -131049, 0, 1, 262166, 0, 1, 458776, 0, 1, -65543, 0, 1, 65534, 0, 1, 524279, 0, 1, 851957, 0, 1, -131067, 0, 1, -196595, 0, 1, 196625, 0, 1, 720905, 0, 1, 720892, 0, 1, 131062, 0, 1, -131073, 0, 0, 1114097, 0, 1, 524265, 0, 1, -18, 0, 1, 589806, 0, 1, -327693, 0, 1, 1376227, 0, 1, 1048552, 0, 1, -655361, 0, 1, -720883, 0, 1, -524269, 0, 1, -851945, 0, 1, -262180, 0, 1, 720867, 0, 1, 1245199, 0, 1, 851986, 0, 1, 458761, 0, 1, 851974, 0, 1, 1048574, 0, 1, 65571, 0, 1, 983073, 0, 1, 852011, 0, 1, -262103, 0, 1, -917463, 0, 1, -589792, 0, 1, -196580, 0, 1, -262116, 0, 1, -983035, 0, 1, -786448, 0, 1, 131037, 0, 1, -786464, 0, 1, 1376212, 0, 1, 1572863, 0, 1, 196593, 0, 2, -786425, 0, 2)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
-layer = -1
+layer = -100
 
 [node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
 anchors_preset = 15
@@ -21,13 +39,6 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 color = Color(0.901961, 0.901961, 0.901961, 1)
-
-[node name="TileMap3" type="TileMap" parent="CanvasLayer"]
-position = Vector2(73, 30)
-tile_set = ExtResource("4_pcljq")
-format = 2
-layer_0/name = "Background"
-layer_0/tile_data = PackedInt32Array(196611, 0, 0, 327688, 0, 0, 196620, 0, 0, 196615, 0, 1, 65537, 0, 1, 458757, 0, 2)
 
 [node name="SpawnLocation" type="Node2D" parent="."]
 
@@ -39,6 +50,9 @@ position = Vector2(1538, 395)
 
 [node name="2" type="Node2D" parent="SpawnLocation" groups=["PlayerSpawnPoint"]]
 position = Vector2(1464, 15)
+
+[node name="3" type="Node2D" parent="SpawnLocation" groups=["PlayerSpawnPoint"]]
+position = Vector2(485, 0)
 
 [node name="TileMap2" type="TileMap" parent="."]
 position = Vector2(0, 2)
@@ -80,5 +94,8 @@ offset_right = 1171.0
 offset_bottom = 762.0
 theme_override_font_sizes/font_size = 50
 text = "Restart"
+
+[node name="GunPickup" parent="." instance=ExtResource("6_10tu1")]
+position = Vector2(978, 158)
 
 [connection signal="button_down" from="GameOver/Button" to="." method="_on_button_button_down"]

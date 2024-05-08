@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://twtt6qjuty6w"]
+[gd_scene load_steps=9 format=3 uid="uid://twtt6qjuty6w"]
 
 [ext_resource type="Script" path="res://Scripts/bow_pickup.gd" id="1_kcc1o"]
 [ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/Tilemaps/spritesheet_retina.png" id="2_rbrx1"]
@@ -14,6 +14,68 @@ region = Rect2(1024, 512, 128, 128)
 atlas = ExtResource("2_rbrx1")
 region = Rect2(896, 1280, 128, 128)
 
+[sub_resource type="Animation" id="Animation_vj272"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0.5, -1.5)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite2D2:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_048j0"]
+resource_name = "default_animation"
+length = 2.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1, 2),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(0.5, -1.5), Vector2(0.5, -17), Vector2(0.5, -1.5)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite2D2:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 1, 2),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(2.08165e-12, -15), Vector2(0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_ve7cs"]
+_data = {
+"RESET": SubResource("Animation_vj272"),
+"default_animation": SubResource("Animation_048j0")
+}
+
 [node name="BowPickup" type="Area2D"]
 collision_layer = 4
 script = ExtResource("1_kcc1o")
@@ -28,3 +90,8 @@ texture = SubResource("AtlasTexture_oq418")
 
 [node name="Sprite2D2" type="Sprite2D" parent="."]
 texture = SubResource("AtlasTexture_6mpm6")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_ve7cs")
+}
