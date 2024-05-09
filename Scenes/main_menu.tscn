@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://c46jwdq74ilpo"]
+[gd_scene load_steps=10 format=3 uid="uid://c46jwdq74ilpo"]
 
 [ext_resource type="Theme" uid="uid://bybbedfkdrq7s" path="res://Assets/Themes/default_theme.tres" id="1_juq3s"]
 [ext_resource type="Script" path="res://Scenes/main_menu.gd" id="2_qnsno"]
@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://carfsgi0hgvfl" path="res://Assets/splash_screen.png" id="3_jbqe5"]
 [ext_resource type="Shader" path="res://Scenes/main_menu.gdshader" id="3_lssoq"]
 [ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/Players/Bodies/red_player.tres" id="3_p6in7"]
+[ext_resource type="Script" path="res://Scripts/button_focus.gd" id="5_iujte"]
 [ext_resource type="AudioStream" uid="uid://dg76w3ksbi7wv" path="res://Assets/Music/bensound-lofinerdbassbuzzer.mp3" id="5_wfcmi"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_o2e07"]
@@ -35,6 +36,7 @@ grow_vertical = 2
 texture = ExtResource("3_jbqe5")
 
 [node name="ColorRect" type="ColorRect" parent="."]
+visible = false
 material = SubResource("ShaderMaterial_o2e07")
 layout_mode = 1
 anchors_preset = 15
@@ -85,6 +87,7 @@ theme = ExtResource("1_juq3s")
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 50
 text = "Host Game"
+script = ExtResource("5_iujte")
 
 [node name="JoinGameButton" type="Button" parent="MarginContainer/MainMenu/ButtonsVBox"]
 layout_mode = 2
@@ -297,6 +300,8 @@ columns = 3
 
 [node name="LeftColorButton" type="Button" parent="MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
+focus_neighbor_right = NodePath("../RightColorButton")
+focus_neighbor_bottom = NodePath("../../../../StartGameButton")
 theme_override_font_sizes/font_size = 100
 text = "<"
 
@@ -306,11 +311,14 @@ texture = ExtResource("3_p6in7")
 
 [node name="RightColorButton" type="Button" parent="MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
+focus_neighbor_left = NodePath("../LeftColorButton")
+focus_neighbor_bottom = NodePath("../../../../StartGameButton")
 theme_override_font_sizes/font_size = 100
 text = ">"
 
 [node name="StartGameButton" type="Button" parent="MarginContainer/LobbyScreen/VBoxContainer2"]
 layout_mode = 2
+focus_neighbor_top = NodePath("../MarginContainer/VBoxContainer/GridContainer/RightColorButton")
 theme_override_font_sizes/font_size = 50
 text = "Start game"
 

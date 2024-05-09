@@ -10,7 +10,9 @@ extends Control
 @onready var hobby_player_list = $MarginContainer/LobbyScreen/VBoxContainer/HBoxContainer/TextEdit
 @onready var hobby_label = $MarginContainer/LobbyScreen/VBoxContainer/Label
 @onready var color_selection_texture_rect = $MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer/TextureRect
-
+@onready var host_button = $MarginContainer/HostScreen/HostButton
+@onready var join_button = $MarginContainer/JoinScreen/JoinButton
+@onready var start_game_button = $MarginContainer/LobbyScreen/VBoxContainer2/StartGameButton
 @export var address = "127.0.0.1"
 @export var port = 8910
 
@@ -79,6 +81,7 @@ func start_game():
 func _on_host_game_button_pressed():
 	main_menu.hide()
 	host_screen.show()
+	host_button.grab_focus()
 
 func _on_host_button_pressed():
 
@@ -99,6 +102,7 @@ func _on_host_button_pressed():
 	send_player_information(host_player_name_line_edit.text, multiplayer.get_unique_id(), color)
 
 	lobby_screen.show()
+	start_game_button.grab_focus()
 	hobby_player_list.text = host_player_name_line_edit.text + "\n"
 	host_screen.hide()
 
@@ -112,6 +116,7 @@ func _on_join_button_pressed():
 	
 	multiplayer.set_multiplayer_peer(peer)
 	lobby_screen.show()
+	start_game_button.grab_focus()
 	join_screen.hide()
 
 func _on_start_game_button_pressed():
@@ -181,6 +186,7 @@ func _on_settings_button_pressed():
 
 func _on_back_button_pressed():
 	main_menu.show()
+	
 	settings_screen.hide()
 
 
