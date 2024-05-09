@@ -1,10 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://bwv8x853by7ui"]
+[gd_scene load_steps=8 format=3 uid="uid://bwv8x853by7ui"]
 
 [ext_resource type="Script" path="res://Scripts/SceneManager.gd" id="1_ai3a2"]
 [ext_resource type="PackedScene" uid="uid://c8s2cf0y7ipjp" path="res://Scenes/player.tscn" id="2_vhrys"]
 [ext_resource type="PackedScene" uid="uid://boebn64dynffy" path="res://Scenes/Weapons/melee.tscn" id="3_b0cuf"]
 [ext_resource type="TileSet" uid="uid://csl8myge1effy" path="res://Assets/tileset.tres" id="4_faeoc"]
-[ext_resource type="PackedScene" uid="uid://bbd8clmxegxfj" path="res://Scenes/Levels/test_scene_2.tscn" id="4_pf2f6"]
 [ext_resource type="PackedScene" uid="uid://twtt6qjuty6w" path="res://Scenes/Pickups/bow_pickup.tscn" id="6_phfbh"]
 [ext_resource type="PackedScene" uid="uid://d0mt5ttq0mdq6" path="res://Scenes/Pickups/gun_pickup.tscn" id="7_xu767"]
 [ext_resource type="PackedScene" uid="uid://ffgn4ls8ajgb" path="res://Scenes/Pickups/hearth.tscn" id="8_tpeod"]
@@ -13,7 +12,6 @@
 script = ExtResource("1_ai3a2")
 player_scene = ExtResource("2_vhrys")
 weapon_scene = ExtResource("3_b0cuf")
-next_scene = ExtResource("4_pf2f6")
 
 [node name="ParallaxBackground" type="ParallaxBackground" parent="."]
 layer = -10

@@ -1,9 +1,8 @@
-[gd_scene load_steps=7 format=3 uid="uid://bbd8clmxegxfj"]
+[gd_scene load_steps=6 format=3 uid="uid://bbd8clmxegxfj"]
 
 [ext_resource type="Script" path="res://Scripts/SceneManager.gd" id="1_kyi1j"]
 [ext_resource type="PackedScene" uid="uid://c8s2cf0y7ipjp" path="res://Scenes/player.tscn" id="2_ivjl2"]
 [ext_resource type="PackedScene" uid="uid://boebn64dynffy" path="res://Scenes/Weapons/melee.tscn" id="3_s84hy"]
-[ext_resource type="PackedScene" uid="uid://bwv8x853by7ui" path="res://Scenes/Levels/test_scene_3.tscn" id="4_at2by"]
 [ext_resource type="TileSet" uid="uid://csl8myge1effy" path="res://Assets/tileset.tres" id="4_pcljq"]
 [ext_resource type="PackedScene" uid="uid://d0mt5ttq0mdq6" path="res://Scenes/Pickups/gun_pickup.tscn" id="6_10tu1"]
 
@@ -11,7 +10,6 @@
 script = ExtResource("1_kyi1j")
 player_scene = ExtResource("2_ivjl2")
 weapon_scene = ExtResource("3_s84hy")
-next_scene = ExtResource("4_at2by")
 
 [node name="ParallaxBackground" type="ParallaxBackground" parent="."]
 layer = -10

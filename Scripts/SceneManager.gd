@@ -2,7 +2,6 @@ extends Node2D
 
 @export var player_scene: PackedScene
 @export var weapon_scene: PackedScene
-@export var next_scene: PackedScene
 
 
 const red_player_texture = preload ("res://Assets/Players/Bodies/red_player.tres")
