@@ -74,8 +74,13 @@ func send_player_information(name, id, color):
 
 @rpc("any_peer", "call_local")
 func start_game():
+
 	var scene = load("res://Scenes/Levels/test_scene_4.tscn").instantiate()
-	get_tree().root.add_child(scene)
+	get_node("../Level").add_child(scene)
+	hide_menu.rpc()
+
+@rpc("any_peer", "call_local")
+func hide_menu():
 	self.hide()
 
 func _on_host_game_button_pressed():
@@ -120,7 +125,7 @@ func _on_join_button_pressed():
 	join_screen.hide()
 
 func _on_start_game_button_pressed():
-	start_game.rpc()
+	start_game.rpc_id(1)
 
 func _on_exit_button_pressed():
 	get_tree().quit()

@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://2ihflsuv6jdd"]
+[gd_scene load_steps=12 format=3 uid="uid://2ihflsuv6jdd"]
 
 [ext_resource type="Script" path="res://Scripts/SceneManager.gd" id="1_7wg3y"]
 [ext_resource type="PackedScene" uid="uid://c8s2cf0y7ipjp" path="res://Scenes/player.tscn" id="2_4xj1r"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://twtt6qjuty6w" path="res://Scenes/Pickups/bow_pickup.tscn" id="7_vbgib"]
 [ext_resource type="PackedScene" uid="uid://d0mt5ttq0mdq6" path="res://Scenes/Pickups/gun_pickup.tscn" id="7_vrpg5"]
 [ext_resource type="Shader" path="res://Scenes/main_menu.gdshader" id="8_y3ksa"]
+[ext_resource type="Shader" path="res://Scenes/main_menu_CRT.gdshader" id="9_rbcnd"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_gl7ke"]
 shader = ExtResource("8_y3ksa")
@@ -15,6 +16,30 @@ shader_parameter/wiggle = 0.03
 shader_parameter/wiggle_speed = 25.0
 shader_parameter/smear = 0.335
 shader_parameter/blur_samples = 15
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2sytx"]
+shader = ExtResource("9_rbcnd")
+shader_parameter/overlay = true
+shader_parameter/scanlines_opacity = 0.4
+shader_parameter/scanlines_width = 0.25
+shader_parameter/grille_opacity = 0.3
+shader_parameter/resolution = Vector2(640, 480)
+shader_parameter/pixelate = false
+shader_parameter/roll = false
+shader_parameter/roll_speed = 8.0
+shader_parameter/roll_size = 15.0
+shader_parameter/roll_variation = 3.287
+shader_parameter/distort_intensity = 0.05
+shader_parameter/noise_opacity = 0.4
+shader_parameter/noise_speed = 5.0
+shader_parameter/static_noise_intensity = 0.06
+shader_parameter/aberration = 0.00600005
+shader_parameter/brightness = 1.4
+shader_parameter/discolor = true
+shader_parameter/warp_amount = 0.0
+shader_parameter/clip_warp = false
+shader_parameter/vignette_intensity = 0.4
+shader_parameter/vignette_opacity = 0.5
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_7wg3y")
@@ -48,7 +73,7 @@ grow_vertical = 2
 scale = Vector2(42.001, 59.672)
 size_flags_horizontal = 4
 size_flags_vertical = 4
-color = Color(0.901961, 0.901961, 0.901961, 1)
+color = Color(0.380392, 0.380392, 0.466667, 1)
 
 [node name="SpawnLocation" type="Node2D" parent="."]
 
@@ -64,7 +89,7 @@ position = Vector2(1521, 362)
 [node name="3" type="Node2D" parent="SpawnLocation" groups=["PlayerSpawnPoint"]]
 position = Vector2(668, 648)
 
-[node name="TileMap2" type="TileMap" parent="."]
+[node name="TileMap" type="TileMap" parent="."]
 position = Vector2(0, 2)
 tile_set = ExtResource("4_c1c2s")
 format = 2
@@ -108,27 +133,47 @@ offset_bottom = 762.0
 theme_override_font_sizes/font_size = 50
 text = "Restart"
 
-[node name="Hearth" parent="." instance=ExtResource("7_itwsn")]
+[node name="Pickups" type="Node" parent="."]
+
+[node name="Hearth" parent="Pickups" instance=ExtResource("7_itwsn")]
 position = Vector2(484, 561)
 
-[node name="Hearth2" parent="." instance=ExtResource("7_itwsn")]
+[node name="Hearth2" parent="Pickups" instance=ExtResource("7_itwsn")]
 position = Vector2(165, 57)
 
-[node name="BowPickup" parent="." instance=ExtResource("7_vbgib")]
+[node name="BowPickup" parent="Pickups" instance=ExtResource("7_vbgib")]
 position = Vector2(1643, -83)
 
-[node name="GunPickup" parent="." instance=ExtResource("7_vrpg5")]
+[node name="GunPickup" parent="Pickups" instance=ExtResource("7_vrpg5")]
 position = Vector2(435, -80)
+
+[node name="Players" type="Node" parent="."]
 
 [node name="CanvasLayer2" type="CanvasLayer" parent="."]
 visible = false
 
 [node name="ColorRect" type="ColorRect" parent="CanvasLayer2"]
+visible = false
 material = SubResource("ShaderMaterial_gl7ke")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="ColorRect2" type="ColorRect" parent="CanvasLayer2"]
+visible = false
+material = SubResource("ShaderMaterial_2sytx")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.933333, 0.466667, 0.470588, 1)
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://Scenes/player.tscn")
+spawn_path = NodePath("../Players")
 
 [connection signal="button_down" from="GameOver/Button" to="." method="_on_button_button_down"]

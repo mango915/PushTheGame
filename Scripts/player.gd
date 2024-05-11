@@ -39,6 +39,7 @@ var can_shoot = false
 #@export var bullet : PackedScene
 
 func _ready():
+	print(name)
 	$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
 	for i in GameManager.players:
 		if i == $MultiplayerSynchronizer.get_multiplayer_authority():
@@ -92,6 +93,7 @@ func take_damage():
 		is_dead = true
 		can_shoot = false
 		GameManager.players[$MultiplayerSynchronizer.get_multiplayer_authority()].alive = false
+		$HurtBox/CollisionShape2D.disabled = true
 		$AnimationPlayer.play("die")
 		health_depleted.emit()
 		$ProgressBar.value = 0
@@ -144,7 +146,7 @@ func _on_timer_timeout():
 	can_shoot = true
 
 func _on_hurt_box_body_entered(_body):
-	if multiplayer.is_server():
+	if multiplayer.is_server() and health > 0:
 		self.take_damage()
 
 func attach_weapon(new_weapon):

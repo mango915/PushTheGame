@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://b3v8el4s2mdao"]
+
+[ext_resource type="PackedScene" uid="uid://c46jwdq74ilpo" path="res://Scenes/main_menu.tscn" id="1_gonq0"]
+
+[node name="Multiplayer" type="Node"]
+
+[node name="MainMenu" parent="." instance=ExtResource("1_gonq0")]
+
+[node name="Level" type="Node" parent="."]
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://Scenes/Levels/test_scene_4.tscn", "res://Scenes/Levels/test_scene_2.tscn", "res://Scenes/Levels/test_scene_3.tscn")
+spawn_path = NodePath("../Level")

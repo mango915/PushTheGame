@@ -93,7 +93,15 @@ offset_bottom = 762.0
 theme_override_font_sizes/font_size = 50
 text = "Restart"
 
-[node name="GunPickup" parent="." instance=ExtResource("6_10tu1")]
+[node name="Pickups" type="Node" parent="."]
+
+[node name="GunPickup" parent="Pickups" instance=ExtResource("6_10tu1")]
 position = Vector2(978, 158)
+
+[node name="Players" type="Node" parent="."]
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://Scenes/player.tscn")
+spawn_path = NodePath("../Players")
 
 [connection signal="button_down" from="GameOver/Button" to="." method="_on_button_button_down"]

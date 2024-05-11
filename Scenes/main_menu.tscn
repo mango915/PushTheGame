@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://c46jwdq74ilpo"]
+[gd_scene load_steps=12 format=3 uid="uid://c46jwdq74ilpo"]
 
 [ext_resource type="Theme" uid="uid://bybbedfkdrq7s" path="res://Assets/Themes/default_theme.tres" id="1_juq3s"]
 [ext_resource type="Script" path="res://Scenes/main_menu.gd" id="2_qnsno"]
@@ -6,17 +6,42 @@
 [ext_resource type="Texture2D" uid="uid://carfsgi0hgvfl" path="res://Assets/splash_screen.png" id="3_jbqe5"]
 [ext_resource type="Shader" path="res://Scenes/main_menu.gdshader" id="3_lssoq"]
 [ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/Players/Bodies/red_player.tres" id="3_p6in7"]
+[ext_resource type="Shader" path="res://Scenes/main_menu_CRT.gdshader" id="5_624fg"]
 [ext_resource type="Script" path="res://Scripts/button_focus.gd" id="5_iujte"]
 [ext_resource type="AudioStream" uid="uid://dg76w3ksbi7wv" path="res://Assets/Music/bensound-lofinerdbassbuzzer.mp3" id="5_wfcmi"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_o2e07"]
 shader = ExtResource("3_lssoq")
-shader_parameter/wiggle = 0.24
+shader_parameter/wiggle = 0.28
 shader_parameter/wiggle_speed = 25.0
 shader_parameter/smear = 0.858
 shader_parameter/blur_samples = 15
 
-[node name="Control" type="Control"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ym21w"]
+shader = ExtResource("5_624fg")
+shader_parameter/overlay = true
+shader_parameter/scanlines_opacity = 0.4
+shader_parameter/scanlines_width = 0.25
+shader_parameter/grille_opacity = 0.3
+shader_parameter/resolution = Vector2(640, 480)
+shader_parameter/pixelate = true
+shader_parameter/roll = false
+shader_parameter/roll_speed = 8.0
+shader_parameter/roll_size = 15.0
+shader_parameter/roll_variation = 1.8
+shader_parameter/distort_intensity = 0.05
+shader_parameter/noise_opacity = 0.0
+shader_parameter/noise_speed = 5.0
+shader_parameter/static_noise_intensity = 0.06
+shader_parameter/aberration = 4.75e-08
+shader_parameter/brightness = 1.4
+shader_parameter/discolor = true
+shader_parameter/warp_amount = 0.0
+shader_parameter/clip_warp = false
+shader_parameter/vignette_intensity = 0.4
+shader_parameter/vignette_opacity = 0.5
+
+[node name="MainMenu" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -38,6 +63,18 @@ texture = ExtResource("3_jbqe5")
 [node name="ColorRect" type="ColorRect" parent="."]
 visible = false
 material = SubResource("ShaderMaterial_o2e07")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.933333, 0.466667, 0.470588, 1)
+
+[node name="ColorRect2" type="ColorRect" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_ym21w")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

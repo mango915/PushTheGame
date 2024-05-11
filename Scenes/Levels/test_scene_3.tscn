@@ -95,19 +95,27 @@ offset_bottom = 762.0
 theme_override_font_sizes/font_size = 50
 text = "Restart"
 
-[node name="BowPickup" parent="." instance=ExtResource("6_phfbh")]
+[node name="Pickups" type="Node" parent="."]
+
+[node name="BowPickup" parent="Pickups" instance=ExtResource("6_phfbh")]
 position = Vector2(1645, -713)
 
-[node name="GunPickup" parent="." instance=ExtResource("7_xu767")]
+[node name="GunPickup" parent="Pickups" instance=ExtResource("7_xu767")]
 position = Vector2(920, -714)
 
-[node name="Hearth" parent="." instance=ExtResource("8_tpeod")]
+[node name="Hearth" parent="Pickups" instance=ExtResource("8_tpeod")]
 position = Vector2(182, -583)
 
-[node name="Hearth2" parent="." instance=ExtResource("8_tpeod")]
+[node name="Hearth2" parent="Pickups" instance=ExtResource("8_tpeod")]
 position = Vector2(179, 444)
 
-[node name="Hearth3" parent="." instance=ExtResource("8_tpeod")]
+[node name="Hearth3" parent="Pickups" instance=ExtResource("8_tpeod")]
 position = Vector2(68, 437)
+
+[node name="Players" type="Node" parent="."]
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://Scenes/player.tscn")
+spawn_path = NodePath("../Players")
 
 [connection signal="button_down" from="GameOver/Button" to="." method="_on_button_button_down"]
