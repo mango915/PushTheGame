@@ -12,7 +12,6 @@ const purple_player_texture = preload ("res://Assets/Players/Bodies/purple_playe
 var alive_players = 0
 var players = {}
 
-# Called when the node enters the scene tree for the first time.
 func _ready():
 
 	multiplayer.peer_disconnected.connect(peer_disconnected)
@@ -22,7 +21,6 @@ func _ready():
 		spawn_players()
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pass
 
@@ -99,6 +97,7 @@ func spawn_function(data):
 	var index = data[1]
 
 	var current_player = player_scene.instantiate()
+	current_player.player = GameManager.players[i].id
 
 	current_player.name = str(GameManager.players[i].id)
 	players[GameManager.players[i].id] = current_player

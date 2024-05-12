@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://c8s2cf0y7ipjp"]
+[gd_scene load_steps=20 format=3 uid="uid://c8s2cf0y7ipjp"]
 
 [ext_resource type="Script" path="res://Scripts/player.gd" id="1_8g4cu"]
 [ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/Players/Bodies/red_player.tres" id="2_ithuv"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://Scripts/States/run.gd" id="7_ec1ms"]
 [ext_resource type="Script" path="res://Scripts/States/fall.gd" id="8_fdv54"]
 [ext_resource type="Script" path="res://Scripts/States/double_jump.gd" id="8_rxbkg"]
+[ext_resource type="Script" path="res://Scripts/InputSynchronizer.gd" id="9_cmu75"]
 [ext_resource type="Script" path="res://Scripts/States/jump.gd" id="9_k3kr2"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_nlme1"]
@@ -94,25 +95,27 @@ _data = {
 radius = 40.0
 height = 124.0
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_ek0q8"]
+[sub_resource type="CircleShape2D" id="CircleShape2D_pilf8"]
+radius = 133.0
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_1euuh"]
+properties/0/path = NodePath("InputSynchronizer:direction")
+properties/0/spawn = false
+properties/0/replication_mode = 1
+properties/1/path = NodePath("InputSynchronizer:down")
+properties/1/spawn = false
+properties/1/replication_mode = 1
+properties/2/path = NodePath("InputSynchronizer:pickup")
+properties/2/spawn = false
+properties/2/replication_mode = 1
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_fumif"]
 properties/0/path = NodePath(".:position")
 properties/0/spawn = true
 properties/0/replication_mode = 1
 properties/1/path = NodePath(".:rotation")
 properties/1/spawn = true
 properties/1/replication_mode = 1
-properties/2/path = NodePath("Sprite2D:flip_h")
-properties/2/spawn = true
-properties/2/replication_mode = 1
-properties/3/path = NodePath(".:weapon_scale")
-properties/3/spawn = true
-properties/3/replication_mode = 1
-properties/4/path = NodePath(".:weapon_rotation")
-properties/4/spawn = true
-properties/4/replication_mode = 1
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_pilf8"]
-radius = 133.0
 
 [node name="Player" type="CharacterBody2D" groups=["Player"]]
 script = ExtResource("1_8g4cu")
@@ -195,14 +198,18 @@ debug_color = Color(0.858824, 0.337255, 0.352941, 0.419608)
 
 [node name="WeaponAttach" type="Node2D" parent="."]
 
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_ek0q8")
-
 [node name="InteractionArea" type="Area2D" parent="."]
 collision_mask = 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea"]
 shape = SubResource("CircleShape2D_pilf8")
+
+[node name="InputSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_1euuh")
+script = ExtResource("9_cmu75")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_fumif")
 
 [connection signal="timeout" from="ShootingTimer" to="." method="_on_timer_timeout"]
 [connection signal="body_entered" from="HurtBox" to="." method="_on_hurt_box_body_entered"]

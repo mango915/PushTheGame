@@ -24,6 +24,8 @@ var weapon = null
 var weapon_scale = Vector2(1, 1)
 var weapon_rotation = 0
 
+var just_jumped = false
+
 var color = "red"
 
 signal health_depleted
@@ -38,49 +40,73 @@ var can_shoot = false
 
 #@export var bullet : PackedScene
 
+@export var player := 1 :
+	set(id):
+		player = id
+		# Give authority over the player input to the appropriate peer.
+		$InputSynchronizer.set_multiplayer_authority(id)
+		$MultiplayerSynchronizer.set_multiplayer_authority(1)
+
+
+
+@onready var input = $InputSynchronizer
+
 func _ready():
 	print(name)
-	$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
+
+	#$MultiplayerSynchronizer.set_multiplayer_authority(1)
+	#$InputSynchronizer.set_multiplayer_authority(str(name).to_int())
+	
 	for i in GameManager.players:
-		if i == $MultiplayerSynchronizer.get_multiplayer_authority():
+		if i == str(name).to_int():
 			$Label.text = GameManager.players[i].name
+	
 	$ProgressBar.value = health
 	
-	if $MultiplayerSynchronizer.get_multiplayer_authority() != multiplayer.get_unique_id():
+	if $InputSynchronizer.get_multiplayer_authority() != multiplayer.get_unique_id():
 		$Camera2D.enabled = false
 	else:
 		$Camera2D.enabled = true
 	
-	GameManager.players[$MultiplayerSynchronizer.get_multiplayer_authority()].alive = true
+	GameManager.players[$InputSynchronizer.get_multiplayer_authority()].alive = true
 	
 	fsm.change_state("idle")
 
 func _physics_process(delta):
 	
-	if $MultiplayerSynchronizer.get_multiplayer_authority() != multiplayer.get_unique_id():
-		$WeaponAttach.get_child(0).scale = weapon_scale
-		$WeaponAttach.get_child(0).rotation = weapon_rotation
-		return
+	#if $InputSynchronizer.get_multiplayer_authority() != multiplayer.get_unique_id():
+		#$WeaponAttach.get_child(0).scale = weapon_scale
+		#$WeaponAttach.get_child(0).rotation = weapon_rotation
+	#	return
 		
 	if is_dead:
 		return
 		
-	if get_jump_input():
+	if just_jumped:
 		jump_buffer_timer.start()
 	sync_direction()
 	fsm.physics_update(delta)
 
 	weapon_scale = $WeaponAttach.get_child(0).scale
 	weapon_rotation = $WeaponAttach.get_child(0).rotation
-	
-func _input(event):
-	if $MultiplayerSynchronizer.get_multiplayer_authority() != multiplayer.get_unique_id():
-		return
-	if event.is_action_pressed("ui_down"):
-		position.y += 1
-	if event.is_action_pressed("pickup"):
+
+func _process(delta):
+	if input.down and multiplayer.is_server():
+		print("trying to fall down")
+		position.y += 10
+	if input.pickup and multiplayer.is_server():
 		print("pickup")
 		try_to_pickup_object.rpc_id(1)
+
+
+#func _input(event):
+#	if $InputSynchronizer.get_multiplayer_authority() != multiplayer.get_unique_id():
+#		return
+#	if event.is_action_pressed("ui_down"):
+#		position.y += 1
+#	if event.is_action_pressed("pickup"):
+#		print("pickup")
+#		try_to_pickup_object.rpc_id(1)
 
 @rpc("any_peer", "call_local")
 func take_damage():
@@ -92,7 +118,7 @@ func take_damage():
 	if health <= 0:
 		is_dead = true
 		can_shoot = false
-		GameManager.players[$MultiplayerSynchronizer.get_multiplayer_authority()].alive = false
+		GameManager.players[$InputSynchronizer.get_multiplayer_authority()].alive = false
 		$HurtBox/CollisionShape2D.disabled = true
 		$AnimationPlayer.play("die")
 		health_depleted.emit()
@@ -134,13 +160,13 @@ func clear_queue():
 	ap.clear_queue()
 
 func get_input_x():
-	return Input.get_axis("ui_left", "ui_right")
+	return input.direction
 
 func get_jump_input():
-	return Input.is_action_just_pressed("ui_accept")
+	return input.just_jumped
 
 func get_jump_hold():
-	return Input.is_action_pressed("ui_accept")
+	return input.jumping
 
 func _on_timer_timeout():
 	can_shoot = true
