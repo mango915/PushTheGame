@@ -38,6 +38,12 @@ var can_shoot = false
 
 #@export var bullet : PackedScene
 
+@export var player := 1 :
+	set(id):
+		player = id
+		# Give authority over the player input to the appropriate peer.
+		$MultiplayerSynchronizer.set_multiplayer_authority(id)
+
 func _ready():
 	print(name)
 	$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())

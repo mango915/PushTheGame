@@ -36,7 +36,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
-color = Color(0.901961, 0.901961, 0.901961, 1)
+color = Color(0.882353, 0.741176, 0.733333, 1)
 
 [node name="SpawnLocation" type="Node2D" parent="."]
 

@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://du8if47y1yxax"]
 
-[ext_resource type="Script" path="res://Scripts/arrow.gd" id="1_eabph"]
+[ext_resource type="Script" path="res://Scripts/Weapons/arrow.gd" id="1_eabph"]
 [ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/Tilemaps/spritesheet_retina.png" id="2_0f82i"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ux4vv"]

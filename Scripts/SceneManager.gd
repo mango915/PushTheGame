@@ -101,6 +101,7 @@ func spawn_function(data):
 	var current_player = player_scene.instantiate()
 
 	current_player.name = str(GameManager.players[i].id)
+	current_player.player = GameManager.players[i].id
 	players[GameManager.players[i].id] = current_player
 
 	print("player color: " + GameManager.players[i].color)

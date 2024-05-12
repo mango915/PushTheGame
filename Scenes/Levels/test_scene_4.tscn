@@ -7,8 +7,8 @@
 [ext_resource type="PackedScene" uid="uid://ffgn4ls8ajgb" path="res://Scenes/Pickups/hearth.tscn" id="7_itwsn"]
 [ext_resource type="PackedScene" uid="uid://twtt6qjuty6w" path="res://Scenes/Pickups/bow_pickup.tscn" id="7_vbgib"]
 [ext_resource type="PackedScene" uid="uid://d0mt5ttq0mdq6" path="res://Scenes/Pickups/gun_pickup.tscn" id="7_vrpg5"]
-[ext_resource type="Shader" path="res://Scenes/main_menu.gdshader" id="8_y3ksa"]
-[ext_resource type="Shader" path="res://Scenes/main_menu_CRT.gdshader" id="9_rbcnd"]
+[ext_resource type="Shader" path="res://Assets/main_menu.gdshader" id="8_y3ksa"]
+[ext_resource type="Shader" path="res://Assets/main_menu_CRT.gdshader" id="9_rbcnd"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_gl7ke"]
 shader = ExtResource("8_y3ksa")

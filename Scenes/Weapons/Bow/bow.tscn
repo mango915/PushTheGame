@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://o62inw4r1ln4"]
 
-[ext_resource type="Script" path="res://Scripts/bow.gd" id="1_dxwbo"]
+[ext_resource type="Script" path="res://Scripts/Weapons/bow.gd" id="1_dxwbo"]
 [ext_resource type="PackedScene" uid="uid://du8if47y1yxax" path="res://Scenes/Weapons/Bow/arrow.tscn" id="2_84nlv"]
 [ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/Tilemaps/spritesheet_retina.png" id="3_vn2mb"]
 [ext_resource type="AudioStream" uid="uid://b8ckelcttjiv5" path="res://Assets/Music/laserShoot.wav" id="4_7ulm5"]

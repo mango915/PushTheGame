@@ -20,6 +20,7 @@ var peer
 var color = "red"
 
 var connected_players = 0
+var ready_players = 0
 
 const red_player_texture = preload ("res://Assets/Players/Bodies/red_player.tres")
 const yellow_player_texture = preload ("res://Assets/Players/Bodies/yellow_player.tres")
@@ -33,6 +34,7 @@ func _ready():
 	multiplayer.connected_to_server.connect(connected_to_server)
 	multiplayer.connection_failed.connect(connection_failed)
 
+
 func peer_connected(id):
 	print("Player Connected: " + str(id))
 	#if multiplayer.is_server():
@@ -41,12 +43,19 @@ func peer_connected(id):
 
 func peer_disconnected(id):
 	print("Player disconnected: " + str(id))
-	#GameManager.players.erase(id)
-	#var players = get_tree().get_nodes_in_group("Player")
-	#for i in players:
-	#	if i.name ==GameManager.players[id].name:
-	#		i.queue_free()
-	
+	if id == 1:
+		#reload current scene
+		get_tree().change_scene_to_file("res://Scenes/ConnectionLost.tscn")
+		#main_menu.hide()
+		#settings_screen.show()
+		GameManager.players.clear()
+		connected_players = 0
+	else:
+		connected_players -= 1
+		GameManager.players.erase(id)
+
+
+
 func connected_to_server():
 	print("Connected to server!")
 	#if connected_players < 4:
@@ -78,6 +87,12 @@ func start_game():
 	var scene = load("res://Scenes/Levels/test_scene_4.tscn").instantiate()
 	get_node("../Level").add_child(scene)
 	hide_menu.rpc()
+
+@rpc("any_peer", "call_local")
+func player_is_ready():
+	ready_players += 1
+	if ready_players == connected_players:
+		start_game.rpc_id(1)
 
 @rpc("any_peer", "call_local")
 func hide_menu():
@@ -125,7 +140,10 @@ func _on_join_button_pressed():
 	join_screen.hide()
 
 func _on_start_game_button_pressed():
-	start_game.rpc_id(1)
+	start_game_button.disabled = true
+	player_is_ready.rpc_id(1)
+	
+	#start_game.rpc_id(1)
 
 func _on_exit_button_pressed():
 	get_tree().quit()
@@ -205,3 +223,4 @@ func _on_music_slider_value_changed(value:float):
 
 func _on_audio_stream_player_2d_finished():
 	$AudioStreamPlayer2D.play()
+

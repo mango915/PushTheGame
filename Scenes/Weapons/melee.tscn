@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://boebn64dynffy"]
 
-[ext_resource type="Script" path="res://Scripts/melee.gd" id="1_pqv4r"]
+[ext_resource type="Script" path="res://Scripts/Weapons/melee.gd" id="1_pqv4r"]
 [ext_resource type="Texture2D" uid="uid://b8ytrbdgk3anc" path="res://Assets/Players/Hands/red_hand.tres" id="2_i3lix"]
 [ext_resource type="AudioStream" uid="uid://u77cavjrp4a8" path="res://Assets/Music/hitHurt-2.wav" id="3_auwdm"]
 
