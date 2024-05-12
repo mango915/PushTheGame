@@ -37,9 +37,6 @@ func _ready():
 
 func peer_connected(id):
 	print("Player Connected: " + str(id))
-	#if multiplayer.is_server():
-		#send_player_information.rpc(GameManager.players[id].name, id)
-	#	hobby_player_list.text += GameManager.players[id].name + "\n"
 
 func peer_disconnected(id):
 	print("Player disconnected: " + str(id))
@@ -58,7 +55,6 @@ func peer_disconnected(id):
 
 func connected_to_server():
 	print("Connected to server!")
-	#if connected_players < 4:
 	hobby_player_list.text = ""
 	send_player_information.rpc_id(1, join_player_name_line_edit.text, multiplayer.get_unique_id(), color)
 

@@ -2,7 +2,7 @@ extends CharacterBody2D
 class_name Player_FSM_new
 
 const ACCELERATION = 5000.0
-const MAX_SPEED = 500.0
+const MAX_SPEED = 800.0
 const JUMP_SPEED = -1800.0
 
 const GRAVITY = 4500
@@ -89,9 +89,9 @@ func _input(event):
 		try_to_pickup_object.rpc_id(1)
 
 @rpc("any_peer", "call_local")
-func take_damage():
+func take_damage(dmg):
 	if health > 0:
-		health -= 20
+		health -= dmg
 		print("total_health = ", health)
 		$ProgressBar.value = health
 		
@@ -106,7 +106,7 @@ func take_damage():
 	if multiplayer.is_server():
 		for i in GameManager.players:
 			if i != 1:
-				self.take_damage.rpc_id(i)
+				self.take_damage.rpc_id(i, dmg)
 
 @rpc("any_peer", "call_local")
 func heal_damage():
@@ -153,7 +153,8 @@ func _on_timer_timeout():
 
 func _on_hurt_box_body_entered(_body):
 	if multiplayer.is_server() and health > 0:
-		self.take_damage()
+		print("Damaged from environment!")
+		self.take_damage(10)
 
 func attach_weapon(new_weapon):
 	new_weapon.set_color(color)

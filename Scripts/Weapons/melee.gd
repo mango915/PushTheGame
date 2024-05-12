@@ -39,7 +39,7 @@ func punch():
 
 func _on_area_2d_body_entered(body:Node2D):
 	if body.has_method("take_damage") and multiplayer.is_server():
-		body.take_damage()
+		body.take_damage(5)
 
 
 func set_color(color):
