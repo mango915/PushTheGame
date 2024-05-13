@@ -23,14 +23,18 @@ func _physics_process(delta):
 		return
 		
 	# look left or right horizontally depending on mouse position
-	var dir = get_global_mouse_position() - global_position
-	if dir.x < 0:
+	#var dir = get_global_mouse_position() - global_position
+
+	var dir = get_parent().get_parent().get_input_x()
+
+	if dir < 0:
 		scale = Vector2( - 1, 1)
-	else:
+	elif dir > 0:
 		scale = Vector2(1, 1)
 
 	if Input.is_action_just_pressed("fire") and get_parent().get_parent().can_shoot:
-		fire.rpc(get_global_mouse_position())
+		#fire.rpc(get_global_mouse_position())
+		fire.rpc(scale)
 
 @rpc("any_peer", "call_local")
 func fire(direction):
@@ -38,11 +42,11 @@ func fire(direction):
 	var bullet = bullet_scene.instantiate()
 	bullet.global_position = $BulletSpawn.global_position
 	# shoot bullet parallel to ground depending on mouse position
-	var dir = direction - global_position
-	dir = dir.normalized()
-	dir.y = 0
-	bullet.global_rotation = dir.angle()
-	bullet.dir = dir
+	#var dir = direction - global_position
+	#dir = dir.normalized()
+	direction.y = 0
+	bullet.global_rotation = direction.angle()
+	bullet.dir = direction
 
 	bullet.speed = 5000
 	get_tree().root.add_child(bullet)

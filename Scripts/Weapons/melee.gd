@@ -22,10 +22,11 @@ func _physics_process(delta):
 	if get_parent().get_parent().is_dead:
 		return
 	
-	var dir = get_global_mouse_position() - global_position
-	if dir.x < 0:
+	#var dir = get_global_mouse_position() - global_position
+	var dir = get_parent().get_parent().get_input_x()
+	if dir < 0:
 		scale = Vector2( - 1, 1)
-	else:
+	elif dir > 0:
 		scale = Vector2(1, 1)
 
 	if Input.is_action_just_pressed("fire") and get_parent().get_parent().can_shoot:

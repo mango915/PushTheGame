@@ -23,8 +23,15 @@ func _physics_process(delta):
 		
 	if get_parent().get_parent().is_dead:
 		return
-		
-	look_at(get_global_mouse_position())
+
+	if Input.get_connected_joypads().size() == 0:
+		look_at(get_global_mouse_position())
+	else:
+		var dir = get_parent().get_parent().get_input_x()
+		if dir > 0:
+			rotation_degrees = -45
+		elif dir < 0:
+			rotation_degrees = -135
 	
 	if Input.is_action_pressed("fire") and get_parent().get_parent().can_shoot:
 		shooting_force += 50
@@ -32,13 +39,30 @@ func _physics_process(delta):
 	if Input.is_action_just_released("fire") and get_parent().get_parent().can_shoot:
 		print("shooting_force = ", shooting_force)
 		#get_parent().velocity.x -= 500
-		fire. rpc (get_global_mouse_position(), shooting_force)
+		
+		if Input.get_connected_joypads().size() == 0:
+			fire.rpc(get_global_mouse_position(), shooting_force)
+		else:
+			if rotation_degrees == -45:
+				fire.rpc(Vector2(100,-100), shooting_force, true)
+			elif rotation_degrees == -135:
+				fire.rpc(Vector2(-100,-100), shooting_force, true)
+			#else:
+			#fire. rpc (, shooting_force)
 		shooting_force = 300
 
 @rpc("any_peer", "call_local")
-func fire(direction, shooting_force):
+func fire(direction, shooting_force, joypad_shooting=false):
 	audio_player.play()
 	var arrow = arrow.instantiate()
+
+	if joypad_shooting:
+		arrow.global_position = $ArrowSpawn.global_position
+		arrow.dir = direction
+		arrow.speed = shooting_force
+		get_tree().root.add_child(arrow)
+
+
 	arrow.global_position = $ArrowSpawn.global_position
 	arrow.dir = direction - $ArrowSpawn.global_position
 	arrow.speed = shooting_force

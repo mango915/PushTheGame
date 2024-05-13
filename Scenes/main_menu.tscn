@@ -163,6 +163,7 @@ text = "Name:"
 [node name="HostPlayerLineEdit" type="LineEdit" parent="MarginContainer/HostScreen/GridContainer"]
 custom_minimum_size = Vector2(200, 2.08165e-12)
 layout_mode = 2
+focus_neighbor_bottom = NodePath("../PortLineEdit")
 theme_override_font_sizes/font_size = 50
 text = "Host"
 
@@ -176,6 +177,8 @@ text = "Port"
 [node name="PortLineEdit" type="LineEdit" parent="MarginContainer/HostScreen/GridContainer"]
 custom_minimum_size = Vector2(150, 2.08165e-12)
 layout_mode = 2
+focus_neighbor_top = NodePath("../HostPlayerLineEdit")
+focus_neighbor_bottom = NodePath("../../HostButton")
 theme_override_font_sizes/font_size = 50
 text = "8910"
 
@@ -183,6 +186,7 @@ text = "8910"
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
+focus_neighbor_top = NodePath("../GridContainer/PortLineEdit")
 theme_override_font_sizes/font_size = 50
 text = "Host.."
 

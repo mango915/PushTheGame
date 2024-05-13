@@ -99,7 +99,7 @@ func take_damage(dmg):
 		is_dead = true
 		can_shoot = false
 		GameManager.players[$MultiplayerSynchronizer.get_multiplayer_authority()].alive = false
-		$HurtBox/CollisionShape2D.disabled = true
+		disable_collider.call_deferred()
 		$AnimationPlayer.play("die")
 		health_depleted.emit()
 		$ProgressBar.value = 0
@@ -107,6 +107,10 @@ func take_damage(dmg):
 		for i in GameManager.players:
 			if i != 1:
 				self.take_damage.rpc_id(i, dmg)
+
+func disable_collider():
+	$CollisionShape2D.disabled = true
+	$HurtBox/CollisionShape2D.disabled = true
 
 @rpc("any_peer", "call_local")
 func heal_damage():
