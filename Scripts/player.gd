@@ -86,6 +86,7 @@ func _input(event):
 		position.y += 1
 	if event.is_action_pressed("pickup"):
 		print("pickup")
+		print(is_next_to_wall())
 		try_to_pickup_object.rpc_id(1)
 
 @rpc("any_peer", "call_local")
@@ -128,6 +129,7 @@ func sync_direction():
 	var input_x = get_input_x()
 	if input_x == 0: return
 	s.flip_h = input_x == - 1
+	$RayCast2D.target_position = (Vector2(89,0) if input_x == 1 else Vector2(-89,0))
 
 func update_velocity(delta):
 	velocity.y = move_toward(velocity.y, TERMINAL_VELOCITY, (GRAVITY if fsm.current_state == "jump" else FALL_GRAVITY) * delta)
@@ -179,3 +181,5 @@ func try_to_pickup_object():
 			if i != 1:
 				self.try_to_pickup_object.rpc_id(i)
 			
+func is_next_to_wall():
+	return $RayCast2D.is_colliding()

@@ -6,11 +6,11 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_kryx0"]
 shader = ExtResource("2_wg5bj")
 shader_parameter/overlay = true
-shader_parameter/scanlines_opacity = 0.4
-shader_parameter/scanlines_width = 0.25
+shader_parameter/scanlines_opacity = 0.365
+shader_parameter/scanlines_width = 0.05
 shader_parameter/grille_opacity = 0.3
-shader_parameter/resolution = Vector2(1280, 720)
-shader_parameter/pixelate = true
+shader_parameter/resolution = Vector2(320, 240)
+shader_parameter/pixelate = false
 shader_parameter/roll = false
 shader_parameter/roll_speed = 8.0
 shader_parameter/roll_size = 15.0
@@ -19,9 +19,9 @@ shader_parameter/distort_intensity = 0.05
 shader_parameter/noise_opacity = 0.0
 shader_parameter/noise_speed = 5.0
 shader_parameter/static_noise_intensity = 0.06
-shader_parameter/aberration = 0.01
+shader_parameter/aberration = 0.00500005
 shader_parameter/brightness = 1.4
-shader_parameter/discolor = true
+shader_parameter/discolor = false
 shader_parameter/warp_amount = 0.0
 shader_parameter/clip_warp = false
 shader_parameter/vignette_intensity = 0.4

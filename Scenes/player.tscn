@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://c8s2cf0y7ipjp"]
+[gd_scene load_steps=19 format=3 uid="uid://c8s2cf0y7ipjp"]
 
 [ext_resource type="Script" path="res://Scripts/player.gd" id="1_8g4cu"]
 [ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/Players/Bodies/red_player.tres" id="2_ithuv"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://Scripts/States/fall.gd" id="8_fdv54"]
 [ext_resource type="Script" path="res://Scripts/States/double_jump.gd" id="8_rxbkg"]
 [ext_resource type="Script" path="res://Scripts/States/jump.gd" id="9_k3kr2"]
+[ext_resource type="Script" path="res://Scripts/States/wall_Jump.gd" id="9_nwbry"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_nlme1"]
 radius = 41.75
@@ -175,6 +176,9 @@ script = ExtResource("9_k3kr2")
 [node name="DoubleJump" type="Node" parent="FSM"]
 script = ExtResource("8_rxbkg")
 
+[node name="WallJump" type="Node" parent="FSM"]
+script = ExtResource("9_nwbry")
+
 [node name="ShootingTimer" type="Timer" parent="."]
 wait_time = 0.5
 one_shot = true
@@ -203,6 +207,9 @@ collision_mask = 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea"]
 shape = SubResource("CircleShape2D_pilf8")
+
+[node name="RayCast2D" type="RayCast2D" parent="."]
+target_position = Vector2(89, 2.08165e-12)
 
 [connection signal="timeout" from="ShootingTimer" to="." method="_on_timer_timeout"]
 [connection signal="body_entered" from="HurtBox" to="." method="_on_hurt_box_body_entered"]
