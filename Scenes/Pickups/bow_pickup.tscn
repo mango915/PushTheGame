@@ -95,3 +95,9 @@ texture = SubResource("AtlasTexture_6mpm6")
 libraries = {
 "": SubResource("AnimationLibrary_ve7cs")
 }
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 6.0
+one_shot = true
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

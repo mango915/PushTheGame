@@ -15,7 +15,7 @@ func enter():
 	elif fsm.previous_state == "doublejump":
 		#print("set can_double_jump and can_wall_jump to false")
 		can_double_jump = false
-		can_wall_jump = false
+		can_wall_jump = true
 	elif fsm.previous_state == "walljump":
 		#print("set can_wall_jump to false")
 		can_double_jump = false

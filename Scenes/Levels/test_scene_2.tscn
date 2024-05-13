@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://bbd8clmxegxfj"]
+[gd_scene load_steps=7 format=3 uid="uid://bbd8clmxegxfj"]
 
 [ext_resource type="Script" path="res://Scripts/SceneManager.gd" id="1_kyi1j"]
 [ext_resource type="PackedScene" uid="uid://c8s2cf0y7ipjp" path="res://Scenes/player.tscn" id="2_ivjl2"]
 [ext_resource type="PackedScene" uid="uid://boebn64dynffy" path="res://Scenes/Weapons/melee.tscn" id="3_s84hy"]
 [ext_resource type="TileSet" uid="uid://csl8myge1effy" path="res://Assets/tileset.tres" id="4_pcljq"]
+[ext_resource type="Theme" uid="uid://bybbedfkdrq7s" path="res://Assets/Themes/default_theme.tres" id="5_ainlq"]
 [ext_resource type="PackedScene" uid="uid://d0mt5ttq0mdq6" path="res://Scenes/Pickups/gun_pickup.tscn" id="6_10tu1"]
 
 [node name="Node2D" type="Node2D"]
@@ -74,24 +75,42 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.643137)
 
-[node name="Label" type="Label" parent="GameOver"]
+[node name="VBoxContainer" type="VBoxContainer" parent="GameOver"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_font_sizes/font_size = 100
+size_flags_horizontal = 4
+size_flags_vertical = 4
+alignment = 1
+
+[node name="Label" type="Label" parent="GameOver/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme = ExtResource("5_ainlq")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 20
+theme_override_font_sizes/font_size = 150
 text = "Game Over!"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Button" type="Button" parent="GameOver"]
-offset_left = 748.0
-offset_top = 685.0
-offset_right = 1171.0
-offset_bottom = 762.0
-theme_override_font_sizes/font_size = 50
+[node name="Button" type="Button" parent="GameOver/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme = ExtResource("5_ainlq")
+theme_override_font_sizes/font_size = 60
 text = "Restart"
+
+[node name="Button2" type="Button" parent="GameOver/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme = ExtResource("5_ainlq")
+theme_override_font_sizes/font_size = 60
+text = "Quit"
 
 [node name="Pickups" type="Node" parent="."]
 
@@ -104,4 +123,5 @@ position = Vector2(978, 158)
 _spawnable_scenes = PackedStringArray("res://Scenes/player.tscn")
 spawn_path = NodePath("../Players")
 
-[connection signal="button_down" from="GameOver/Button" to="." method="_on_button_button_down"]
+[connection signal="button_down" from="GameOver/VBoxContainer/Button" to="." method="_on_button_button_down"]
+[connection signal="button_down" from="GameOver/VBoxContainer/Button2" to="." method="_on_button_2_button_down"]

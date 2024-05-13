@@ -20,11 +20,13 @@ const MAX_HEALTH = 100
 var health = MAX_HEALTH
 var is_dead = false
 
-var weapon = null
+#var weapon = null
 var weapon_scale = Vector2(1, 1)
 var weapon_rotation = 0
 
 var color = "red"
+
+const melee_scene = preload("res://Scenes/Weapons/melee.tscn")
 
 signal health_depleted
 
@@ -88,6 +90,8 @@ func _input(event):
 		print("pickup")
 		print(is_next_to_wall())
 		try_to_pickup_object.rpc_id(1)
+	if event.is_action_pressed("drop_weapon"):
+		drop_weapon.rpc_id(1)
 
 @rpc("any_peer", "call_local")
 func take_damage(dmg):
@@ -180,6 +184,29 @@ func try_to_pickup_object():
 		for i in GameManager.players:
 			if i != 1:
 				self.try_to_pickup_object.rpc_id(i)
-			
+
+@rpc("any_peer", "call_local")
+func drop_weapon():
+	if $WeaponAttach.get_child_count() > 0:
+		var weapon = $WeaponAttach.get_child(0)
+		print("dropping weapon", weapon.name)
+		if weapon.name == "Gun":
+			var gun_pickup = preload("res://Scenes/Pickups/gun_pickup.tscn").instantiate()
+			gun_pickup.global_position = weapon.global_position
+			get_parent().get_parent().add_child(gun_pickup)
+		elif weapon.name == "Bow":
+			var bow_pickup = preload("res://Scenes/Pickups/bow_pickup.tscn").instantiate()
+			bow_pickup.global_position = weapon.global_position
+			get_parent().get_parent().add_child(bow_pickup)
+		
+		weapon.queue_free()
+		var melee = melee_scene.instantiate()
+		attach_weapon(melee)
+
+		if multiplayer.is_server():
+			for i in GameManager.players:
+				if i != 1:
+					self.drop_weapon.rpc_id(i)
+
 func is_next_to_wall():
 	return $RayCast2D.is_colliding()

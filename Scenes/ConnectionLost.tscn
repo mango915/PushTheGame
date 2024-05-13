@@ -6,13 +6,13 @@
 [ext_resource type="Theme" uid="uid://bybbedfkdrq7s" path="res://Assets/Themes/default_theme.tres" id="3_0oq8f"]
 [ext_resource type="Shader" path="res://Assets/main_menu_CRT.gdshader" id="5_t5wn4"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_34g8w"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_e4gqs"]
 shader = ExtResource("5_t5wn4")
 shader_parameter/overlay = true
-shader_parameter/scanlines_opacity = 0.4
-shader_parameter/scanlines_width = 0.25
+shader_parameter/scanlines_opacity = 0.365
+shader_parameter/scanlines_width = 0.05
 shader_parameter/grille_opacity = 0.3
-shader_parameter/resolution = Vector2(640, 480)
+shader_parameter/resolution = Vector2(320, 240)
 shader_parameter/pixelate = false
 shader_parameter/roll = false
 shader_parameter/roll_speed = 8.0
@@ -22,7 +22,7 @@ shader_parameter/distort_intensity = 0.05
 shader_parameter/noise_opacity = 0.0
 shader_parameter/noise_speed = 5.0
 shader_parameter/static_noise_intensity = 0.06
-shader_parameter/aberration = 0.01
+shader_parameter/aberration = 0.00500005
 shader_parameter/brightness = 1.4
 shader_parameter/discolor = false
 shader_parameter/warp_amount = 0.0
@@ -40,6 +40,7 @@ grow_vertical = 2
 script = ExtResource("1_1yv8m")
 
 [node name="TextureRect" type="TextureRect" parent="."]
+modulate = Color(0.258824, 0.258824, 0.258824, 1)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -70,7 +71,7 @@ size_flags_vertical = 6
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 20
 theme_override_fonts/font = ExtResource("2_rm031")
-theme_override_font_sizes/font_size = 100
+theme_override_font_sizes/font_size = 150
 text = "Host
 disconnected..."
 horizontal_alignment = 1
@@ -82,19 +83,19 @@ size_flags_vertical = 6
 [node name="Button2" type="Button" parent="MarginContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
 theme = ExtResource("3_0oq8f")
-theme_override_font_sizes/font_size = 50
+theme_override_font_sizes/font_size = 70
 text = "Back to main menu"
 
 [node name="Button" type="Button" parent="MarginContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
 theme = ExtResource("3_0oq8f")
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 50
 text = "Exit"
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer2" type="CanvasLayer" parent="."]
 
-[node name="ColorRect2" type="ColorRect" parent="CanvasLayer"]
-material = SubResource("ShaderMaterial_34g8w")
+[node name="ColorRect2" type="ColorRect" parent="CanvasLayer2"]
+material = SubResource("ShaderMaterial_e4gqs")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

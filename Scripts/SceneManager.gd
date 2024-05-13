@@ -39,18 +39,18 @@ func _on_player_died():
 	if not GameManager.players[multiplayer.get_unique_id()].alive:
 		%GameOver.visible = true
 		players[multiplayer.get_unique_id()].can_shoot = false
-		%GameOver/Label.text = "You Lose! \n current score : " + str(GameManager.players[multiplayer.get_unique_id()].score)
+		%GameOver/VBoxContainer/Label.text = "You Lose! \n current score : " + str(GameManager.players[multiplayer.get_unique_id()].score)
 		# disable %GameOver/Button
-		%GameOver/Button.disabled = true
+		%GameOver/VBoxContainer/Button.disabled = true
 	if alive_players == 1:
 		print("Finished the round!")
 		%GameOver.visible = true
-		%GameOver/Button.disabled = false
+		%GameOver/VBoxContainer/Button.disabled = false
 		if GameManager.players[multiplayer.get_unique_id()].alive:
 			players[multiplayer.get_unique_id()].can_shoot = false
 			update_players_score.rpc(multiplayer.get_unique_id())
 			#GameManager.players[multiplayer.get_unique_id()].score += 1
-			%GameOver/Label.text = "You Win! \n current score : " + str(GameManager.players[multiplayer.get_unique_id()].score)
+			%GameOver/VBoxContainer/Label.text = "You Win! \n current score : " + str(GameManager.players[multiplayer.get_unique_id()].score)
 		#get_tree().paused = true
 
 func _on_button_button_down():
@@ -128,3 +128,8 @@ func spawn_function(data):
 	alive_players += 1
 	return current_player
 
+
+
+func _on_button_2_button_down():
+	#quit the game
+	get_tree().quit()

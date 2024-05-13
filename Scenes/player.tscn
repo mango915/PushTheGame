@@ -98,7 +98,7 @@ height = 124.0
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_ek0q8"]
 properties/0/path = NodePath(".:position")
 properties/0/spawn = true
-properties/0/replication_mode = 2
+properties/0/replication_mode = 1
 properties/1/path = NodePath(".:rotation")
 properties/1/spawn = true
 properties/1/replication_mode = 2
@@ -127,8 +127,8 @@ offset_left = -43.0
 offset_top = -176.0
 offset_right = 72.0
 offset_bottom = -121.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 40
 text = "Name"
 
