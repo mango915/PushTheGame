@@ -21,8 +21,11 @@ var health = MAX_HEALTH
 var is_dead = false
 
 #var weapon = null
-var weapon_scale = Vector2(1, 1)
-var weapon_rotation = 0
+@export var weapon_scale = Vector2(1, 1)
+@export var weapon_rotation = 0
+@export var synchd_position = Vector2(0, 0)
+@export var synchd_rotation = 0
+@export var synchd_velocity = Vector2(0, 0)
 
 var color = "red"
 
@@ -68,6 +71,9 @@ func _physics_process(delta):
 	if $MultiplayerSynchronizer.get_multiplayer_authority() != multiplayer.get_unique_id():
 		$WeaponAttach.get_child(0).scale = weapon_scale
 		$WeaponAttach.get_child(0).rotation = weapon_rotation
+		rotation = synchd_rotation
+		global_position = global_position.lerp(synchd_position+synchd_velocity*delta, 0.1)
+		
 		return
 		
 	if is_dead:
@@ -80,6 +86,9 @@ func _physics_process(delta):
 
 	weapon_scale = $WeaponAttach.get_child(0).scale
 	weapon_rotation = $WeaponAttach.get_child(0).rotation
+	synchd_position = global_position
+	synchd_rotation = rotation
+	synchd_velocity = velocity
 	
 func _input(event):
 	if $MultiplayerSynchronizer.get_multiplayer_authority() != multiplayer.get_unique_id():

@@ -8,7 +8,7 @@
 [ext_resource type="Script" path="res://Scripts/States/fall.gd" id="8_fdv54"]
 [ext_resource type="Script" path="res://Scripts/States/double_jump.gd" id="8_rxbkg"]
 [ext_resource type="Script" path="res://Scripts/States/jump.gd" id="9_k3kr2"]
-[ext_resource type="Script" path="res://Scripts/States/wall_Jump.gd" id="9_nwbry"]
+[ext_resource type="Script" path="res://Scripts/States/wall_jump.gd" id="9_nwbry"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_nlme1"]
 radius = 41.75
@@ -96,24 +96,27 @@ radius = 40.0
 height = 124.0
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_ek0q8"]
-properties/0/path = NodePath(".:position")
+properties/0/path = NodePath("Sprite2D:flip_h")
 properties/0/spawn = true
-properties/0/replication_mode = 1
-properties/1/path = NodePath(".:rotation")
+properties/0/replication_mode = 2
+properties/1/path = NodePath(".:weapon_scale")
 properties/1/spawn = true
 properties/1/replication_mode = 2
-properties/2/path = NodePath("Sprite2D:flip_h")
+properties/2/path = NodePath(".:weapon_rotation")
 properties/2/spawn = true
 properties/2/replication_mode = 2
-properties/3/path = NodePath(".:weapon_scale")
+properties/3/path = NodePath(".:synchd_position")
 properties/3/spawn = true
-properties/3/replication_mode = 2
-properties/4/path = NodePath(".:weapon_rotation")
+properties/3/replication_mode = 1
+properties/4/path = NodePath(".:synchd_rotation")
 properties/4/spawn = true
-properties/4/replication_mode = 2
+properties/4/replication_mode = 1
+properties/5/path = NodePath(".:synchd_velocity")
+properties/5/spawn = true
+properties/5/replication_mode = 1
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_pilf8"]
-radius = 133.0
+radius = 266.002
 
 [node name="Player" type="CharacterBody2D" groups=["Player"]]
 script = ExtResource("1_8g4cu")

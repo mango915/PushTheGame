@@ -46,6 +46,7 @@ func _on_player_died():
 		print("Finished the round!")
 		%GameOver.visible = true
 		%GameOver/VBoxContainer/Button.disabled = false
+		%GameOver/VBoxContainer/Button.grab_focus()
 		if GameManager.players[multiplayer.get_unique_id()].alive:
 			players[multiplayer.get_unique_id()].can_shoot = false
 			update_players_score.rpc(multiplayer.get_unique_id())
