@@ -205,9 +205,15 @@ func _on_settings_button_pressed():
 
 func _on_back_button_pressed():
 	main_menu.show()
-	
 	settings_screen.hide()
 
+func _on_back_host_button_pressed():
+	main_menu.show()
+	host_screen.hide()
+
+func _on_back_join_button_pressed():
+	main_menu.show()
+	join_screen.hide()
 
 func _on_sfx_slider_value_changed(value:float):
 	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("SFX"), linear_to_db(value))
@@ -219,4 +225,5 @@ func _on_music_slider_value_changed(value:float):
 
 func _on_audio_stream_player_2d_finished():
 	$AudioStreamPlayer2D.play()
+
 

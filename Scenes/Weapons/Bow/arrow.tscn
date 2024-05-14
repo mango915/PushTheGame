@@ -11,6 +11,7 @@ region = Rect2(1024, 512, 128, 128)
 size = Vector2(20, 15)
 
 [node name="Arrow" type="Area2D"]
+collision_mask = 3
 script = ExtResource("1_eabph")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]

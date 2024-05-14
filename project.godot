@@ -87,6 +87,14 @@ drop_weapon={
 ]
 }
 
+[layer_names]
+
+2d_physics/layer_1="Players"
+2d_physics/layer_2="Ground"
+2d_physics/layer_3="HurtSurface"
+2d_physics/layer_4="Pickups"
+2d_physics/layer_5="Bullets"
+
 [rendering]
 
 renderer/rendering_method="mobile"

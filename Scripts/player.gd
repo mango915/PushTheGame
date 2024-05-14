@@ -185,10 +185,17 @@ func attach_weapon(new_weapon):
 @rpc("any_peer", "call_local")
 func try_to_pickup_object():
 	var bodies = $InteractionArea.get_overlapping_areas()
+	var body_to_pickup = null
 	for body in bodies:
 		print("body = ", body)
 		if body.has_method("pickup"):
-			body.pickup(self)
+			if body_to_pickup == null:
+				body_to_pickup = body
+			else:
+				if body.global_position.distance_to(global_position) < body_to_pickup.global_position.distance_to(global_position):
+					body_to_pickup = body
+	body_to_pickup.pickup(self)
+
 	if multiplayer.is_server():
 		for i in GameManager.players:
 			if i != 1:
@@ -202,10 +209,12 @@ func drop_weapon():
 		if weapon.name == "Gun":
 			var gun_pickup = preload("res://Scenes/Pickups/gun_pickup.tscn").instantiate()
 			gun_pickup.global_position = weapon.global_position
+			gun_pickup.is_dropped_weapon = true
 			get_parent().get_parent().add_child(gun_pickup)
 		elif weapon.name == "Bow":
 			var bow_pickup = preload("res://Scenes/Pickups/bow_pickup.tscn").instantiate()
 			bow_pickup.global_position = weapon.global_position
+			bow_pickup.is_dropped_weapon = true
 			get_parent().get_parent().add_child(bow_pickup)
 		
 		weapon.queue_free()

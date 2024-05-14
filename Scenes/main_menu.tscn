@@ -191,6 +191,14 @@ focus_neighbor_top = NodePath("../GridContainer/PortLineEdit")
 theme_override_font_sizes/font_size = 50
 text = "Host.."
 
+[node name="BackHostButton" type="Button" parent="MarginContainer/HostScreen"]
+layout_mode = 2
+size_flags_vertical = 10
+size_flags_stretch_ratio = 0.0
+focus_neighbor_top = NodePath("../GridContainer/PortLineEdit")
+theme_override_font_sizes/font_size = 50
+text = "Back"
+
 [node name="JoinScreen" type="VBoxContainer" parent="MarginContainer"]
 visible = false
 layout_mode = 2
@@ -247,6 +255,14 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_font_sizes/font_size = 50
 text = "Join.."
+
+[node name="BackJoinButton" type="Button" parent="MarginContainer/JoinScreen"]
+layout_mode = 2
+size_flags_vertical = 10
+size_flags_stretch_ratio = 0.0
+focus_neighbor_top = NodePath("../GridContainer/PortLineEdit")
+theme_override_font_sizes/font_size = 50
+text = "Back"
 
 [node name="LobbyScreen" type="HBoxContainer" parent="MarginContainer"]
 visible = false
@@ -430,7 +446,9 @@ bus = &"Music"
 [connection signal="pressed" from="MarginContainer/MainMenu/ButtonsVBox/SettingsButton" to="." method="_on_settings_button_pressed"]
 [connection signal="pressed" from="MarginContainer/MainMenu/ButtonsVBox/ExitButton" to="." method="_on_exit_button_pressed"]
 [connection signal="pressed" from="MarginContainer/HostScreen/HostButton" to="." method="_on_host_button_pressed"]
+[connection signal="pressed" from="MarginContainer/HostScreen/BackHostButton" to="." method="_on_back_host_button_pressed"]
 [connection signal="pressed" from="MarginContainer/JoinScreen/JoinButton" to="." method="_on_join_button_pressed"]
+[connection signal="pressed" from="MarginContainer/JoinScreen/BackJoinButton" to="." method="_on_back_join_button_pressed"]
 [connection signal="pressed" from="MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer/LeftColorButton" to="." method="_on_left_color_button_pressed"]
 [connection signal="pressed" from="MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer/RightColorButton" to="." method="_on_right_color_button_pressed"]
 [connection signal="pressed" from="MarginContainer/LobbyScreen/VBoxContainer2/StartGameButton" to="." method="_on_start_game_button_pressed"]

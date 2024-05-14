@@ -3,6 +3,8 @@ extends Area2D
 const bow_scene = preload("res://Scenes/Weapons/Bow/bow.tscn")
 var player_inside
 
+var is_dropped_weapon = false
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	$AnimationPlayer.play("default_animation")
@@ -16,11 +18,12 @@ func pickup(player):
 	player.get_node("WeaponAttach").get_child(0).queue_free()
 	var bow = bow_scene.instantiate()
 	player.attach_weapon(bow)
-	$Timer.start()
-	#disable visibility
-	self.visible = false
-	$CollisionShape2D.disabled = true
-	#queue_free()
+	if not is_dropped_weapon:
+		$Timer.start()
+		self.visible = false
+		$CollisionShape2D.disabled = true
+	else:
+		self.queue_free()
 
 
 
