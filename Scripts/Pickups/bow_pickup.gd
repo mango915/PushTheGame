@@ -7,11 +7,15 @@ var is_dropped_weapon = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	$AnimationPlayer.play("default_animation")
+	if not is_dropped_weapon:
+		$AnimationPlayer.play("default_animation")
+	else:
+		$AnimationPlayer.play("drop")
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	pass
+	if not $RayCast2D.is_colliding():
+		position.y += delta*800
 
 func pickup(player):
 
@@ -31,4 +35,5 @@ func _on_timer_timeout():
 	self.show()
 	self.visible = true
 	$CollisionShape2D.disabled = false
+	$AnimationPlayer.play("default_animation")
 

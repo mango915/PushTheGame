@@ -27,3 +27,4 @@ func _on_body_entered(body):
 	queue_free()
 	if body.has_method("take_damage") and multiplayer.is_server():
 		body.take_damage(20)
+	#if body.is_collision_polygon_one_way:

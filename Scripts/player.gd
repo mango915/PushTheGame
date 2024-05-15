@@ -173,7 +173,7 @@ func _on_timer_timeout():
 func _on_hurt_box_body_entered(_body):
 	if multiplayer.is_server() and health > 0:
 		print("Damaged from environment!")
-		self.take_damage(10)
+		self.take_damage(25)
 
 func attach_weapon(new_weapon):
 	new_weapon.set_color(color)
@@ -194,7 +194,8 @@ func try_to_pickup_object():
 			else:
 				if body.global_position.distance_to(global_position) < body_to_pickup.global_position.distance_to(global_position):
 					body_to_pickup = body
-	body_to_pickup.pickup(self)
+	if body_to_pickup != null:
+		body_to_pickup.pickup(self)
 
 	if multiplayer.is_server():
 		for i in GameManager.players:

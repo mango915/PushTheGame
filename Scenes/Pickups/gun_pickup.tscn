@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://d0mt5ttq0mdq6"]
+[gd_scene load_steps=9 format=3 uid="uid://d0mt5ttq0mdq6"]
 
 [ext_resource type="Script" path="res://Scripts/Pickups/gun_pickup.gd" id="1_07ukx"]
 [ext_resource type="Texture2D" uid="uid://dq0t7k5kw0waj" path="res://Assets/Tilemaps/spritesheet_retina.png" id="2_w603w"]
@@ -24,6 +24,18 @@ tracks/0/keys = {
 "update": 0,
 "values": [Vector2(0.5, -1.5)]
 }
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite2D:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
 
 [sub_resource type="Animation" id="Animation_0l1jw"]
 resource_name = "default_animation"
@@ -42,10 +54,38 @@ tracks/0/keys = {
 "values": [Vector2(0.5, -1.5), Vector2(0.5, -15), Vector2(0.5, -1.5)]
 }
 
+[sub_resource type="Animation" id="Animation_blth3"]
+resource_name = "drop"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0.5, -1.5), Vector2(0.5, 40)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite2D:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 0.403171]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_5e77h"]
 _data = {
 "RESET": SubResource("Animation_6ihnv"),
-"default_animation": SubResource("Animation_0l1jw")
+"default_animation": SubResource("Animation_0l1jw"),
+"drop": SubResource("Animation_blth3")
 }
 
 [node name="GunPickup" type="Area2D"]
@@ -68,5 +108,9 @@ libraries = {
 [node name="Timer" type="Timer" parent="."]
 wait_time = 6.0
 one_shot = true
+
+[node name="RayCast2D" type="RayCast2D" parent="."]
+target_position = Vector2(2, 79)
+collision_mask = 2
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
