@@ -166,7 +166,7 @@ position = Vector2(1643, -83)
 [node name="GunPickup" parent="Pickups" instance=ExtResource("7_vrpg5")]
 position = Vector2(426, -81)
 
-[node name="Players" type="Node" parent="."]
+[node name="Players" type="Node2D" parent="."]
 
 [node name="CanvasLayer2" type="CanvasLayer" parent="."]
 visible = false

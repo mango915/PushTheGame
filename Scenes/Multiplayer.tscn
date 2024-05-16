@@ -31,7 +31,7 @@ shader_parameter/vignette_opacity = 0.5
 
 [node name="MainMenu" parent="." instance=ExtResource("1_jdjqa")]
 
-[node name="Level" type="Node" parent="."]
+[node name="Level" type="Node2D" parent="."]
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://Scenes/Levels/test_scene_4.tscn", "res://Scenes/Levels/test_scene_2.tscn", "res://Scenes/Levels/test_scene_3.tscn")

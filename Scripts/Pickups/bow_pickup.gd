@@ -2,7 +2,6 @@ extends Area2D
 
 const bow_scene = preload("res://Scenes/Weapons/Bow/bow.tscn")
 var player_inside
-
 var is_dropped_weapon = false
 
 # Called when the node enters the scene tree for the first time.

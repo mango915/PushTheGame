@@ -177,7 +177,7 @@ func _on_hurt_box_body_entered(_body):
 
 func attach_weapon(new_weapon):
 	new_weapon.set_color(color)
-	$WeaponAttach.add_child(new_weapon)
+	$WeaponAttach.add_child(new_weapon, true)
 	#weapon.global_position = Vector2(0, 0)
 	#weapon_scale = $WeaponAttach.scale
 	#weapon_rotation = $WeaponAttach.rotation
@@ -211,12 +211,12 @@ func drop_weapon():
 			var gun_pickup = preload("res://Scenes/Pickups/gun_pickup.tscn").instantiate()
 			gun_pickup.global_position = weapon.global_position
 			gun_pickup.is_dropped_weapon = true
-			get_parent().get_parent().add_child(gun_pickup)
+			get_parent().get_parent().add_child(gun_pickup, true)
 		elif weapon.name == "Bow":
 			var bow_pickup = preload("res://Scenes/Pickups/bow_pickup.tscn").instantiate()
 			bow_pickup.global_position = weapon.global_position
 			bow_pickup.is_dropped_weapon = true
-			get_parent().get_parent().add_child(bow_pickup)
+			get_parent().get_parent().add_child(bow_pickup, true)
 		
 		weapon.queue_free()
 		var melee = melee_scene.instantiate()

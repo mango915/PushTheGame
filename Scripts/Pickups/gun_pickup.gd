@@ -21,10 +21,13 @@ func pickup(player):
 	player.get_node("WeaponAttach").get_child(0).queue_free()
 	var bow = bow_scene.instantiate()
 	player.attach_weapon(bow)
-	$Timer.start()
-	#disable visibility
-	self.visible = false
-	$CollisionShape2D.disabled = true
+	if not is_dropped_weapon:
+		$Timer.start()
+		self.visible = false
+		$CollisionShape2D.disabled = true
+	else:
+		self.queue_free()
+
 
 
 

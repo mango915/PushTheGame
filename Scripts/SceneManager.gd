@@ -11,6 +11,8 @@ const purple_player_texture = preload ("res://Assets/Players/Bodies/purple_playe
 
 var alive_players = 0
 var players = {}
+var ready_players = 0
+var connected_players = 0
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -30,6 +32,7 @@ func _process(delta):
 func peer_disconnected(id):
 	print("Player disconnected: " + str(id))
 	players[id].queue_free()
+	connected_players -= 1
 	GameManager.players.erase(id)
 	
 
@@ -56,7 +59,18 @@ func _on_player_died():
 
 func _on_button_button_down():
 	print("game should restart")
-	start_next_game.rpc_id(1)
+	%GameOver/VBoxContainer/Button.disabled = true
+	player_is_ready.rpc_id(1)
+	#start_next_game.rpc_id(1)
+
+
+@rpc("any_peer", "call_local")
+func player_is_ready():
+	ready_players += 1
+	if ready_players == connected_players:
+		start_next_game.rpc_id(1)
+
+
 
 @rpc("any_peer", "call_local")
 func start_next_game():
@@ -88,6 +102,7 @@ func spawn_players():
 	var index = 0
 
 	for i in GameManager.players:
+		connected_players += 1
 		for spawn in get_tree().get_nodes_in_group("PlayerSpawnPoint"):
 			if spawn.name == str(index):
 				$MultiplayerSpawner.spawn([i,index])
