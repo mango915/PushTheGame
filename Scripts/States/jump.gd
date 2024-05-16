@@ -5,7 +5,7 @@ var variable_jump_height
 func enter():
 	#obj.play("jump")
 	obj.velocity.y = Player_FSM_new.JUMP_SPEED
-	obj.velocity.x += Player_FSM_new.MAX_SPEED * obj.get_input_x()
+	#obj.velocity.x += Player_FSM_new.MAX_SPEED * obj.get_input_x()
 	variable_jump_height = false
 	obj.jump_buffer_timer.stop()
 
