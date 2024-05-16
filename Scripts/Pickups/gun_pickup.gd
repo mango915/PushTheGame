@@ -13,7 +13,7 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	if not $RayCast2D.is_colliding():
+	if not $RayCast2D.is_colliding() and is_dropped_weapon:
 		position.y += delta*800
 
 func pickup(player):
