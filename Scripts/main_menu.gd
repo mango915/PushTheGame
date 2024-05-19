@@ -36,7 +36,7 @@ func _ready():
 
 
 func peer_connected(id):
-	print("Player Connected: " + str(id))
+	print("Player Connected: " + str(id)) 
 
 func peer_disconnected(id):
 	print("Player disconnected: " + str(id))
@@ -60,6 +60,8 @@ func connected_to_server():
 
 func connection_failed():
 	print("Connection failed!")
+	#reload current scene
+	#get_tree().change_scene_to_file("res://Scenes/ConnectionLost.tscn")
 
 @rpc("any_peer")
 func send_player_information(name, id, color):
@@ -72,6 +74,8 @@ func send_player_information(name, id, color):
 		}
 		hobby_player_list.text += GameManager.players[id].name + "\n"
 		connected_players += 1
+		if connected_players == 4:
+			peer.set_refuse_new_connections(true)
 		hobby_label.text = "Connected Players (" + str(connected_players) + "/4) ..."
 	if multiplayer.is_server():
 		for i in GameManager.players:
@@ -80,6 +84,7 @@ func send_player_information(name, id, color):
 @rpc("any_peer", "call_local")
 func start_game():
 
+	peer.set_refuse_new_connections(true)
 	var scene = load("res://Scenes/Levels/test_scene_4.tscn").instantiate()
 	get_node("../Level").add_child(scene)
 	hide_menu.rpc()

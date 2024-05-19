@@ -13,6 +13,7 @@ var alive_players = 0
 var players = {}
 var ready_players = 0
 var connected_players = 0
+var match_is_finished = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -39,7 +40,7 @@ func peer_disconnected(id):
 
 func _on_player_died():
 	alive_players -= 1
-	if not GameManager.players[multiplayer.get_unique_id()].alive:
+	if not GameManager.players[multiplayer.get_unique_id()].alive and not match_is_finished:
 		%GameOver.visible = true
 		players[multiplayer.get_unique_id()].can_shoot = false
 		%GameOver/VBoxContainer/Label.text = "You Lose! \n current score : " + str(GameManager.players[multiplayer.get_unique_id()].score)
@@ -47,6 +48,7 @@ func _on_player_died():
 		%GameOver/VBoxContainer/Button.disabled = true
 	if alive_players == 1:
 		print("Finished the round!")
+		match_is_finished = true
 		%GameOver.visible = true
 		%GameOver/VBoxContainer/Button.disabled = false
 		%GameOver/VBoxContainer/Button.grab_focus()
