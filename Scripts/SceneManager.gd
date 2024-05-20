@@ -46,7 +46,7 @@ func _on_player_died():
 		%GameOver/VBoxContainer/Label.text = "You Lose! \n current score : " + str(GameManager.players[multiplayer.get_unique_id()].score)
 		# disable %GameOver/Button
 		%GameOver/VBoxContainer/Button.disabled = true
-	if alive_players == 1:
+	if alive_players <= 1:
 		print("Finished the round!")
 		match_is_finished = true
 		%GameOver.visible = true
