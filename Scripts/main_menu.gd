@@ -13,8 +13,14 @@ extends Control
 @onready var host_button = $MarginContainer/HostScreen/HostButton
 @onready var join_button = $MarginContainer/JoinScreen/JoinButton
 @onready var start_game_button = $MarginContainer/LobbyScreen/VBoxContainer2/StartGameButton
+@onready var music_slider = $MarginContainer/SettingsScreen/MarginContainer/GridContainer/MusicSlider
+@onready var sfx_slider = $MarginContainer/SettingsScreen/MarginContainer/GridContainer/SFXSlider
+
+
 @export var address = "127.0.0.1"
 @export var port = 8910
+
+var user_prefs: UserPreferences
 
 var peer
 var color = "red"
@@ -29,6 +35,23 @@ const purple_player_texture = preload ("res://Assets/Players/Bodies/purple_playe
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	user_prefs = UserPreferences.load_or_create()
+
+	if music_slider:
+		music_slider.value = user_prefs.music_audio_level
+	if sfx_slider:
+		sfx_slider.value = user_prefs.sfx_audio_level
+	
+	if address:
+		$MarginContainer/JoinScreen/GridContainer/IpLineEdit.text = user_prefs.ip_address
+	if port:
+		$MarginContainer/JoinScreen/GridContainer/PortLineEdit.text = str(user_prefs.port)
+		$MarginContainer/HostScreen/GridContainer/PortLineEdit.text = str(user_prefs.port)
+	
+	host_player_name_line_edit.text = user_prefs.host_name
+	join_player_name_line_edit.text = user_prefs.peer_name
+	
+
 	multiplayer.peer_connected.connect(peer_connected)
 	multiplayer.peer_disconnected.connect(peer_disconnected)
 	multiplayer.connected_to_server.connect(connected_to_server)
@@ -127,6 +150,11 @@ func _on_host_button_pressed():
 	hobby_player_list.text = host_player_name_line_edit.text + "\n"
 	host_screen.hide()
 
+	if user_prefs:
+		user_prefs.host_name = host_player_name_line_edit.text
+		user_prefs.port = port
+		user_prefs.save()
+
 func _on_join_button_pressed():
 	address = $MarginContainer/JoinScreen/GridContainer/IpLineEdit.text
 	port = int($MarginContainer/JoinScreen/GridContainer/PortLineEdit.text)
@@ -139,6 +167,12 @@ func _on_join_button_pressed():
 	lobby_screen.show()
 	start_game_button.grab_focus()
 	join_screen.hide()
+
+	if user_prefs:
+		user_prefs.peer_name = join_player_name_line_edit.text
+		user_prefs.ip_address = address
+		user_prefs.port = port
+		user_prefs.save()
 
 func _on_start_game_button_pressed():
 	start_game_button.disabled = true
@@ -224,9 +258,17 @@ func _on_sfx_slider_value_changed(value:float):
 	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("SFX"), linear_to_db(value))
 	AudioServer.set_bus_mute(AudioServer.get_bus_index("SFX"), value < 0.05)
 
+	if user_prefs:
+		user_prefs.sfx_audio_level = value
+		user_prefs.save()
+
 func _on_music_slider_value_changed(value:float):
 	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Music"), linear_to_db(value))
 	AudioServer.set_bus_mute(AudioServer.get_bus_index("Music"), value < 0.05)
+
+	if user_prefs:
+		user_prefs.music_audio_level = value
+		user_prefs.save()
 
 func _on_audio_stream_player_2d_finished():
 	$AudioStreamPlayer2D.play()
