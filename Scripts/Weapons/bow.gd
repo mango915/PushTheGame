@@ -35,11 +35,11 @@ func _physics_process(delta):
 
 
 	if Input.is_action_pressed("aim_up"):
-		pointing_angle_controller_degrees = clamp(pointing_angle_controller_degrees + 1, 0, 90)
+		pointing_angle_controller_degrees = clamp(pointing_angle_controller_degrees + 1, -90, 90)
 		print(pointing_angle_controller_degrees)
 	elif Input.is_action_pressed("aim_down"):
 		print(pointing_angle_controller_degrees)
-		pointing_angle_controller_degrees = clamp(pointing_angle_controller_degrees - 1, 0, 90)
+		pointing_angle_controller_degrees = clamp(pointing_angle_controller_degrees - 1, -90, 90)
 
 
 	if Input.get_connected_joypads().size() == 0:
