@@ -142,6 +142,9 @@ func _on_host_button_pressed():
 	peer.get_host().compress(ENetConnection.COMPRESS_RANGE_CODER)
 	
 	multiplayer.set_multiplayer_peer(peer)
+
+	upnp_setup()
+
 	print("Waiting For Players")
 	send_player_information(host_player_name_line_edit.text, multiplayer.get_unique_id(), color)
 
@@ -274,3 +277,18 @@ func _on_audio_stream_player_2d_finished():
 	$AudioStreamPlayer2D.play()
 
 
+func upnp_setup():
+	var upnp = UPNP.new()
+	
+	var discover_result = upnp.discover()
+	assert(discover_result == UPNP.UPNP_RESULT_SUCCESS, \
+		"UPNP Discover Failed! Error %s" % discover_result)
+
+	assert(upnp.get_gateway() and upnp.get_gateway().is_valid_gateway(), \
+		"UPNP Invalid Gateway!")
+
+	var map_result = upnp.add_port_mapping(port)
+	assert(map_result == UPNP.UPNP_RESULT_SUCCESS, \
+		"UPNP Port Mapping Failed! Error %s" % map_result)
+	
+	print("Success! Join Address: %s" % upnp.query_external_address())
