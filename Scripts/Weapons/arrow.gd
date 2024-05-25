@@ -26,4 +26,4 @@ func _physics_process(delta: float) -> void:
 func _on_body_entered(body):
 	queue_free()
 	if body.has_method("take_damage") and multiplayer.is_server():
-		body.take_damage(50)
+		body.take_damage(10 + speed / 100 * 2)

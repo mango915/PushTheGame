@@ -87,20 +87,20 @@ func fire(direction, shooting_force, joypad_shooting=false):
 		return
 
 	audio_player.play()
-	var arrow = arrow.instantiate()
+	var this_arrow = arrow.instantiate()
 	can_shoot = false
 	$ShootingTimer.start()
 
 	if joypad_shooting:
-		arrow.global_position = $ArrowSpawn.global_position
-		arrow.dir = direction
-		arrow.speed = shooting_force
-		get_tree().root.add_child(arrow)
-
-	arrow.global_position = $ArrowSpawn.global_position
-	arrow.dir = direction - $ArrowSpawn.global_position
-	arrow.speed = shooting_force
-	get_tree().root.add_child(arrow)
+		this_arrow.global_position = $ArrowSpawn.global_position
+		this_arrow.dir = direction
+		this_arrow.speed = shooting_force
+		get_tree().root.add_child(this_arrow)
+	else:
+		this_arrow.global_position = $ArrowSpawn.global_position
+		this_arrow.dir = direction - $ArrowSpawn.global_position
+		this_arrow.speed = shooting_force
+		get_tree().root.add_child(this_arrow)
 
 func set_color(color):
 	if color == "red":
