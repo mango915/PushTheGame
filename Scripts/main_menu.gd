@@ -15,10 +15,14 @@ extends Control
 @onready var start_game_button = $MarginContainer/LobbyScreen/VBoxContainer2/StartGameButton
 @onready var music_slider = $MarginContainer/SettingsScreen/MarginContainer/GridContainer/MusicSlider
 @onready var sfx_slider = $MarginContainer/SettingsScreen/MarginContainer/GridContainer/SFXSlider
+@onready var invite_code_label = $MarginContainer/LobbyScreen/VBoxContainer/GridContainer/InviteCodeLabel
+@onready var copy_button = $MarginContainer/LobbyScreen/VBoxContainer/GridContainer/Button
 
 
 @export var address = "127.0.0.1"
 @export var port = 8910
+
+var generated_invite_code = ""
 
 var user_prefs: UserPreferences
 
@@ -131,8 +135,8 @@ func _on_host_button_pressed():
 
 	peer = ENetMultiplayerPeer.new()
 
-	port = int(host_screen.get_node("GridContainer/PortLineEdit").text)
-	
+	#port = int(host_screen.get_node("GridContainer/PortLineEdit").text)
+	port = 8910
 	var error = peer.create_server(port, 6)
 	
 	if error != OK:
@@ -149,6 +153,7 @@ func _on_host_button_pressed():
 	send_player_information(host_player_name_line_edit.text, multiplayer.get_unique_id(), color)
 
 	lobby_screen.show()
+	invite_code_label.text = "Invite Code: " + str(generated_invite_code)
 	start_game_button.grab_focus()
 	hobby_player_list.text = host_player_name_line_edit.text + "\n"
 	host_screen.hide()
@@ -159,8 +164,16 @@ func _on_host_button_pressed():
 		user_prefs.save()
 
 func _on_join_button_pressed():
-	address = $MarginContainer/JoinScreen/GridContainer/IpLineEdit.text
-	port = int($MarginContainer/JoinScreen/GridContainer/PortLineEdit.text)
+	#address = $MarginContainer/JoinScreen/GridContainer/IpLineEdit.text
+	#port = int($MarginContainer/JoinScreen/GridContainer/PortLineEdit.text)
+	var join_code = $MarginContainer/JoinScreen/GridContainer/JoinCodeLineEdit.text
+
+	var decoded = decode_invite_code(join_code)
+	print("Decoded Invite Code: " + str(decoded))
+	address = str(decoded[0]) + "." + str(decoded[1]) + "." + str(decoded[2]) + "." + str(decoded[3])
+	port = 8910
+	print("Decoded Address: " + address)
+	#print("Decoded Port: " + str(port))
 
 	peer = ENetMultiplayerPeer.new()
 	peer.create_client(address, port)
@@ -168,6 +181,8 @@ func _on_join_button_pressed():
 	
 	multiplayer.set_multiplayer_peer(peer)
 	lobby_screen.show()
+	invite_code_label.hide()
+	copy_button.hide()
 	start_game_button.grab_focus()
 	join_screen.hide()
 
@@ -292,3 +307,54 @@ func upnp_setup():
 		"UPNP Port Mapping Failed! Error %s" % map_result)
 	
 	print("Success! Join Address: %s" % upnp.query_external_address())
+	generated_invite_code = transform_ip_into_invite_code(upnp.query_external_address())
+
+func transform_ip_into_invite_code(ip):
+	var ip_parts = ip.split(".")
+	var invite_code = generate_invite_code(int(ip_parts[0]), int(ip_parts[1]), int(ip_parts[2]), int(ip_parts[3]))
+
+	print("Invite Code: " + invite_code)
+
+	#print("Decoded Invite Code: " + str(decode_invite_code(invite_code)))
+
+
+	return invite_code
+
+
+var BASE62_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+var BASE62_BASE = BASE62_ALPHABET.length()
+
+# Helper function to encode a single number to a base62 string
+func encode_number_to_base62(number: int) -> String:
+	var encoded = ""
+	while number > 0:
+		var remainder = number % BASE62_BASE
+		encoded = BASE62_ALPHABET[remainder] + encoded
+		number = number / BASE62_BASE
+	return encoded if encoded != "" else "0"
+
+# Helper function to decode a base62 string back to a number
+func decode_base62_to_number(encoded: String) -> int:
+	var number = 0
+	for charz in encoded:
+		number = number * BASE62_BASE + BASE62_ALPHABET.find(charz)
+	return number
+
+# Function to generate invite code from four numbers
+func generate_invite_code(num1: int, num2: int, num3: int, num4: int) -> String:
+	var combined_number = (num1 << 24) | (num2 << 16) | (num3 << 8) | num4
+	return encode_number_to_base62(combined_number)
+
+# Function to decode invite code back to four numbers
+func decode_invite_code(code: String) -> Array:
+	var combined_number = decode_base62_to_number(code)
+	var num1 = (combined_number >> 24) & 0xFF
+	var num2 = (combined_number >> 16) & 0xFF
+	var num3 = (combined_number >> 8) & 0xFF
+	var num4 = combined_number & 0xFF
+	return [num1, num2, num3, num4]
+
+func _on_copy_button_pressed():
+	DisplayServer.clipboard_set(generated_invite_code)
+	copy_button.text = "  Copied!"
+	copy_button.disabled = true

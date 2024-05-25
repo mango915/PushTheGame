@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://c46jwdq74ilpo"]
+[gd_scene load_steps=13 format=3 uid="uid://c46jwdq74ilpo"]
 
 [ext_resource type="Theme" uid="uid://bybbedfkdrq7s" path="res://Assets/Themes/default_theme.tres" id="1_juq3s"]
 [ext_resource type="Script" path="res://Scripts/main_menu.gd" id="2_q5d8r"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://Scripts/button_focus.gd" id="5_iujte"]
 [ext_resource type="Shader" path="res://Assets/main_menu_CRT.gdshader" id="5_t8avl"]
 [ext_resource type="AudioStream" uid="uid://dg76w3ksbi7wv" path="res://Assets/Music/bensound-lofinerdbassbuzzer.mp3" id="5_wfcmi"]
+[ext_resource type="FontFile" uid="uid://bcwpr0hijho33" path="res://Assets/Fonts/m5x7.ttf" id="7_p5am1"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_o2e07"]
 shader = ExtResource("4_ioe8b")
@@ -50,6 +51,8 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_juq3s")
 script = ExtResource("2_q5d8r")
+address = null
+port = null
 
 [node name="TextureRect" type="TextureRect" parent="."]
 modulate = Color(0.72549, 0.709804, 0.694118, 1)
@@ -169,6 +172,7 @@ theme_override_font_sizes/font_size = 50
 text = "Host"
 
 [node name="Label2" type="Label" parent="MarginContainer/HostScreen/GridContainer"]
+visible = false
 layout_mode = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 15
@@ -176,6 +180,7 @@ theme_override_font_sizes/font_size = 50
 text = "Port"
 
 [node name="PortLineEdit" type="LineEdit" parent="MarginContainer/HostScreen/GridContainer"]
+visible = false
 custom_minimum_size = Vector2(150, 2.08165e-12)
 layout_mode = 2
 focus_neighbor_top = NodePath("../HostPlayerLineEdit")
@@ -224,6 +229,7 @@ theme_override_font_sizes/font_size = 50
 text = "Peer"
 
 [node name="Label2" type="Label" parent="MarginContainer/JoinScreen/GridContainer"]
+visible = false
 layout_mode = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 15
@@ -231,12 +237,14 @@ theme_override_font_sizes/font_size = 50
 text = "Ip:"
 
 [node name="IpLineEdit" type="LineEdit" parent="MarginContainer/JoinScreen/GridContainer"]
+visible = false
 custom_minimum_size = Vector2(150, 2.08165e-12)
 layout_mode = 2
 theme_override_font_sizes/font_size = 50
 text = "127.0.0.1"
 
 [node name="Label3" type="Label" parent="MarginContainer/JoinScreen/GridContainer"]
+visible = false
 layout_mode = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 15
@@ -244,10 +252,22 @@ theme_override_font_sizes/font_size = 50
 text = "Port:"
 
 [node name="PortLineEdit" type="LineEdit" parent="MarginContainer/JoinScreen/GridContainer"]
+visible = false
 custom_minimum_size = Vector2(150, 2.08165e-12)
 layout_mode = 2
 theme_override_font_sizes/font_size = 50
-text = "8910"
+
+[node name="Label4" type="Label" parent="MarginContainer/JoinScreen/GridContainer"]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 15
+theme_override_font_sizes/font_size = 50
+text = "invite code:"
+
+[node name="JoinCodeLineEdit" type="LineEdit" parent="MarginContainer/JoinScreen/GridContainer"]
+custom_minimum_size = Vector2(150, 2.08165e-12)
+layout_mode = 2
+theme_override_font_sizes/font_size = 50
 
 [node name="JoinButton" type="Button" parent="MarginContainer/JoinScreen"]
 layout_mode = 2
@@ -315,6 +335,24 @@ size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 50
 text = "Waiting for 
 other players..."
+
+[node name="GridContainer" type="GridContainer" parent="MarginContainer/LobbyScreen/VBoxContainer"]
+layout_mode = 2
+columns = 2
+
+[node name="InviteCodeLabel" type="Label" parent="MarginContainer/LobbyScreen/VBoxContainer/GridContainer"]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 15
+theme_override_fonts/font = ExtResource("7_p5am1")
+theme_override_font_sizes/font_size = 80
+text = "Invite code: "
+
+[node name="Button" type="Button" parent="MarginContainer/LobbyScreen/VBoxContainer/GridContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("7_p5am1")
+theme_override_font_sizes/font_size = 50
+text = "  Copy"
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/LobbyScreen"]
 layout_mode = 2
@@ -449,6 +487,7 @@ bus = &"Music"
 [connection signal="pressed" from="MarginContainer/HostScreen/BackHostButton" to="." method="_on_back_host_button_pressed"]
 [connection signal="pressed" from="MarginContainer/JoinScreen/JoinButton" to="." method="_on_join_button_pressed"]
 [connection signal="pressed" from="MarginContainer/JoinScreen/BackJoinButton" to="." method="_on_back_join_button_pressed"]
+[connection signal="pressed" from="MarginContainer/LobbyScreen/VBoxContainer/GridContainer/Button" to="." method="_on_copy_button_pressed"]
 [connection signal="pressed" from="MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer/LeftColorButton" to="." method="_on_left_color_button_pressed"]
 [connection signal="pressed" from="MarginContainer/LobbyScreen/VBoxContainer2/MarginContainer/VBoxContainer/GridContainer/RightColorButton" to="." method="_on_right_color_button_pressed"]
 [connection signal="pressed" from="MarginContainer/LobbyScreen/VBoxContainer2/StartGameButton" to="." method="_on_start_game_button_pressed"]
