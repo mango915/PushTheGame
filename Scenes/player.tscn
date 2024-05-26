@@ -1,8 +1,9 @@
-[gd_scene load_steps=19 format=3 uid="uid://c8s2cf0y7ipjp"]
+[gd_scene load_steps=22 format=3 uid="uid://c8s2cf0y7ipjp"]
 
 [ext_resource type="Script" path="res://Scripts/player.gd" id="1_8g4cu"]
 [ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/Players/Bodies/red_player.tres" id="2_ithuv"]
 [ext_resource type="Script" path="res://Scripts/fsm.gd" id="5_7n17n"]
+[ext_resource type="Script" path="res://Scripts/States/crouch.gd" id="5_8rhaa"]
 [ext_resource type="Script" path="res://Scripts/States/idle.gd" id="6_v5l3r"]
 [ext_resource type="Script" path="res://Scripts/States/run.gd" id="7_ec1ms"]
 [ext_resource type="Script" path="res://Scripts/States/fall.gd" id="8_fdv54"]
@@ -57,6 +58,66 @@ tracks/2/keys = {
 "update": 0,
 "values": [0.0]
 }
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("CollisionShape2D:rotation")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("HurtBox:rotation")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath(".:position")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("CollisionShape2D:disabled")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("CollisionShape2D:position")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1.25, -1)]
+}
 
 [sub_resource type="Animation" id="Animation_6h3jw"]
 resource_name = "die"
@@ -85,10 +146,92 @@ tracks/1/keys = {
 "values": [0.0, 1.5708]
 }
 
+[sub_resource type="Animation" id="Animation_6pehv"]
+resource_name = "crouch"
+length = 0.2
+step = 0.01
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 1.5708]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CollisionShape2D:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 1.5708]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("HurtBox:rotation")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 1.5708]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = false
+tracks/3/path = NodePath(".:position")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(2.08165e-12, -30), Vector2(2.08165e-12, 2.08165e-12)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("CollisionShape2D:disabled")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.01, 0.19, 0.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [false, true, true, false]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("CollisionShape2D:position")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0, 0.09, 0.2),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(1.25, -1), Vector2(1.25, -50), Vector2(1.25, -1)]
+}
+
+[sub_resource type="Animation" id="Animation_kub3d"]
+resource_name = "new_animation"
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_j0jnl"]
 _data = {
 "RESET": SubResource("Animation_7o873"),
-"die": SubResource("Animation_6h3jw")
+"crouch": SubResource("Animation_6pehv"),
+"die": SubResource("Animation_6h3jw"),
+"new_animation": SubResource("Animation_kub3d")
 }
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_w0xy0"]
@@ -164,6 +307,9 @@ script = ExtResource("5_7n17n")
 [node name="Idle" type="Node" parent="FSM"]
 script = ExtResource("6_v5l3r")
 
+[node name="Crouch" type="Node" parent="FSM"]
+script = ExtResource("5_8rhaa")
+
 [node name="Run" type="Node" parent="FSM"]
 script = ExtResource("7_ec1ms")
 
@@ -190,6 +336,10 @@ autostart = true
 
 [node name="JumpBufferTimer" type="Timer" parent="."]
 wait_time = 0.1
+one_shot = true
+
+[node name="DescendPlatformTimer" type="Timer" parent="."]
+wait_time = 0.3
 one_shot = true
 
 [node name="HurtBox" type="Area2D" parent="."]

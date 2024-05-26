@@ -16,6 +16,7 @@ const MAX_HEALTH = 100
 @onready var ap = $AnimationPlayer
 @onready var s = $Sprite2D
 @onready var jump_buffer_timer = $JumpBufferTimer
+@onready var descend_platform_timer = $DescendPlatformTimer
 
 var health = MAX_HEALTH
 var is_dead = false
@@ -93,8 +94,10 @@ func _physics_process(delta):
 func _input(event):
 	if $MultiplayerSynchronizer.get_multiplayer_authority() != multiplayer.get_unique_id():
 		return
-	if event.is_action_pressed("ui_down"):
+	if event.is_action_pressed("ui_down") and not descend_platform_timer.is_stopped():
 		position.y += 1
+	if event.is_action_released("ui_down"):
+		descend_platform_timer.start()
 	if event.is_action_pressed("pickup"):
 		print("pickup")
 		print(is_next_to_wall())
@@ -149,8 +152,13 @@ func update_velocity(delta):
 	velocity.x = move_toward(velocity.x, get_input_x() * MAX_SPEED, (1 if is_on_floor() else AIR_MULTIPLIER) * ACCELERATION * delta)
 	#print("player velocity: %s" % velocity)
 
+@rpc("any_peer", "call_local")
 func play(anim):
 	ap.play(anim)
+	
+@rpc("any_peer", "call_local")
+func play_backwards(anim):
+	ap.play_backwards(anim)
 
 func queue(anim):
 	ap.queue(anim)
@@ -167,8 +175,14 @@ func get_jump_input():
 func get_jump_hold():
 	return Input.is_action_pressed("ui_accept")
 
+func get_down_input():
+	return Input.is_action_pressed("ui_down")
+
 func _on_timer_timeout():
 	can_shoot = true
+
+func start_descend_platform_timer():
+	descend_platform_timer.start()
 
 func _on_hurt_box_body_entered(_body):
 	if multiplayer.is_server() and health > 0:

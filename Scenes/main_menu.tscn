@@ -51,8 +51,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_juq3s")
 script = ExtResource("2_q5d8r")
-address = null
-port = null
 
 [node name="TextureRect" type="TextureRect" parent="."]
 modulate = Color(0.72549, 0.709804, 0.694118, 1)
