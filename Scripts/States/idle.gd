@@ -17,8 +17,9 @@ func physics_update(delta):
 		change_state("jump")
 	elif obj.get_input_x() != 0:
 		change_state("run")
-	#elif obj.get_down_input():
-	#	change_state("crouch")
+	elif obj.get_crouch_input():
+		#crouching_timer.start()
+		change_state("crouch")
 
 func exit():
 	obj.clear_queue()

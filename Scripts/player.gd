@@ -61,11 +61,11 @@ func _ready():
 	if $MultiplayerSynchronizer.get_multiplayer_authority() != multiplayer.get_unique_id():
 		$Camera2D.enabled = false
 	else:
+		fsm.change_state("idle")
 		$Camera2D.enabled = true
 	
 	GameManager.players[$MultiplayerSynchronizer.get_multiplayer_authority()].alive = true
 	
-	fsm.change_state("idle")
 
 func _physics_process(delta):
 	
@@ -155,10 +155,18 @@ func update_velocity(delta):
 @rpc("any_peer", "call_local")
 func play(anim):
 	ap.play(anim)
+	if multiplayer.is_server():
+		for i in GameManager.players:
+			if i != 1:
+				self.play.rpc_id(i, anim)
 	
 @rpc("any_peer", "call_local")
 func play_backwards(anim):
 	ap.play_backwards(anim)
+	if multiplayer.is_server():
+		for i in GameManager.players:
+			if i != 1:
+				self.play_backwards.rpc_id(i, anim)
 
 func queue(anim):
 	ap.queue(anim)
@@ -177,6 +185,9 @@ func get_jump_hold():
 
 func get_down_input():
 	return Input.is_action_pressed("ui_down")
+
+func get_crouch_input():
+	return Input.is_action_pressed("crouch")
 
 func _on_timer_timeout():
 	can_shoot = true
