@@ -1,5 +1,7 @@
 extends State
 
+@onready var crouching_timer = $CrouchingTimer
+
 func enter():
 	pass
 	#if fsm.previous_state == "fall":
@@ -17,9 +19,14 @@ func physics_update(delta):
 		change_state("jump")
 	elif obj.get_input_x() != 0:
 		change_state("run")
-	elif obj.get_crouch_input():
-		#crouching_timer.start()
-		change_state("crouch")
+	elif obj.get_down_input() and crouching_timer.is_stopped():
+		print("crouch")
+		crouching_timer.start()
+		#change_state("crouch")
 
 func exit():
 	obj.clear_queue()
+
+func _on_crouching_timer_timeout():
+	if fsm.current_state == "idle" and obj.is_on_floor():
+		change_state("crouch")

@@ -16,9 +16,9 @@ func physics_update(delta):
 	#	change_state("fall")
 	#elif obj.get_jump_input():
 	#	change_state("jump")
-	if obj.get_input_x() != 0 and not obj.get_crouch_input():
+	if obj.get_input_x() != 0 and not obj.get_down_hold():
 		change_state("run")
-	elif not obj.get_crouch_input(): # and not obj.descend_platform_timer.is_stopped():
+	elif not obj.get_down_hold(): # and not obj.descend_platform_timer.is_stopped():
 		#down_released = true
 		change_state("idle")
 

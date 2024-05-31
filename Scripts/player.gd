@@ -73,7 +73,7 @@ func _physics_process(delta):
 		$WeaponAttach.get_child(0).scale = weapon_scale
 		$WeaponAttach.get_child(0).rotation = weapon_rotation
 		rotation = synchd_rotation
-		global_position = global_position.lerp(synchd_position+synchd_velocity*delta, 0.1)
+		global_position = global_position.lerp(synchd_position+synchd_velocity*delta, delta*10)
 		
 		return
 		
@@ -95,7 +95,7 @@ func _input(event):
 	if $MultiplayerSynchronizer.get_multiplayer_authority() != multiplayer.get_unique_id():
 		return
 	if event.is_action_pressed("ui_down") and not descend_platform_timer.is_stopped():
-		position.y += 1
+		position.y += 5
 	if event.is_action_released("ui_down"):
 		descend_platform_timer.start()
 	if event.is_action_pressed("pickup"):
@@ -149,7 +149,7 @@ func sync_direction():
 
 func update_velocity(delta):
 	velocity.y = move_toward(velocity.y, TERMINAL_VELOCITY, (GRAVITY if fsm.current_state == "jump" else FALL_GRAVITY) * delta)
-	velocity.x = move_toward(velocity.x, get_input_x() * MAX_SPEED, (1 if is_on_floor() else AIR_MULTIPLIER) * ACCELERATION * delta)
+	velocity.x = move_toward(velocity.x,(1 if fsm.current_state != "crouch" else 0.4) * get_input_x() * MAX_SPEED, (1 if is_on_floor() else AIR_MULTIPLIER) * ACCELERATION * delta)
 	#print("player velocity: %s" % velocity)
 
 @rpc("any_peer", "call_local")
@@ -184,10 +184,10 @@ func get_jump_hold():
 	return Input.is_action_pressed("ui_accept")
 
 func get_down_input():
-	return Input.is_action_pressed("ui_down")
+	return Input.is_action_just_pressed("ui_down")
 
-func get_crouch_input():
-	return Input.is_action_pressed("crouch")
+func get_down_hold():
+	return Input.is_action_pressed("ui_down")
 
 func _on_timer_timeout():
 	can_shoot = true

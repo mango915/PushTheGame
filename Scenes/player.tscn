@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://c8s2cf0y7ipjp"]
+[gd_scene load_steps=24 format=3 uid="uid://c8s2cf0y7ipjp"]
 
 [ext_resource type="Script" path="res://Scripts/player.gd" id="1_8g4cu"]
 [ext_resource type="Texture2D" uid="uid://bgnbdtt7w673c" path="res://Assets/Players/Bodies/red_player.tres" id="2_ithuv"]
@@ -11,9 +11,9 @@
 [ext_resource type="Script" path="res://Scripts/States/jump.gd" id="9_k3kr2"]
 [ext_resource type="Script" path="res://Scripts/States/wall_jump.gd" id="9_nwbry"]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_nlme1"]
-radius = 41.75
-height = 127.0
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_37778"]
+radius = 42.75
+height = 126.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_q078h"]
 
@@ -94,6 +94,25 @@ tracks/5/keys = {
 "update": 0,
 "values": [Vector2(1, 1)]
 }
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("CollisionShape2D:shape")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [SubResource("CapsuleShape2D_37778")]
+}
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_fjg61"]
+radius = 40.75
+height = 128.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_6nan0"]
+radius = 31.7657
 
 [sub_resource type="Animation" id="Animation_6pehv"]
 resource_name = "crouch"
@@ -130,14 +149,14 @@ tracks/2/path = NodePath("CollisionShape2D:position")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.08),
+"times": PackedFloat32Array(0, 0.01),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(1.25, -1), Vector2(1.25, 30)]
+"values": [Vector2(1.25, -1.5), Vector2(1.25, 30)]
 }
 tracks/3/type = "value"
 tracks/3/imported = false
-tracks/3/enabled = true
+tracks/3/enabled = false
 tracks/3/path = NodePath("CollisionShape2D:scale")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
@@ -146,6 +165,18 @@ tracks/3/keys = {
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
 "values": [Vector2(1, 1), Vector2(1, 0.5)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("CollisionShape2D:shape")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.01),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [SubResource("CapsuleShape2D_fjg61"), SubResource("CircleShape2D_6nan0")]
 }
 
 [sub_resource type="Animation" id="Animation_6h3jw"]
@@ -219,7 +250,7 @@ script = ExtResource("1_8g4cu")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(1.25, -1)
-shape = SubResource("CapsuleShape2D_nlme1")
+shape = SubResource("CapsuleShape2D_37778")
 
 [node name="Label" type="Label" parent="."]
 offset_left = -43.0
@@ -258,6 +289,10 @@ script = ExtResource("5_7n17n")
 
 [node name="Idle" type="Node" parent="FSM"]
 script = ExtResource("6_v5l3r")
+
+[node name="CrouchingTimer" type="Timer" parent="FSM/Idle"]
+wait_time = 0.2
+one_shot = true
 
 [node name="Crouch" type="Node" parent="FSM"]
 script = ExtResource("5_8rhaa")
@@ -317,5 +352,6 @@ shape = SubResource("CircleShape2D_pilf8")
 target_position = Vector2(89, 2.08165e-12)
 collision_mask = 2
 
+[connection signal="timeout" from="FSM/Idle/CrouchingTimer" to="FSM/Idle" method="_on_crouching_timer_timeout"]
 [connection signal="timeout" from="ShootingTimer" to="." method="_on_timer_timeout"]
 [connection signal="body_entered" from="HurtBox" to="." method="_on_hurt_box_body_entered"]

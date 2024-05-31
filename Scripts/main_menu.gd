@@ -253,7 +253,6 @@ func _on_right_color_button_pressed():
 func update_players_color(id, colors):
 	print("Updating player ", id, " color to ", colors)
 	GameManager.players[id].color = colors
-	
 
 
 func _on_settings_button_pressed():
