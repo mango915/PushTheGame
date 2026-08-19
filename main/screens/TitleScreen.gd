@@ -15,6 +15,14 @@ const MAX_LOCAL_PLAYERS := 4
 # in project.godot, where playerN_* is bound to joypad device N-1.
 const KEYBOARD_PLAYERS := 2
 
+# The menu's CRT/VHS treatment, ported from the compa_dev branch. Both are
+# full-screen post-effects: they sample hint_screen_texture, so they distort
+# whatever is drawn beneath them and must therefore be the LAST children of this
+# screen. The title screen only -- during a round this would be actively harmful
+# to read, which is why nothing else gets it.
+const VHS_SHADER := preload("res://assets/shaders/menu_vhs.gdshader")
+const CRT_SHADER := preload("res://assets/shaders/menu_crt.gdshader")
+
 const COLOR_HINT := Color(0.435, 0.573, 0.643)
 const COLOR_HINT_WARN := Color(0.851, 0.643, 0.255)
 
@@ -26,6 +34,7 @@ var _count_buttons := {}
 
 func _ready() -> void:
 	_build_player_count_row()
+	_build_crt_overlay()
 	# A pad plugged in while the menu is up should update the hint rather than
 	# leaving a stale "not connected" warning on screen.
 	Input.joy_connection_changed.connect(_on_joy_connection_changed)
@@ -75,6 +84,64 @@ func _build_player_count_row() -> void:
 		button.pressed.connect(_on_count_pressed.bind(count))
 		row.add_child(button)
 		_count_buttons[count] = button
+
+# Two stacked full-screen passes: the VHS wobble first, then the CRT grille over
+# it. Added last, and re-added last whenever anything else is built, because a
+# screen-texture effect only sees what was drawn before it.
+func _build_crt_overlay() -> void:
+	_add_pass(VHS_SHADER, {
+		"wiggle": 0.28,
+		"wiggle_speed": 25.0,
+		"smear": 0.858,
+		"blur_samples": 15,
+	})
+	_add_pass(CRT_SHADER, {
+		"overlay": true,
+		"scanlines_opacity": 0.4,
+		"scanlines_width": 0.25,
+		"grille_opacity": 0.3,
+		"resolution": Vector2(640, 360),
+		"pixelate": true,
+		# Rolling and noise are off: on a menu you actually have to read, a
+		# rolling band sweeping the buttons is nausea rather than nostalgia.
+		"roll": false,
+		"noise_opacity": 0.0,
+		"static_noise_intensity": 0.06,
+		"aberration": -0.006,
+		"brightness": 1.4,
+		"discolor": true,
+		# No barrel warp: it bends the button edges away from where the mouse
+		# actually is, since the shader moves pixels and not the controls.
+		"warp_amount": 0.0,
+		"vignette_intensity": 0.4,
+		"vignette_opacity": 0.5,
+	})
+
+func _add_pass(shader: Shader, params: Dictionary) -> void:
+	var rect := ColorRect.new()
+	rect.name = "Pass_" + shader.resource_path.get_file().get_basename()
+	rect.anchor_left = 0.0
+	rect.anchor_top = 0.0
+	rect.anchor_right = 1.0
+	rect.anchor_bottom = 1.0
+	rect.offset_left = 0.0
+	rect.offset_top = 0.0
+	rect.offset_right = 0.0
+	rect.offset_bottom = 0.0
+	rect.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	rect.grow_vertical = Control.GROW_DIRECTION_BOTH
+	# Clicks must reach the buttons underneath: the effect moves pixels, not
+	# controls, so anything that swallowed input would put the game's hit
+	# targets somewhere other than where they appear.
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var material := ShaderMaterial.new()
+	material.shader = shader
+	for key in params:
+		material.set_shader_parameter(key, params[key])
+	rect.material = material
+
+	add_child(rect)
 
 func _on_count_pressed(count: int) -> void:
 	local_player_count = clampi(count, MIN_LOCAL_PLAYERS, MAX_LOCAL_PLAYERS)

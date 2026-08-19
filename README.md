@@ -259,6 +259,13 @@ with the following exceptions:
   [CC BY-NC License](assets/LICENSE.txt) — art by Orlando Herrera a.k.a.
   [Pixel Frog](https://pixelfrog-store.itch.io/), music and sound by Jakob T.
   Rypdal.
+* The title screen's CRT/VHS treatment (`assets/shaders/`) came from this
+  project's own `compa_dev` branch, where it carried no attribution. The
+  scanline/grille/aberration pass is the widely-shared "VHS and CRT monitor
+  effect" by pend00 on [godotshaders.com](https://godotshaders.com) (MIT); the
+  wobble pass derives from the "bad TV" ShaderToy effect that circulates with
+  it. Both files carry a note saying so.
+
 * The [Snopek State Machine](https://gitlab.com/snopek-games/godot-state-machine)
   included in [addons/snopek-state-machine/](addons/snopek-state-machine) is
   licensed under the MIT License.
