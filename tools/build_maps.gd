@@ -10,6 +10,7 @@ extends SceneTree
 #   res://maps/arena_oneway_tileset.tres  jump-through   (physics layer 5)
 #   res://maps/Arena1.tscn                "Terrace"  1408 x 896
 #   res://maps/Arena2.tscn                "The Well" 1216 x 960
+#   res://maps/Arena3.tscn                "The Maw"  1344 x 832
 #
 # WHY A TOOL AND NOT HAND-WRITTEN .tscn
 # ------------------------------------
@@ -117,7 +118,7 @@ func _initialize() -> void:
 	var terrain_shared: TileSet = load(TERRAIN_TILESET_PATH)
 	var oneway_shared: TileSet = load(ONEWAY_TILESET_PATH)
 
-	for spec in [arena1_spec(), arena2_spec()]:
+	for spec in [arena1_spec(), arena2_spec(), arena3_spec()]:
 		_build_arena(spec, terrain_shared, oneway_shared)
 
 	print("[build] %d error(s)" % _failures)
@@ -416,6 +417,109 @@ func arena2_spec() -> Dictionary:
 			{"effect": "SLIPPERY", "rect": Rect2(480, 488, 256, 24)},
 			{"effect": "STICKY", "rect": Rect2(480, 872, 96, 24)},
 			{"effect": "STICKY", "rect": Rect2(640, 872, 96, 24)},
+		],
+	}
+
+# ARENA 3 -- "The Maw": a ring around a hole. 42 x 26 = 1344 x 832 px.
+#
+# The other two arenas are read vertically -- Terrace is a stack of wide tiers,
+# The Well is two towers and a shaft. This one is read HORIZONTALLY: the middle
+# of the map is missing. An 8-block pit (256 px, 78% of a running jump) splits
+# the floor, with a single one-way stepping stone hanging in its mouth, so
+# crossing at ground level is possible, committed, and the stone can be dropped
+# through by anyone who would rather you did not make it.
+#
+# Everything worth having sits over the hole: the island above the pit carries a
+# bomb, and the pad on the upper shelf is the only way to the crown. Fighting
+# therefore happens across the gap rather than up a ladder.
+func arena3_spec() -> Dictionary:
+	return {
+		"name": "Arena3",
+		"cols": 42,
+		"rows": 26,
+		"env_modulate": Color(1.0, 0.86, 0.80),
+		"solid": [
+			[0, 0, 41, 0],      # ceiling
+			[0, 1, 1, 23],      # left wall
+			[40, 1, 41, 23],    # right wall
+			[0, 24, 16, 25],    # floor, left of the maw
+			[25, 24, 41, 25],   # floor, right of the maw
+
+			# Low shelves flanking the pit: the run-up for jumping the gap, and
+			# the only ground-level route onto the island.
+			[3, 20, 10, 20],
+			[31, 20, 38, 20],
+
+			# The island, suspended over the maw. 6 blocks (192 px) from the
+			# shelves either side and 2 blocks up -- a running jump, not a
+			# formality, and a miss goes straight down the hole.
+			[17, 18, 24, 18],
+
+			# Mid ring, offset 3 blocks INWARD from the shelf below it. Every
+			# tier here is staggered against the one under it so there is always
+			# an open column to rise through: a ledge sitting squarely above
+			# another is not a step up, it is a ceiling, and a player jumping
+			# from the lower one just cracks their head on its underside.
+			[6, 16, 13, 16],
+			[28, 16, 35, 16],
+
+			# The upper shelf, pulled in to sit directly over the island and no
+			# wider. It used to span cols 14-27, which put its underside (y=480)
+			# straight through the flight path from the low shelves to the
+			# island: a full jump from y=640 apexes at y=477, so players cracked
+			# their heads on it and the whole upper half of the map became
+			# unreachable. The validator caught it; the arithmetic in the header
+			# would not have.
+			[17, 14, 24, 14],
+
+			# Upper perches, staggered back OUTWARD from the mid ring, leaving
+			# its outer columns clear to jump up through.
+			[2, 12, 9, 12],
+			[32, 12, 39, 12],
+		],
+		"oneway": [
+			# The stepping stone in the mouth of the maw. Reachable from either
+			# floor edge (3 blocks across, 3 up) and droppable-through.
+			[19, 21, 22, 21],
+			# Bridges from the mid ring out to the upper shelf. One-way, so they
+			# do not block anything rising through them.
+			[10, 14, 17, 14], [24, 14, 31, 14],
+			# The crown: pad-only, like the crow's nest and the crown before it.
+			[18, 7, 23, 7],
+		],
+		# All four on the floor, mirrored about the map centre (x = 672), clear
+		# of both the tar and the pit.
+		"spawns": [
+			Vector2(96, 768), Vector2(1248, 768),
+			Vector2(448, 768), Vector2(896, 768),
+		],
+		"generators": [
+			{"pos": Vector2(224, 768), "pickup": SWORD},
+			{"pos": Vector2(1120, 768), "pickup": SWORD},
+			{"pos": Vector2(672, 576), "pickup": GRENADE},  # the island prize
+			{"pos": Vector2(192, 640), "pickup": GUN},
+			{"pos": Vector2(1152, 640), "pickup": GUN},
+			# The shotgun's knockback is what this arena is for: the whole map is
+			# built around a hole, and this is the weapon that puts someone in it.
+			{"pos": Vector2(288, 512), "pickup": SHOTGUN},
+			{"pos": Vector2(1056, 512), "pickup": GUN},
+			{"pos": Vector2(656, 224), "pickup": GUN},    # crown reward
+		],
+		"zones": [
+			# The maw itself, drawn so it reads as death before you step in it.
+			{"effect": "KILL", "rect": Rect2(544, 784, 256, 40)},
+			# ...and the void under everything, as the backstop.
+			{"effect": "KILL", "rect": Rect2(-256, 852, 1856, 200), "visual": false},
+			# The only way to the crown.
+			{"effect": "LAUNCH", "rect": Rect2(640, 424, 64, 24)},
+			# Ice on the island, so the contested prize is also the worst footing
+			# on the map and it sits directly over the hole.
+			{"effect": "SLIPPERY", "rect": Rect2(560, 552, 224, 24)},
+			# Tar on both floors. STICKY blocks jumping, so each pool leaves dry
+			# ground at both ends of its run -- the validator fails the build
+			# otherwise.
+			{"effect": "STICKY", "rect": Rect2(160, 744, 160, 24)},
+			{"effect": "STICKY", "rect": Rect2(1024, 744, 160, 24)},
 		],
 	}
 

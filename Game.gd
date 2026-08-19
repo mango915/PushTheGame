@@ -8,6 +8,7 @@ var Player = preload("res://actors/Player.tscn")
 @export var map_scenes: Array[PackedScene] = [
 	preload("res://maps/Arena1.tscn"),
 	preload("res://maps/Arena2.tscn"),
+	preload("res://maps/Arena3.tscn"),
 ]
 
 # Which entry of map_scenes is currently loaded.

@@ -43,7 +43,7 @@ extends Node
 
 const TAG := "map"
 
-const ARENAS := ["res://maps/Arena1.tscn", "res://maps/Arena2.tscn"]
+const ARENAS := ["res://maps/Arena1.tscn", "res://maps/Arena2.tscn", "res://maps/Arena3.tscn"]
 
 const CELL := 16.0
 const PLAYER_HALF_WIDTH := 15.0
