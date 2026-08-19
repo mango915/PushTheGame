@@ -101,6 +101,22 @@ func use() -> void:
 	use_by_player = player
 
 	animation_player.play("Shoot")
+	_recoil_visual()
+
+# The muzzle flash was a frame of the old pixel sheet. The Scribble gun is a
+# single sprite, so the shot reads as a recoil kick instead -- and SparksEffect
+# still fires at the barrel, which is what actually says "that went off".
+const RECOIL_PIXELS := 5.0
+
+func _recoil_visual() -> void:
+	var sprite := get_node_or_null("GunSprite") as Node2D
+	if sprite == null:
+		return
+	var rest: Vector2 = sprite.position
+	sprite.position = rest - Vector2(RECOIL_PIXELS, 0.0)
+	var tween := create_tween()
+	tween.tween_property(sprite, "position", rest, 0.14) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 # The angles, relative to the barrel, of each pellet in one shot.
 #

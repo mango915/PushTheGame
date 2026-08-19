@@ -49,7 +49,7 @@ const CELL := 16    # world px per TileMap cell (2x2 cells per block)
 # Re-run that script if the chosen tiles change.
 const TERRAIN_TEXTURE := "res://assets/doodle/tilesets/scribble_arena.png"
 const MAP_SCRIPT := "res://maps/Map.gd"
-const BACKGROUND_SCENE := "res://maps/StaticBackground.tscn"
+const BACKGROUND_SCENE := "res://maps/DoodleBackground.tscn"
 const GENERATOR_SCENE := "res://objects/TimedGeneratorFlat.tscn"
 const EFFECT_ZONE_SCRIPT := "res://objects/EffectZone.gd"
 const GUN := "res://pickups/Gun.tscn"
