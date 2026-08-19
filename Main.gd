@@ -164,8 +164,10 @@ func _on_OnlineMatch_error(message: String):
 	ui_layer.show_screen("MatchScreen")
 
 func _on_OnlineMatch_disconnected():
-	#_on_OnlineMatch_error("Disconnected from host")
-	_on_OnlineMatch_error('')
+	# The informative message was commented out and replaced with '', so losing
+	# the host dropped you back to the match screen with no explanation at all --
+	# indistinguishable from the game deciding to quit on its own.
+	_on_OnlineMatch_error("Disconnected from host")
 
 func _on_OnlineMatch_player_left(player) -> void:
 	game.kill_player(player.peer_id)
