@@ -2,7 +2,16 @@ extends Node2D
 
 var Player = preload("res://actors/Player.tscn")
 
-@export var map_scene: PackedScene = preload("res://maps/Map1.tscn")
+# The map pool. The host picks one per round and ships the choice to every peer
+# alongside the settings, so everyone loads the same arena -- picking
+# independently would put players in different levels.
+@export var map_scenes: Array[PackedScene] = [
+	preload("res://maps/Arena1.tscn"),
+	preload("res://maps/Arena2.tscn"),
+]
+
+# Which entry of map_scenes is currently loaded.
+var map_index: int = 0
 
 # Movement feel and match rules. The host's copy is the one that counts: it is
 # shipped to every peer in _do_game_setup() and rebuilt there before any player
@@ -45,11 +54,24 @@ func game_start(players: Dictionary) -> void:
 	# Resources do not serialize over RPC safely, so the settings travel as a
 	# plain Dictionary and are rebuilt on each peer.
 	var settings_data: Dictionary = get_game_settings().to_dict()
+	var chosen_map := _pick_next_map()
 
 	if GameState.online_play:
-		rpc('_do_game_setup', players, settings_data)
+		rpc('_do_game_setup', players, settings_data, chosen_map)
 	else:
-		_do_game_setup(players, settings_data)
+		_do_game_setup(players, settings_data, chosen_map)
+
+# Rotate rather than pick at random, so a short session actually sees both
+# arenas instead of the same one three times running.
+func _pick_next_map() -> int:
+	if map_scenes.is_empty():
+		return 0
+	return (map_index + 1) % map_scenes.size()
+
+func get_map_scene() -> PackedScene:
+	if map_scenes.is_empty():
+		return null
+	return map_scenes[clampi(map_index, 0, map_scenes.size() - 1)]
 
 func get_game_settings() -> GameSettings:
 	if game_settings == null:
@@ -62,12 +84,15 @@ func reload_game_settings() -> void:
 	game_settings = GameSettings.load_saved()
 
 # Initializes the game so that it is ready to really start.
-@rpc("any_peer", "call_local") func _do_game_setup(players: Dictionary, settings_data: Dictionary = {}) -> void:
+@rpc("any_peer", "call_local") func _do_game_setup(players: Dictionary, settings_data: Dictionary = {}, chosen_map: int = -1) -> void:
 	# Adopt the host's tuning before spawning anyone. from_dict() builds a fresh
 	# resource rather than mutating the preloaded default, which the resource
 	# cache would otherwise keep mutated for the rest of the process.
 	if not settings_data.is_empty():
 		game_settings = GameSettings.from_dict(settings_data)
+
+	if chosen_map >= 0 and chosen_map < map_scenes.size():
+		map_index = chosen_map
 
 	# Tear the previous round down before pausing: game_stop() unpauses, so
 	# pausing first would immediately be undone here.
@@ -195,14 +220,19 @@ func game_stop() -> void:
 	get_tree().set_pause(false)
 
 func reload_map() -> void:
-	var map_index = map.get_index()
+	# Named to avoid shadowing the map_index member, which tracks which arena
+	# is loaded rather than where the node sits in the tree.
+	var child_index := map.get_index()
 	remove_child(map)
 	map.queue_free()
 
-	map = map_scene.instantiate()
+	var scene := get_map_scene()
+	if scene == null:
+		return
+	map = scene.instantiate()
 	map.name = 'Map'
 	add_child(map)
-	move_child(map, map_index)
+	move_child(map, child_index)
 
 	var map_rect = map.get_map_rect()
 	camera.global_position = original_camera_position

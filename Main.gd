@@ -47,17 +47,40 @@ func _on_TitleScreen_play_online() -> void:
 	# Show the game map in the background because we have nothing better.
 	game.reload_map()
 
-	# Sign in silently with a device identity so playing online does not require
-	# creating an account. The email/password screen is only a fallback now.
+	# MatchScreen offers both transports: Nakama rooms/matchmaking, and LAN play
+	# (autoload/LanMatch.gd), which needs no server, no account and no port
+	# forwarding. So the screen is shown FIRST and the Nakama sign-in happens
+	# behind it -- previously a missing or unreachable server bounced the player
+	# to ConnectionScreen and there was no way to reach LAN play at all.
 	ui_layer.hide_screen()
-	ui_layer.show_message("Signing in...")
+	ui_layer.show_screen("MatchScreen")
 
-	if await Online.ensure_session():
+	_sign_in_for_online_play()
+
+# Signs in silently with a device identity so playing online does not require
+# creating an account. The email/password screen is only a fallback now, reached
+# from the message below rather than automatically.
+#
+# Deliberately not awaited by the caller: the LAN buttons must be usable while
+# this is still waiting on (or timing out against) the server. The online
+# buttons re-check the session themselves in MatchScreen._on_match_button_pressed.
+func _sign_in_for_online_play() -> void:
+	if Online.has_valid_session():
+		return
+
+	ui_layer.show_message("Signing in...")
+	var signed_in: bool = await Online.ensure_session()
+
+	# The player may have moved on (or started a LAN game) while we waited.
+	if ui_layer.current_screen_name != 'MatchScreen':
+		return
+
+	if signed_in:
 		ui_layer.hide_message()
-		ui_layer.show_screen("MatchScreen")
 	else:
-		ui_layer.show_message("Could not sign in - check the server settings")
-		ui_layer.show_screen("ConnectionScreen")
+		# Server host/port is editable on SettingsScreen; the LAN buttons on
+		# MatchScreen work regardless.
+		ui_layer.show_message("No server - LAN games still work")
 
 func _on_UILayer_change_screen(name: String, _screen) -> void:
 	if name == 'TitleScreen':
