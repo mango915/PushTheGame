@@ -391,6 +391,12 @@ var _squash_target := Vector2.ONE
 # exactly the same amount, which reads as weightless.
 var _impact_speed := 0.0
 
+# A jump the tar refused. Kicks the body once so the press is visibly received.
+func stuck_bump() -> void:
+	_set_squash(1.22, 0.82, true)
+	if sounds != null and sounds.has_node("Jump"):
+		sounds.play("Jump")
+
 func _set_squash(x: float, y: float, immediate: bool = false) -> void:
 	_squash_target = Vector2(x, y)
 	if immediate:
@@ -416,10 +422,21 @@ func _update_flash(delta: float) -> void:
 	_flash_left -= delta
 	body_sprite.modulate = _flash_color if _flash_left > 0.0 else Color.WHITE
 
+# How far the body is pressed down while stuck in tar. Enough to read as
+# "something has hold of you", not so much that it looks like a duck.
+const STUCK_SQUASH := Vector2(1.12, 0.86)
+
 func _update_squash(delta: float) -> void:
 	if body_sprite == null:
 		return
-	_squash = _squash.lerp(_squash_target, clampf(SQUASH_RESPONSE * delta, 0.0, 1.0))
+
+	var target := _squash_target
+	# Composed with whatever pose the state asked for, rather than replacing it,
+	# so a player wading through tar still reads as walking.
+	if jump_blocked and is_on_floor():
+		target = Vector2(target.x * STUCK_SQUASH.x, target.y * STUCK_SQUASH.y)
+
+	_squash = _squash.lerp(target, clampf(SQUASH_RESPONSE * delta, 0.0, 1.0))
 	body_sprite.scale = _squash
 	body_sprite.position.y = BODY_REST_Y * _squash.y
 

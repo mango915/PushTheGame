@@ -91,6 +91,31 @@ Two-player local play needs no server: Title screen → "Play Local" wires `play
 
 Note `tests/net_multiplayer.tscn` is deliberately **not** named `*Test.tscn` — that pattern is auto-discovered by the unit gate, and this one needs a server plus CLI args.
 
+### Looking at how the game MOVES
+
+`tools/capture.gd` records real gameplay to a numbered PNG sequence, and
+`tools/assemble_capture.py` turns that into an mp4, a gif and a labelled frame
+strip:
+
+```bash
+godot --path . tools/Capture.tscn -- /tmp/cap run 120 480x270
+python3 tools/assemble_capture.py /tmp/cap /tmp/run --stride 4 --cols 6
+```
+
+Scenarios live in `capture.gd::_timeline()` — `run`, `drop`, `fight`, `bow`.
+Input is applied with `Input.action_press()`, which is genuinely the same path a
+keyboard takes: the players read the real Input singleton through
+`components/InputBuffer.gd`. No compositor, no screen recorder, and the same run
+every time. Capture is on PHYSICS frames, not rendered ones — the game simulates
+at 60Hz and renders as fast as it can, so per-render capture yields duplicate
+frames and a recording that misrepresents the pacing.
+
+The **frame strip** is the point for anything that reads still images: an
+animated file only ever shows its first frame, so motion has to be laid out in
+space to be reviewed at all. Feel bugs — a missing squash, a pop, camera drift,
+an input that produces no response — are invisible in a screenshot and obvious
+across a strip.
+
 ### The regression harness
 
 `scripts/check.sh` is the only safety net — there is no unit-test framework. Four gates: **parse** every non-addon script, **boot** `Main.tscn` headless, **play** a full local 2-player round (including a forced death and round end), and **units**, which auto-discovers `tests/*Test.tscn`.

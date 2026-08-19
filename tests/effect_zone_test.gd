@@ -35,6 +35,7 @@ func _ready() -> void:
 	await _check_sticky()
 	await _check_kill()
 	_check_composition()
+	await _check_stuck_feedback()
 
 	print("[zone] %d assertion(s) failed" % _failures)
 
@@ -188,3 +189,25 @@ func _check_composition() -> void:
 
 	player.queue_free()
 	tar.queue_free()
+
+# Tar takes jumping away. Before this it did so silently: you pressed jump, the
+# game did nothing at all, and that reads as a dropped input rather than as a
+# hazard. The cue is cosmetic, but "the player can tell why they did not jump"
+# is a gameplay property, so it is pinned here.
+func _check_stuck_feedback() -> void:
+	var player := _make_player()
+	var tar := _make_zone(EffectZone.Effect.STICKY)
+	await get_tree().process_frame
+
+	player.play_animation("Idle")
+	for i in range(12): await get_tree().process_frame
+	var free_pose: Vector2 = player._squash
+
+	player.enter_effect_zone(tar)
+	# The press is acknowledged even though the jump is refused.
+	player.stuck_bump()
+	_check_true("a refused jump kicks the body", player._squash.y < free_pose.y)
+
+	player.queue_free()
+	tar.queue_free()
+	await get_tree().process_frame

@@ -53,6 +53,10 @@ func _state_physics_process(delta: float) -> void:
 				"input_vector": input_vector,
 			})
 			return
+	elif host.input_buffer.is_action_just_pressed("jump") and host.jump_blocked:
+		# Refused by tar. Acknowledge the press -- an input that produces no
+		# response at all reads as a dropped input rather than as a hazard.
+		host.stuck_bump()
 	elif host.input_buffer.is_action_pressed("down") and host.is_on_floor():
 		get_parent().change_state("Duck")
 		return
