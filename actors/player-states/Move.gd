@@ -32,6 +32,20 @@ func _state_physics_process(delta: float) -> void:
 		get_parent().change_state("Fall")
 		return
 
+# Offered by the airborne states (Fall, Jump): pressing jump while pressed
+# against a wall kicks off it instead of doing nothing.
+#
+# Returns true when the state changed, so the caller must stop processing --
+# WallJump has already set the velocity this frame and anything after would
+# stomp it. Deliberately NOT called from WallJump itself, which inherits this.
+func _try_wall_jump() -> bool:
+	if not host.input_buffer.is_action_just_pressed("jump"):
+		return false
+	if not host.can_wall_jump():
+		return false
+	get_parent().change_state("WallJump", { "wall_normal": host.get_wall_normal() })
+	return true
+
 func do_flip_sprite(input_vector: Vector2) -> void:
 	if input_vector.x < 0:
 		host.flip_h = true

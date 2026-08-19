@@ -1,4 +1,4 @@
-[gd_scene load_steps=45 format=3 uid="uid://d0hkj3kxla3cu"]
+[gd_scene load_steps=46 format=3 uid="uid://d0hkj3kxla3cu"]
 
 [ext_resource type="Texture2D" uid="uid://24j34m2e7nqe" path="res://assets/sprites/whale_orange.png" id="1"]
 [ext_resource type="Script" path="res://actors/player-states/Hurt.gd" id="2"]
@@ -22,6 +22,7 @@
 [ext_resource type="AudioStream" uid="uid://cg4svqwngfdd6" path="res://assets/sounds/blops/blop1.wav" id="20"]
 [ext_resource type="AudioStream" uid="uid://diylxbhkljylk" path="res://assets/sounds/blops/blop2.wav" id="21"]
 [ext_resource type="Script" path="res://actors/player-states/Fall.gd" id="22"]
+[ext_resource type="Script" path="res://actors/player-states/WallJump.gd" id="walljump_1"]
 
 [sub_resource type="RectangleShape2D" id="1"]
 size = Vector2(29, 56)
@@ -515,6 +516,9 @@ script = ExtResource("15")
 
 [node name="Fall" type="Node" parent="StateMachine"]
 script = ExtResource("22")
+
+[node name="WallJump" type="Node" parent="StateMachine"]
+script = ExtResource("walljump_1")
 
 [node name="Duck" type="Node" parent="StateMachine"]
 script = ExtResource("4")

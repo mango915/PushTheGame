@@ -119,6 +119,27 @@ var push_back_speed: float:
 	get:
 		return get_settings().push_back_speed
 
+var wall_jump_speed: float:
+	get:
+		return get_settings().wall_jump_speed
+
+var wall_jump_push: float:
+	get:
+		return get_settings().wall_jump_push
+
+# True when the player is airborne and pressed against a wall hard enough to
+# kick off it.
+#
+# is_on_wall() reports what the LAST move_and_slide() found, and states run
+# before this frame's move (see _physics_process), so this is always one frame
+# old -- which is what we want: it is the contact the player can see.
+func can_wall_jump() -> bool:
+	if wall_jump_speed <= 0.0:
+		return false
+	if jump_blocked or is_on_floor():
+		return false
+	return is_on_wall()
+
 var throw_velocity: float:
 	get:
 		return get_settings().throw_velocity

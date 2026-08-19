@@ -24,6 +24,8 @@ const FIELDS := [
 	"glide_speed",
 	"terminal_velocity",
 	"push_back_speed",
+	"wall_jump_speed",
+	"wall_jump_push",
 	"throw_velocity",
 	"throw_upward_velocity",
 	"throw_vector_mix",
@@ -46,6 +48,17 @@ const FIELDS := [
 @export var glide_speed: float = -100.0
 @export var terminal_velocity: float = 1000.0
 @export var push_back_speed: float = 50.0
+
+## Upward speed of a wall jump. 0 disables wall jumping entirely.
+##
+## Below jump_speed on purpose: a wall jump that matched a standing jump would
+## make any vertical surface a free ladder, and every arena is laid out against
+## a documented jump budget that tools/build_maps.gd and MapReachabilityTest
+## both reason about.
+@export var wall_jump_speed: float = 560.0
+## Horizontal shove AWAY from the wall. This is what stops a wall jump being a
+## ladder: you leave the wall whether you want to or not, and have to come back.
+@export var wall_jump_push: float = 320.0
 
 @export_group("Throwing")
 @export var throw_velocity: float = 300.0

@@ -8,6 +8,9 @@ func _state_exit() -> void:
 
 func _state_physics_process(delta: float) -> void:
 	_check_pickup_or_throw_or_use()
+
+	if _try_wall_jump():
+		return
 	
 	var input_vector = _get_player_input_vector()
 	
