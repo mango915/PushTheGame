@@ -257,7 +257,11 @@ pause={
 [rendering]
 
 environment/defaults/default_environment="res://default_env.tres"
-quality/driver/driver_name="GLES2"
 2d/snapping/use_gpu_pixel_snap=true
-vram_compression/import_etc=true
-quality/2d/use_pixel_snap=true
+
+; Required to export for macOS/arm64 and for mobile: Godot refuses those targets
+; outright without it ("Cannot export for universal or arm64 if ETC2 ASTC
+; texture format is disabled"). The Godot 3 spelling of this was
+; vram_compression/import_etc, which Godot 4 ignores -- along with
+; quality/driver/driver_name and quality/2d/use_pixel_snap, both removed here.
+textures/vram_compression/import_etc2_astc=true
