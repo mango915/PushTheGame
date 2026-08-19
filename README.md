@@ -61,8 +61,8 @@ Playing the game from source
 
 You'll need:
 
-* [Godot](https://godotengine.org/download) **4.2** (the project declares
-  `config/features = "4.2"` and the scripts use Godot 4 syntax throughout).
+* [Godot](https://godotengine.org/download) **4.7.2** (the project declares
+  `config/features = "4.7"` and the scripts use Godot 4 syntax throughout).
 * A Nakama server to connect to. The bundled `docker-compose.yml` runs
   Nakama 3.20.1 against CockroachDB.
 
