@@ -576,6 +576,13 @@ func try_use() -> void:
 		return
 	current_pickup.use()
 
+# Only weapons that charge care; everything else inherits a no-op.
+func try_use_release() -> void:
+	if not current_pickup:
+		return
+	if current_pickup.has_method("use_release"):
+		current_pickup.use_release()
+
 func hurt(node: Node2D) -> void:
 	# Declared as an @export since forever but never actually read, so the
 	# inspector checkbox did nothing. An invincible player takes no damage.

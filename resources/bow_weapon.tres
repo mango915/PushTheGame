@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/WeaponData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+weapon_name = "Bow"
+pickup_position = 1
+bounce = 0.2
+cooldown_time = 0.35
+max_ammo = 4
+draw_seconds = 0.75
+min_projectile_velocity = 260.0
+projectile_velocity = 1000.0
+projectile_range = 900.0

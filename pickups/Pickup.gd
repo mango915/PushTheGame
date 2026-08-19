@@ -136,6 +136,11 @@ func use() -> void:
 	# Implement this in child classes.
 	pass
 
+# Called when the use button is RELEASED, for weapons that charge while held.
+# Instant weapons ignore it.
+func use_release() -> void:
+	pass
+
 func _physics_process(delta: float) -> void:
 	# Ticked before the early returns, so a pickup that is caught mid-flight (or
 	# put to sleep) does not freeze its thrower's grace period and hand it back

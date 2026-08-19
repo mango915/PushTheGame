@@ -58,6 +58,7 @@ const SHOTGUN := "res://pickups/Shotgun.tscn"
 const GRENADE := "res://pickups/Grenade.tscn"
 const MINE := "res://pickups/Mine.tscn"
 const LASER := "res://pickups/Laser.tscn"
+const BOW := "res://pickups/Bow.tscn"
 
 const TERRAIN_TILESET_PATH := "res://maps/arena_tileset.tres"
 const ONEWAY_TILESET_PATH := "res://maps/arena_oneway_tileset.tres"
@@ -342,7 +343,7 @@ func arena1_spec() -> Dictionary:
 			{"pos": Vector2(737, 576), "pickup": MINE},
 			{"pos": Vector2(225, 448), "pickup": SHOTGUN},
 			{"pos": Vector2(1153, 448), "pickup": SHOTGUN},
-			{"pos": Vector2(129, 192), "pickup": GUN},
+			{"pos": Vector2(129, 192), "pickup": BOW},
 			{"pos": Vector2(1249, 192), "pickup": GUN},
 			{"pos": Vector2(689, 128), "pickup": LASER},   # crow's nest reward
 		],
@@ -423,7 +424,7 @@ func arena2_spec() -> Dictionary:
 			{"pos": Vector2(737, 896), "pickup": SWORD},
 			{"pos": Vector2(161, 512), "pickup": SHOTGUN},
 			{"pos": Vector2(1025, 512), "pickup": SHOTGUN},
-			{"pos": Vector2(129, 256), "pickup": GRENADE},
+			{"pos": Vector2(129, 256), "pickup": BOW},
 			{"pos": Vector2(1057, 256), "pickup": GRENADE},
 			{"pos": Vector2(593, 128), "pickup": LASER},   # crown reward
 		],
@@ -522,7 +523,7 @@ func arena3_spec() -> Dictionary:
 			# built around a hole, and this is the weapon that puts someone in it.
 			{"pos": Vector2(288, 512), "pickup": SHOTGUN},
 			{"pos": Vector2(1056, 512), "pickup": GUN},
-			{"pos": Vector2(656, 224), "pickup": GUN},    # crown reward
+			{"pos": Vector2(656, 224), "pickup": BOW},    # crown reward
 		],
 		"zones": [
 			# The maw itself, drawn so it reads as death before you step in it.

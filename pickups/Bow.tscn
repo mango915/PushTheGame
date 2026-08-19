@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://pickups/Pickup.tscn" id="1"]
+[ext_resource type="Script" path="res://pickups/Bow.gd" id="2"]
+[ext_resource type="Texture2D" path="res://assets/doodle/sprites/weapon_bow.png" id="3"]
+[ext_resource type="Script" path="res://components/Sounds.gd" id="4"]
+[ext_resource type="Resource" path="res://resources/bow_weapon.tres" id="5"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bow"]
+size = Vector2(18, 44)
+
+[node name="Bow" instance=ExtResource("1")]
+script = ExtResource("2")
+pickup_position = 1
+weapon_data = ExtResource("5")
+
+[node name="Sprite2D" type="Sprite2D" parent="." index="0"]
+position = Vector2(6, -28)
+texture = ExtResource("3")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." index="1"]
+position = Vector2(6, -24)
+shape = SubResource("RectangleShape2D_bow")
+
+[node name="ArrowPosition" type="Marker2D" parent="." index="2"]
+position = Vector2(20, -28)
+
+[node name="Sounds" type="Node" parent="." index="3"]
+script = ExtResource("4")
+
+[node name="HeldPosition" parent="." index="4"]
+position = Vector2(0, -22)

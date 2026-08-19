@@ -94,6 +94,17 @@ extends Resource
 ## Backwards shove applied to the SHOOTER when the weapon fires.
 @export var recoil: float = 0.0
 
+# --- Charged weapons (Bow.gd) ----------------------------------------------
+# Ignored by weapons that fire the instant you press the button.
+
+## Seconds of holding "use" to reach a full draw.
+@export var draw_seconds: float = 0.75
+
+## Launch speed at zero draw. Draw force buys REACH, not damage: this game is
+## one hit, so a tapped shot should drop short and embarrass you rather than be
+## a slightly weaker kill.
+@export var min_projectile_velocity: float = 260.0
+
 # --- Explosives (Explosive.gd / Grenade.gd / Mine.gd) ----------------------
 
 ## Seconds from the fuse being lit to the blast.

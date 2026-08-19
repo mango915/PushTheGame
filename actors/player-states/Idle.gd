@@ -25,6 +25,12 @@ func _check_pickup_or_throw_or_use():
 		host.call_deferred("pickup_or_throw")
 	elif host.input_buffer.is_action_just_pressed("use"):
 		host.call_deferred("try_use")
+	elif host.input_buffer.is_action_just_released("use"):
+		# Weapons that CHARGE need the release, not just the press. It comes off
+		# the input buffer like every other input, so a remote player replaying
+		# that buffer looses their arrow at the same moment on every peer --
+		# reading Input directly here would work locally and desync online.
+		host.call_deferred("try_use_release")
 
 func _decelerate_to_zero(delta: float) -> void:
 	if host.vector.x < 0:

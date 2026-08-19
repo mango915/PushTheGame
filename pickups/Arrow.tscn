@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://pickups/Arrow.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/doodle/sprites/weapon_arrow.png" id="2"]
+[ext_resource type="PackedScene" path="res://components/Hitbox.tscn" id="3"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_arrow"]
+size = Vector2(22, 8)
+
+[node name="Arrow" type="Area2D"]
+collision_layer = 0
+collision_mask = 1
+script = ExtResource("1")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_arrow")
+
+[node name="Hitbox" parent="." instance=ExtResource("3")]
+collision_mask = 2
+
+[node name="ArrowHit" type="CollisionShape2D" parent="Hitbox"]
+shape = SubResource("RectangleShape2D_arrow")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
