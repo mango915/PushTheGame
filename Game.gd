@@ -314,7 +314,7 @@ func _run_countdown() -> void:
 		# deliberately NOT emitted, or a zero countdown would still flash across
 		# the screen. Anything that just wants to know play began has
 		# game_started_signal.
-		get_tree().set_pause(false)
+		_begin_play()
 		return
 
 	_counting_down = true
@@ -334,12 +334,26 @@ func _run_countdown() -> void:
 
 	_counting_down = false
 	emit_signal("countdown_tick", 0)
-	get_tree().set_pause(false)
+	_begin_play()
 
-	# Started HERE and not in _do_game_setup: setup pauses the tree and waits on
-	# the handshake (up to SETUP_TIMEOUT_SECONDS), so a clock started there
-	# would have the countdown eaten by the handshake -- and on a slow peer the
-	# round could reach sudden death before anyone had moved.
+# The single point at which a round becomes playable: the tree starts running
+# and the round clock starts with it.
+#
+# It is one function because _run_countdown() reaches this state by two routes --
+# a countdown that ran to zero, and a countdown disabled outright -- and the
+# disabled route unpaused WITHOUT starting the clock. Every test sets
+# round_countdown to 0 so as not to be paced by it, so that route is the one
+# they all take: the round clock never started under test at all, and the whole
+# round-timer suite failed at once.
+#
+# The clock starts HERE and not in _do_game_setup() because setup pauses the
+# tree and waits on the handshake (up to SETUP_TIMEOUT_SECONDS), so a clock
+# started there would have its countdown eaten by the handshake -- and on a slow
+# peer the round could reach sudden death before anyone had moved. It equally
+# must not start before the count-in, or players lose three seconds of a round
+# they cannot yet move in.
+func _begin_play() -> void:
+	get_tree().set_pause(false)
 	_start_round_clock()
 
 func game_stop() -> void:

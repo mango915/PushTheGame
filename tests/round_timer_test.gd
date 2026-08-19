@@ -114,6 +114,12 @@ func _start_round(limit: float, sudden_death_duration: float = 20.0) -> void:
 	# them on every peer -- the same path the host's numbers take online.
 	_game.get_game_settings().round_time_limit = limit
 	_game.get_game_settings().sudden_death_duration = sudden_death_duration
+	# A round now counts in before it becomes playable, and the round clock
+	# deliberately does not start until it does -- otherwise players lose the
+	# first seconds of a round they cannot yet move in. This suite measures the
+	# clock, so it takes the count-in out rather than being paced by it, the
+	# same way every other round-driving test does.
+	_game.get_game_settings().round_countdown = 0.0
 
 	_main._on_TitleScreen_play_local()
 
