@@ -12,7 +12,7 @@
 #   scripts/check.sh parse        parse gate only
 #   scripts/check.sh boot         boot gate only
 #   scripts/check.sh play         local-play gate only
-#   scripts/check.sh state        OnlineMatch state gate only
+#   scripts/check.sh units        unit-style test scenes only
 #
 # Exit code 0 = no errors found. Non-zero = errors (printed to stdout).
 
@@ -176,29 +176,44 @@ gate_play() {
 }
 
 # ---------------------------------------------------------------------------
-# Gate 4: OnlineMatch state machine (no server required).
+# Gate 4: unit-style scenes under tests/ (no server required).
+#
+# Each tests/*Test.tscn boots, prints "[<tag>] OK:" / "[<tag>] FAIL:" lines and
+# a final "N assertion(s) failed", then quits. Drop in a new one and it is
+# picked up automatically.
 # ---------------------------------------------------------------------------
-gate_state() {
-	hr; echo "GATE 4/4: online match state"; hr
-	local log="$OUT_DIR/state.log"
-	"$GODOT" --headless --path . tests/OnlineStateTest.tscn >"$log" 2>&1
+gate_units() {
+	hr; echo "GATE 4/4: unit scenes"; hr
+	local any=0
 
-	grep -a '\[state\] OK' "$log" | sed 's/\x1b\[[0-9;]*m//g' | sed 's/^/  /'
+	for scene in tests/*Test.tscn; do
+		[ -e "$scene" ] || continue
+		any=1
+		local name log
+		name="$(basename "$scene" .tscn)"
+		log="$OUT_DIR/unit-$name.log"
+		"$GODOT" --headless --path . "$scene" >"$log" 2>&1
 
-	if ! grep -aq 'assertion(s) failed' "$log"; then
-		echo "WARNING: state test did not run to completion."
-		FAILED=$((FAILED + 1))
-		return
-	fi
+		echo "$name:"
+		sed 's/\x1b\[[0-9;]*m//g' "$log" | grep -aE '\] (OK|FAIL):' | sed 's/^/  /'
 
-	local errors
-	errors="$(filter_errors <"$log")"
-	if [ -n "$errors" ]; then
-		echo "STATE ERRORS:"
-		echo "$errors" | sed 's/\x1b\[[0-9;]*m//g'
-		FAILED=$((FAILED + 1))
-	else
-		echo "OK - online match state intact."
+		if ! grep -aq 'assertion(s) failed' "$log"; then
+			echo "  WARNING: $name did not run to completion."
+			FAILED=$((FAILED + 1))
+			continue
+		fi
+
+		local errors
+		errors="$(filter_errors <"$log")"
+		if [ -n "$errors" ]; then
+			echo "  ERRORS in $name:"
+			echo "$errors" | sed 's/\x1b\[[0-9;]*m//g' | sed 's/^/    /'
+			FAILED=$((FAILED + 1))
+		fi
+	done
+
+	if [ "$any" -eq 0 ]; then
+		echo "No test scenes found under tests/."
 	fi
 }
 
@@ -208,9 +223,9 @@ case "${1:-all}" in
 	parse) gate_parse ;;
 	boot)  gate_boot ;;
 	play)  gate_play ;;
-	state) gate_state ;;
-	all)   gate_parse; gate_boot; gate_play; gate_state ;;
-	*) echo "Unknown gate: $1 (use parse|boot|play|state|all)"; exit 2 ;;
+	units|state) gate_units ;;
+	all)   gate_parse; gate_boot; gate_play; gate_units ;;
+	*) echo "Unknown gate: $1 (use parse|boot|play|units|all)"; exit 2 ;;
 esac
 
 hr

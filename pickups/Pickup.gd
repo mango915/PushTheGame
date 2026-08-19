@@ -111,7 +111,11 @@ func _physics_process(delta: float) -> void:
 
 	# Sleep the object if it gets below certain linear/angular velocity thresholds.
 	if not GameState.online_play or is_multiplayer_authority():
-		if linear_velocity.length() < MIN_LINEAR_VELOCITY and angular_velocity < MIN_ANGULAR_VELOCITY:
+		# abs() matters: angular_velocity is signed, so a counter-clockwise spin
+		# would otherwise satisfy this threshold instantly and put the pickup to
+		# sleep while it is still spinning fast. Latent today only because every
+		# throw currently uses a positive torque.
+		if linear_velocity.length() < MIN_LINEAR_VELOCITY and abs(angular_velocity) < MIN_ANGULAR_VELOCITY:
 			if GameState.online_play:
 				rpc('_do_physics_finished', global_transform)
 			else:

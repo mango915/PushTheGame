@@ -109,6 +109,7 @@ func reload_map() -> void:
 	camera.limit_left = map_rect.position.x
 	camera.limit_top = map_rect.position.y
 	camera.limit_right = map_rect.position.x + map_rect.size.x
+	camera.limit_bottom = map_rect.position.y + map_rect.size.y
 
 func kill_player(peer_id) -> void:
 	var player_node = players_node.get_node_or_null(str(peer_id))

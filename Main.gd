@@ -42,7 +42,17 @@ func _on_TitleScreen_play_online() -> void:
 	# Show the game map in the background because we have nothing better.
 	game.reload_map()
 
-	ui_layer.show_screen("ConnectionScreen")
+	# Sign in silently with a device identity so playing online does not require
+	# creating an account. The email/password screen is only a fallback now.
+	ui_layer.hide_screen()
+	ui_layer.show_message("Signing in...")
+
+	if await Online.ensure_session():
+		ui_layer.hide_message()
+		ui_layer.show_screen("MatchScreen")
+	else:
+		ui_layer.show_message("Could not sign in - check the server settings")
+		ui_layer.show_screen("ConnectionScreen")
 
 func _on_UILayer_change_screen(name: String, _screen) -> void:
 	if name == 'TitleScreen':
@@ -173,9 +183,10 @@ func _on_game_over_signal(peer_id: int) -> void:
 		rpc("show_winner", players[peer_id], peer_id, players_score[peer_id], is_match)
 
 func update_wins_leaderboard() -> void:
-	if not Online.nakama_session or Online.nakama_session.is_expired():
-		# If our session has expired, then wait until a new session is setup.
-		await Online.session_connected
+	if not Online.has_valid_session():
+		# Re-authenticate rather than waiting on a session that may never come.
+		if not await Online.ensure_session():
+			return
 
 	var result = await Online.nakama_client.write_leaderboard_record_async(Online.nakama_session, LEADERBOARD_ID, 1)
 	if result.is_exception():
@@ -206,5 +217,7 @@ func update_wins_leaderboard() -> void:
 		restart_game()
 
 func _on_Music_song_finished(song) -> void:
-	if not music.current_song.playing:
+	# current_song is null until the first track starts, and play_random() can
+	# legitimately no-op when there is nothing else to switch to.
+	if music.current_song == null or not music.current_song.playing:
 		music.play_random()

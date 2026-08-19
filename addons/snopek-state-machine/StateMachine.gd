@@ -2,8 +2,13 @@
 extends Node
 
 @export_multiline var allowed_transitions : String = '' :
-	set(allowed_transitons):
-		set_allowed_transitions(allowed_transitions)
+	set(value):
+		if allowed_transitions == value:
+			return
+		# Assigning the backing variable from inside its own setter does not
+		# re-enter the setter, so this cannot recurse.
+		allowed_transitions = value
+		_parse_allowed_transitions()
 	get:
 		return allowed_transitions
 
@@ -23,19 +28,20 @@ signal state_changed (state, info)
 #	return ""
 
 func set_allowed_transitions(_allowed_transitions) -> void:
-	if allowed_transitions != _allowed_transitions:
-		allowed_transitions = _allowed_transitions
-		
-		allowed_transitions_parsed = {}
-		for line in allowed_transitions.split("\n", false):
-			var parts = line.split("->", false)
-			if parts.size() == 2:
-				var start = parts[0].strip_edges()
-				var end = parts[1].strip_edges()
-				
-				if !allowed_transitions_parsed.has(start):
-					allowed_transitions_parsed[start] = []
-				allowed_transitions_parsed[start].append(end)
+	# Goes through the property setter, which parses the new value.
+	allowed_transitions = _allowed_transitions
+
+func _parse_allowed_transitions() -> void:
+	allowed_transitions_parsed = {}
+	for line in allowed_transitions.split("\n", false):
+		var parts = line.split("->", false)
+		if parts.size() == 2:
+			var start = parts[0].strip_edges()
+			var end = parts[1].strip_edges()
+
+			if !allowed_transitions_parsed.has(start):
+				allowed_transitions_parsed[start] = []
+			allowed_transitions_parsed[start].append(end)
 
 func check_allowed_transition(start, end) -> bool:
 	if allowed_transitions_parsed.size() == 0:

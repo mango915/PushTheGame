@@ -15,14 +15,14 @@ func _show_screen(_info: Dictionary = {}) -> void:
 	join_match_id_control.text = ''
 
 func _on_match_button_pressed(mode) -> void:
-	# If our session has expired, show the ConnectionScreen again.
-	if Online.nakama_session == null or Online.nakama_session.is_expired():
-		ui_layer.show_screen("ConnectionScreen", { reconnect = true, next_screen = null })
-
-		# Wait to see if we get a new valid session.
-		await Online.session_changed
-		if Online.nakama_session == null:
+	# Re-authenticate silently if the session lapsed, rather than bouncing the
+	# player back to a login screen.
+	if not Online.has_valid_session():
+		ui_layer.show_message("Signing in...")
+		if not await Online.ensure_session():
+			ui_layer.show_message("Could not sign in")
 			return
+		ui_layer.hide_message()
 
 	# Connect socket to realtime Nakama API if not connected.
 	if not Online.is_nakama_socket_connected():

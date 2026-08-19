@@ -15,10 +15,12 @@ func clear_records() -> void:
 func _show_screen(info: Dictionary = {}) -> void:
 	ui_layer.hide_message()
 	
-	# If our session has expired, show the ConnectionScreen again.
-	if Online.nakama_session == null or Online.nakama_session.is_expired():
-		ui_layer.show_screen("ConnectionScreen", { reconnect = true, next_screen = "LeaderboardScreen" })
-		return
+	# Re-authenticate silently if the session lapsed.
+	if not Online.has_valid_session():
+		if not await Online.ensure_session():
+			ui_layer.show_message("Could not sign in")
+			ui_layer.show_screen("MatchScreen")
+			return
 	
 	var result: NakamaAPI.ApiLeaderboardRecordList = await Online.nakama_client.list_leaderboard_records_async(Online.nakama_session, 'push_the_game_wins')
 	if result.is_exception():

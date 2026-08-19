@@ -37,6 +37,9 @@ func use() -> void:
 		else:
 			rpc("_start_use")
 	else:
+		# Dry fire never goes through _start_use(), so assign the user here;
+		# otherwise _fire_projectile() dereferences a null use_by_player.
+		use_by_player = player
 		_fire_projectile()
 
 @rpc("any_peer", "call_local") func _start_use() -> void:
@@ -46,7 +49,7 @@ func use() -> void:
 	animation_player.play("Shoot")
 
 func _fire_projectile() -> void:
-	if GameState.online_play and not use_by_player.is_multiplayer_authority():
+	if GameState.online_play and (use_by_player == null or not use_by_player.is_multiplayer_authority()):
 		return
 
 	var projectile_name = Util.find_unique_name(original_parent, 'Projectile-')
@@ -76,11 +79,14 @@ func _fire_projectile() -> void:
 		sounds.play("Shoot")
 
 func _on_throw_finished() -> void:
-	if ammo <= 0:
-		if not GameState.online_play:
-			_disintegrate()
-		else:
-			rpc("_disintegrate")
+	# _do_physics_finished() is an @rpc(..., "call_local") method, so this
+	# already runs on every peer - only the authority may re-broadcast.
+	if not GameState.online_play or is_multiplayer_authority():
+		if ammo <= 0:
+			if not GameState.online_play:
+				_disintegrate()
+			else:
+				rpc("_disintegrate")
 
 @rpc("any_peer", "call_local") func _disintegrate() -> void:
 	var parent = get_parent();
