@@ -14,7 +14,8 @@ set -uo pipefail
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_DIR" || exit 1
 
-GODOT="${GODOT:-/Applications/Godot.app/Contents/MacOS/Godot}"
+GODOT="${GODOT:-/Applications/Godot 4.7.app/Contents/MacOS/Godot}"
+[ -x "$GODOT" ] || GODOT="/Applications/Godot.app/Contents/MacOS/Godot"
 [ -x "$GODOT" ] || GODOT="$(command -v godot)" || { echo "Godot not found"; exit 2; }
 
 if ! curl -s -o /dev/null http://127.0.0.1:7350/; then

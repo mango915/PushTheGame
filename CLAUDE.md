@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-"Push The Game" — a 2-4 player online arena brawler in **Godot 4.2** (GDScript), forked from Heroic Labs' `fishgame-godot` Nakama demo. Multiplayer runs over a [Nakama](https://heroiclabs.com/) server via the bundled `addons/com.heroiclabs.nakama` SDK.
+"Push The Game" — a 2-4 player online arena brawler in **Godot 4.7.2** (GDScript), forked from Heroic Labs' `fishgame-godot` Nakama demo. Multiplayer runs over a [Nakama](https://heroiclabs.com/) server via the bundled `addons/com.heroiclabs.nakama` SDK.
 
 **This was a sloppy Godot 3 → 4 port.** The dominant bug class is calls into APIs that no longer exist: they parse fine and only fail on the frame they finally run. A large batch has been fixed (see git log), but assume more are lurking in code paths nothing exercises yet. `export_presets.cfg` still carries Godot 3 platform names (`Mac OSX`, `HTML5`, `Linux/X11`) and needs regenerating from the editor before any build is trustworthy.
 
@@ -13,11 +13,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 There is no linter or package manager in this repo; the Godot editor is the toolchain and
 `scripts/check.sh` is the test runner (see "The regression harness" below).
 
-The engine is **Godot 4.2** specifically. Do not run this project through a newer Godot —
-opening it in 4.3+ migrates `project.godot` and the `.godot` cache in place. The commands
-below assume `godot` resolves to a 4.2.x binary on `PATH`; on macOS that is
-`/Applications/Godot.app/Contents/MacOS/Godot`, and `scripts/check.sh` honours a `GODOT`
-environment variable if it is somewhere else.
+The engine is **Godot 4.7.2** (`project.godot` declares `config/features = "4.7"`). The
+project was upgraded from 4.2.1 and the entire suite — 514 assertions plus both
+multiplayer runners — passed on 4.7.2 with **no code changes**; the only edit needed was
+a log-filter casing tweak in the harness, because 4.7 writes "N resources still in use at
+exit" where 4.2 wrote "Resources still in use at exit".
+
+`scripts/check.sh`, `scripts/nettest.sh` and `tests/lantest.sh` resolve Godot in this
+order: a `GODOT` environment variable, then `/Applications/Godot 4.7.app`, then
+`/Applications/Godot.app`, then `godot` on `PATH`. On this machine 4.7.2 is installed
+alongside the older 4.2.1 rather than replacing it, so a stale `/Applications/Godot.app`
+cannot silently run the suite on the wrong engine.
+
+`TileMap` is deprecated in favour of `TileMapLayer` from 4.3 onward but still present and
+instantiable in 4.7, which is why the maps still work untouched. That is a deprecation to
+retire deliberately, not something to discover when it is finally removed.
 
 ```bash
 # Regression harness -- run this before and after any change (see below)
@@ -54,7 +64,7 @@ Note `tests/net_multiplayer.tscn` is deliberately **not** named `*Test.tscn` —
 
 Test scenes follow one convention: print `[tag] OK:` / `[tag] FAIL:` lines, then `print("[tag] %d assertion(s) failed" % _failures)`, then `get_tree().quit(0)`. Drop a new `tests/FooTest.tscn` in and the harness picks it up. Assert on *invariants*, not just absence of crashes — most bugs here are silently wrong behavior, not errors.
 
-Godot 4.2 quirks the harness had to work around, all of which cost real time:
+Godot quirks the harness had to work around, all of which cost real time:
 - **There is no `--import` flag.** Passing one is silently ignored and the engine just runs the game forever.
 - **`--headless --editor` imports correctly but never exits** (`--quit`/`--quit-after` do not end the editor's import pass). The harness watches `.godot/imported` until it settles, then stops it.
 - **`--quit-after` counts render frames**, which in headless run far faster than the 60 Hz physics tick. Anything counting physics frames must bound itself.

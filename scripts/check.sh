@@ -21,14 +21,24 @@ set -uo pipefail
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_DIR" || exit 1
 
-GODOT="${GODOT:-/Applications/Godot.app/Contents/MacOS/Godot}"
-if [ ! -x "$GODOT" ]; then
-	if command -v godot >/dev/null 2>&1; then
-		GODOT="$(command -v godot)"
-	else
-		echo "ERROR: Godot not found. Set GODOT=/path/to/godot" >&2
-		exit 2
-	fi
+# The project targets Godot 4.7 (see project.godot config/features). Prefer a
+# 4.7 install, then fall back, so a machine that still has an older Godot as
+# /Applications/Godot.app does not silently run the suite on the wrong engine.
+if [ -z "${GODOT:-}" ]; then
+	for candidate in \
+		"/Applications/Godot 4.7.app/Contents/MacOS/Godot" \
+		"/Applications/Godot.app/Contents/MacOS/Godot" \
+		"$(command -v godot 2>/dev/null || true)"
+	do
+		if [ -n "$candidate" ] && [ -x "$candidate" ]; then
+			GODOT="$candidate"
+			break
+		fi
+	done
+fi
+if [ -z "${GODOT:-}" ] || [ ! -x "$GODOT" ]; then
+	echo "ERROR: Godot not found. Set GODOT=/path/to/godot" >&2
+	exit 2
 fi
 
 OUT_DIR="${TMPDIR:-/tmp}/ptg-check"
@@ -55,7 +65,7 @@ ERROR_PATTERN='\[[a-z-]+\] FAIL|SCRIPT ERROR|Nonexistent function|Invalid call|I
 # on those paths is the assertions around them ("hosting on a busy port fails
 # instead of half-working"), which still fail loudly if the behaviour regresses.
 #
-# "Resources still in use at exit" / "ObjectDB instances leaked at exit" are
+# "[Rr]esources still in use at exit" / "ObjectDB instances leaked at exit" are
 # emitted when the engine shuts down with objects still alive. Every scene in
 # tests/ ends by calling get_tree().quit() the moment its assertions are done,
 # which leaves that frame's deferred queue_free() calls unprocessed by
@@ -69,7 +79,7 @@ ERROR_PATTERN='\[[a-z-]+\] FAIL|SCRIPT ERROR|Nonexistent function|Invalid call|I
 # Tests should still free what they create (see tests/effect_zone_test.gd); a
 # real leak check would need to be its own test, asserting on
 # Performance.get_monitor(OBJECT_COUNT) rather than grepping shutdown chatter.
-IGNORE_PATTERN='ERROR: Cannot open file .*\.import|texture_create|No loader found|vulkan|Vulkan|OpenGL|GLES|audio driver|Dummy|CPU pipeline|Couldn'"'"'t create an ENet host|Resources still in use at exit|ObjectDB instances leaked at exit'
+IGNORE_PATTERN='ERROR: Cannot open file .*\.import|texture_create|No loader found|vulkan|Vulkan|OpenGL|GLES|audio driver|Dummy|CPU pipeline|Couldn'"'"'t create an ENet host|[Rr]esources still in use at exit|ObjectDB instances leaked at exit'
 
 FAILED=0
 

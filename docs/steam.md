@@ -37,31 +37,27 @@ in, which you do not want here.
 
 ### Do not grab the latest release
 
-**This project runs Godot 4.2.1.** The current GodotSteam line (v4.16 and up) targets
-Godot 4.4+, and a GDExtension built for 4.4+ **will not load on 4.3 or lower**. It
-fails quietly: `Engine.has_singleton("Steam")` stays false and the game carries on as
-if nothing were installed, which looks exactly like not having installed it at all.
+**This project runs Godot 4.7.2.** That is above the 4.4 floor for the current
+GodotSteam line, so use the **latest** GDExtension release.
 
-GDExtension releases that cover Godot 4.2:
-
-| Release | Godot versions |
+| GDExtension release | Godot support |
 | --- | --- |
-| **v4.14-gde** | **4.1 – 4.4  ← use this one** |
-| v4.13-gde | 4.1 – 4.4 |
-| v4.12-gde | 4.1 / 4.2 / 4.3 |
-| v4.11-gde | 4.1 / 4.2 / 4.3 |
-| v4.9-gde | 4.1.x / 4.2.x |
+| **v4.21-gde** | **4.4 and up  ← use this one** |
+| v4.20.1-gde | 4.4+ |
+| v4.16-gde and up | 4.4+ |
+| v4.14-gde and older | 4.1 – 4.4 (only needed on Godot 4.3 or lower) |
 
-Use **v4.14-gde**: it is the newest release that still supports 4.2.
+Take the newest `-gde` release. The `-gde` suffix matters: those are the
+GDExtension builds that drop into a stock Godot. The releases without it are a
+custom engine binary you would have to run instead of your normal editor.
 
 Note also that the GitHub mirror only lists the newer releases; the older ones are on
 Codeberg, linked above.
 
-> **About staying on 4.2.** The maintained GodotSteam line has moved on to Godot 4.4+,
-> so remaining on 4.2 means remaining on an older GodotSteam. Upgrading the project's
-> engine version later would let you track current releases. That is a trade-off, not
-> a recommendation: this project was already ported once from Godot 3 to Godot 4, and
-> that port left a long tail of runtime bugs. Another engine jump is not a small job.
+> **Version note.** The project was upgraded from Godot 4.2 to 4.7.2 specifically
+> so it could track the maintained GodotSteam line; the whole test suite passed on
+> 4.7.2 with no code changes. If you ever move back below 4.4 you would need
+> v4.14-gde or older instead.
 
 ### Where the files go
 
@@ -97,7 +93,7 @@ Both must print `true`.
   peer. `SteamMultiplayerPeer` lives in the **main** GodotSteam branches; it used to
   be a separate `-mp` repository (`v4.10-mp`, `v4.9-mp`), which is now **retired**,
   its functionality having been merged into the main branches from about v4.11
-  onward. v4.14-gde should include it — verify rather than assume.
+  onward. v4.21-gde should include it — verify rather than assume.
 
 The game checks both of these itself: `SteamMatch.is_available()` and
 `SteamMatch.has_multiplayer_peer()`. If the peer is missing you get lobbies and
@@ -212,7 +208,7 @@ Steam-facing logic that can be tested without Steam.
 
 ## Testing it for real (what nobody here has done)
 
-1. Install v4.14-gde as above and confirm the two `print()` checks.
+1. Install v4.21-gde as above and confirm the two `print()` checks.
 2. Put `480` in `steam_appid.txt` in the project root.
 3. Start the Steam client and sign in.
 4. Run the game. The Steam row on the match screen should say
