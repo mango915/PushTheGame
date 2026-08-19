@@ -40,5 +40,12 @@ text = "[b]Push The Game[/b]
 	[color=aqua]Jakob T. Rypdal[/color]
 
 [b]Font:[/b]
-	[color=yellow][url=https://datagoblin.itch.io/monogram]Monogram[/url][/color] by [color=aqua]Vinícius Menézio[/color]"
+	[color=yellow][url=https://datagoblin.itch.io/monogram]Monogram[/url][/color] by [color=aqua]Vinícius Menézio[/color]
+	[color=yellow][url=https://managore.itch.io/m5x7]m5x7[/url][/color] by [color=aqua]Daniel Linssen[/color] (CC0)
+
+[b]Additional art (CC0):[/b]
+	[color=yellow][url=https://kenney.nl/assets/scribble-platformer]Scribble Platformer[/url][/color] and [color=yellow][url=https://kenney.nl/assets/1-bit-pack]1-Bit Pack[/url][/color] by [color=aqua]Kenney[/color]
+
+[b]Title screen CRT effect:[/b]
+	after [color=yellow][url=https://godotshaders.com]pend00[/url][/color]'s VHS/CRT shader (MIT)"
 scroll_active = false

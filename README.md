@@ -246,6 +246,9 @@ by Vinícius Menézio. The same credits are shown in-game on the Credits screen.
 License
 -------
 
+Full per-asset provenance, including what was deliberately left out and why, is
+in [CREDITS.md](CREDITS.md).
+
 This project is licensed under the Apache 2.0 License (see [LICENSE.txt](LICENSE.txt)),
 with the following exceptions:
 
@@ -259,6 +262,10 @@ with the following exceptions:
   [CC BY-NC License](assets/LICENSE.txt) — art by Orlando Herrera a.k.a.
   [Pixel Frog](https://pixelfrog-store.itch.io/), music and sound by Jakob T.
   Rypdal.
+* Additional CC0 art from Kenney: [Scribble Platformer](https://kenney.nl/assets/scribble-platformer)
+  (`assets/doodle/sprites/`) and [1-Bit Pack](https://kenney.nl/assets/1-bit-pack)
+  (`assets/doodle/tilesets/`).
+* The [m5x7](https://managore.itch.io/m5x7) font by Daniel Linssen is CC0.
 * The title screen's CRT/VHS treatment (`assets/shaders/`) came from this
   project's own `compa_dev` branch, where it carried no attribution. The
   scanline/grille/aberration pass is the widely-shared "VHS and CRT monitor
