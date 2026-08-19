@@ -1,6 +1,8 @@
 image: barichello/godot-ci:4.2.1
 
-# NOTE: not validated against Godot 4 -- see .github/workflows/godot-export.yml.
+# NOTE: the export jobs here are NOT validated against Godot 4 -- export_presets.cfg
+# still names Godot 3 platforms. See .github/workflows/godot-export.yml, which also
+# carries a `check` job running scripts/check.sh; this file has no equivalent yet.
 
 variables:
   EXPORT_NAME: push-the-game
