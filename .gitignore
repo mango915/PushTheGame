@@ -6,4 +6,4 @@
 /webrtc/
 /nakama/data/
 /.godot/
-settings.json
+settings.json/tests/.godot/
