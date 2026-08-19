@@ -87,12 +87,19 @@ var resting := false
 # it ends up lying on its belly or its back rather than frozen mid-tumble.
 var _rest_rotation := 0.0
 
+# A dead body is squashed wider than it is tall. With no death frame to draw,
+# this is the whole difference between a corpse and a character standing still.
+const CORPSE_SQUASH := Vector2(1.22, 0.72)
+
 func _ready() -> void:
 	add_to_group(GROUP)
-	# Set here as well as in Corpse.tscn so the two frames cannot drift apart:
-	# the fin sheet lives exactly one row below the body on the same texture.
-	body_sprite.frame = DEAD_FRAME
-	fin_sprite.frame = DEAD_FRAME + FIN_FRAME_OFFSET
+	# The characters are a single sprite each now -- there is no dead FRAME to
+	# select, and no fin. What made a corpse read as a corpse was the pose, so
+	# that is what it uses: squashed flat, as if it had hit the ground hard.
+	if fin_sprite != null:
+		fin_sprite.visible = false
+	if body_sprite != null:
+		body_sprite.scale = CORPSE_SQUASH
 	_enforce_cap()
 
 # Called by Player._spawn_corpse() immediately after add_child().
@@ -106,9 +113,7 @@ func setup(index: int, inherited: Vector2, impulse: Vector2, flipped: bool) -> v
 	var sheet: Texture2D = load(Characters.TEXTURES[character_index])
 	if sheet != null:
 		body_sprite.texture = sheet
-		fin_sprite.texture = sheet
 	body_sprite.flip_h = flipped
-	fin_sprite.flip_h = flipped
 
 	linear_velocity = inherited + impulse
 	angular_velocity = clamp(

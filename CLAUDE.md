@@ -10,6 +10,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 `assets/music/FISHSTICKS.ogg` and the `Fishsticks` node in `Main.tscn` are a **track title by the composer**, not a leftover reference to the old game. Leave them alone.
 
+**The art is Kenney's Scribble Platformer** (`assets/doodle/`), not the pixel art
+the project started with. Two consequences that are easy to trip over:
+
+- **The characters and weapons have NO animation frames** — one sprite each,
+  where the whales had 154. Every animation in `Player.tscn` kept its name and
+  length (`get_current_animation()` and `animation_finished` are both still used)
+  but has no `BodySprite:frame` track. Motion is squash and stretch on the
+  transform (`Player._update_squash`), applied to `BodySprite` rather than the
+  player, because the player's own `scale.x` carries `flip_h`. Adding a frame
+  track back, or a static `frame = N`, means "Index p_frame is out of bounds" on
+  every keyframe — that was 157 errors in one round of local play.
+- **The arena atlas is generated**, by `tools/make_scribble_atlas.py`, into the
+  16px cell layout `tools/build_maps.gd` already addresses. Rewriting that PNG is
+  not enough on its own: Godot serves textures from its import cache, so
+  rebuilding the maps straight afterwards silently uses the PREVIOUS art and
+  reports zero errors. Let the editor re-import in between.
+
 **This was a sloppy Godot 3 → 4 port.** The dominant bug class is calls into APIs that no longer exist: they parse fine and only fail on the frame they finally run. A large batch has been fixed (see git log), but assume more are lurking in code paths nothing exercises yet. `export_presets.cfg` had Godot 3 platform names; the platform/preset names are now the Godot 4 ones (`Windows Desktop`, `Linux`, `macOS`, `Web` — verified against 4.7.2 by loading each preset), but the per-preset **option keys** in that file are still Godot 3 vintage, so regenerate it from the editor's Export dialog before any build is trustworthy. `project.godot` likewise still carries dead Godot 3 sections (`[gdnative] singletons`, the `[importer_defaults] texture` block, and `quality/driver/driver_name="GLES2"` / `quality/2d/use_pixel_snap` / `vram_compression/import_etc` under `[rendering]`); Godot 4 ignores them.
 
 Several scenes are also still saved in the Godot 3 text format (`format=2`): `main/screens/{LeaderboardRecord,LeaderboardScreen,MatchScreen,PeerStatus}.tscn`. They load, but Godot-3-only properties in them are silently dropped — that is exactly how the Credits screen ended up rendering an unstyled fallback for months (see below).
