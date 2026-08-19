@@ -62,12 +62,52 @@ Controls
 
 #### Keyboard: ####
 
-| Action               | Player 1                   | Player 2   |
-| -------------------- | -------------------------- | ---------- |
-| move                 | **W**, **A**, **S**, **D** | Arrow keys |
-| pickup/throw weapon  | **C**                      | **L**      |
-| use weapon           | **V**                      | **;**      |
-| blop                 | **E**                      | **P**      |
+Two to four players share one machine. Pick the number on the title screen next
+to **LOCAL** — it tells you which input each seat expects and says so plainly
+when a seat needs a pad that is not plugged in.
+
+**Players 3 and 4 are gamepad only.** There are no keyboard bindings for them:
+four players on one keyboard would need 8–12 simultaneous keys, which most
+keyboards cannot register, and the dropped inputs would look like a game bug.
+
+| Action               | Player 1                   | Player 2   | Players 3 / 4 |
+| -------------------- | -------------------------- | ---------- | ------------- |
+| move                 | **W**, **A**, **S**, **D** | Arrow keys | D-pad / stick |
+| pickup/throw weapon  | **C**                      | **L**      | Y / Triangle  |
+| use weapon           | **V**                      | **;**      | X / Square    |
+| blop                 | **E**                      | **P**      | B / Circle    |
+
+### Pausing ###
+
+**Escape**, or **Start on any pad** — on a four-player couch the person who needs
+to stop the game is not necessarily holding controller 1. Online play shows the
+menu but does **not** pause: the other players keep going regardless, and halting
+your own simulation while their input keeps arriving would desync you.
+
+### During a round ###
+
+Rounds count in from three before anyone can move, so everyone can see the arena
+and which character is theirs. A scoreboard along the bottom shows every
+player's portrait, name and round wins out of the target; an eliminated player
+dims rather than disappearing, so the row does not reflow mid-fight.
+
+### The arenas ###
+
+Three, drawn from a shuffled bag so every arena gets an outing per cycle without
+the order being guessable:
+
+- **Terrace** — wide and tiered, with a central stack and a pit in the floor. A
+  launch pad is the only way to the crow's nest.
+- **The Well** — tall and enclosed: two towers of staggered ledges and a central
+  shaft of one-way platforms you can punch straight up through.
+- **The Maw** — read horizontally instead. The middle of the floor is missing,
+  and one droppable stepping stone hangs in the hole. Everything worth having is
+  on the iced island above it, and the shotgun's knockback is what puts people in.
+
+`tools/build_maps.gd` is the source of truth for all three: it generates them
+from a code layout against a documented movement budget, and
+`tests/MapReachabilityTest.tscn` then proves every surface is reachable and
+escapable before a build is trusted.
 
 Playing the game from source
 ----------------------------

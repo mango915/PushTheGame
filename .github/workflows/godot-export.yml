@@ -15,18 +15,35 @@ on:
       - 'v*'
 
 env:
-  GODOT_VERSION: 4.2.1
+  GODOT_VERSION: 4.7.2
   EXPORT_NAME: push-the-game
 
 jobs:
+  check:
+    name: Regression harness
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.7.2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Run the gates
+        # parse, boot, local play, and every tests/*Test.tscn. No export
+        # templates and no server needed, so this one actually works -- unlike
+        # the export jobs below, whose presets are still unregenerated.
+        run: ./scripts/check.sh
+
   export-windows:
+    needs: check
     name: Windows Export
     runs-on: ubuntu-latest
     container:
-      image: barichello/godot-ci:4.2.1
+      image: barichello/godot-ci:4.7.2
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           lfs: true
       - name: Setup
@@ -46,19 +63,20 @@ jobs:
       - name: Tar files
         run: tar -cvf ./build/$EXPORT_NAME-windows.tar ./build/windows/
       - name: Upload Artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.EXPORT_NAME }}-windows
           path: build/${{ env.EXPORT_NAME }}-windows.tar
 
   export-linux:
+    needs: check
     name: Linux Export
     runs-on: ubuntu-latest
     container:
-      image: barichello/godot-ci:4.2.1
+      image: barichello/godot-ci:4.7.2
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           lfs: true
       - name: Setup
@@ -78,19 +96,20 @@ jobs:
       - name: Tar files
         run: tar -cvf ./build/$EXPORT_NAME-linux.tar ./build/linux/
       - name: Upload Artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.EXPORT_NAME }}-linux
           path: build/${{ env.EXPORT_NAME }}-linux.tar
 
   export-macosx:
+    needs: check
     name: MacOS Export
     runs-on: ubuntu-latest
     container:
-      image: barichello/godot-ci:4.2.1
+      image: barichello/godot-ci:4.7.2
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           lfs: true
       - name: Setup
@@ -108,7 +127,7 @@ jobs:
           mkdir -v -p build/macosx
           godot -v --headless --export-release "macOS" ./build/macosx/$EXPORT_NAME.zip
       - name: Upload Artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.EXPORT_NAME }}-macosx
           path: build/macosx
@@ -122,50 +141,20 @@ jobs:
       - export-linux
       - export-macosx
     steps:
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Push The Game ${{ github.ref }}
-          draft: true
-          prerelease: false
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           path: ./artifacts
       - name: Prepare files
         run: |
-          for x in ./artifacts/*/*.tar; do tar -xvf $x; done
-          (cd ./build && for x in *; do mv $x $EXPORT_NAME-$x; done)
-          (cd ./build && for x in *; do zip $x.zip $(find $x); done)
-      - name: Upload Windows build to release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          mkdir -v -p ./release
+          for x in ./artifacts/*/*.tar; do tar -xvf "$x"; done
+          (cd ./build && for x in *; do zip -r "../release/$EXPORT_NAME-$x.zip" "$x"; done)
+          cp ./artifacts/${EXPORT_NAME}-macosx/*.zip "./release/$EXPORT_NAME-macosx.zip" || true
+          ls -la ./release
+      - name: Create release
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/${{ env.EXPORT_NAME }}-windows.zip
-          asset_name: ${{ env.EXPORT_NAME }}-windows.zip
-          asset_content_type: application/zip
-      - name: Upload Linux build to release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/${{ env.EXPORT_NAME }}-linux.zip
-          asset_name: ${{ env.EXPORT_NAME }}-linux.zip
-          asset_content_type: application/zip
-      - name: Upload MacOS build to release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/${{ env.EXPORT_NAME }}-macosx/${{ env.EXPORT_NAME }}.zip
-          asset_name: ${{ env.EXPORT_NAME }}-macosx.zip
-          asset_content_type: application/zip
-
+          name: Push The Game ${{ github.ref_name }}
+          draft: true
+          files: ./release/*.zip
