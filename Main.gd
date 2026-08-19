@@ -102,7 +102,12 @@ func _on_OnlineMatch_player_left(player) -> void:
 	players.erase(player.peer_id)
 	players_ready.erase(player.peer_id)
 
-	if players.size() < 2:
+	# `players` is only populated when a round starts, so while sitting in the
+	# lobby it is empty and this test would fire on ANY departure -- tearing
+	# down the match and kicking the host out of their own room the moment a
+	# friend backed out. Only abandon a match that is actually in progress; in
+	# the lobby, ReadyScreen already disables Ready via match_not_ready.
+	if game.game_started and players.size() < 2:
 		OnlineMatch.leave()
 		_on_OnlineMatch_error(player.username + " has left - not enough players!")
 	else:
@@ -178,7 +183,7 @@ func _on_game_over_signal(peer_id: int) -> void:
 		else:
 			players_score[peer_id] += 1
 
-		var is_match: bool = players_score[peer_id] >= 5
+		var is_match: bool = players_score[peer_id] >= game.get_game_settings().rounds_to_win
 
 		rpc("show_winner", players[peer_id], peer_id, players_score[peer_id], is_match)
 

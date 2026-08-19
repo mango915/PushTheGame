@@ -3,6 +3,9 @@ extends Pickup
 var DisintegrateEffect: PackedScene = preload("res://pickups/DisintegrateEffect.tscn")
 var SparksEffect: PackedScene = preload("res://pickups/SparksEffect.tscn")
 
+# Fallback tuning, used verbatim when the scene has no `weapon_data` assigned.
+# When one is assigned (see resources/gun_weapon.tres) these are overwritten in
+# _apply_weapon_data() before anything reads them.
 @export var projectile_scene: PackedScene = preload("res://pickups/Projectile.tscn")
 @export var projectile_velocity : float = 1200.0
 @export var projectile_range : float = 400.0
@@ -17,12 +20,34 @@ var SparksEffect: PackedScene = preload("res://pickups/SparksEffect.tscn")
 @onready var sounds := $Sounds
 
 var allow_shoot := true
-@onready var ammo := max_ammo
+
+# Filled from max_ammo in _ready(), i.e. after weapon_data has been applied --
+# an @onready initialiser would run too early and capture the fallback value.
+var ammo := 0
 
 var use_by_player: Node = null
 
 func _ready() -> void:
+	# Applies weapon_data (Pickup._ready -> _apply_weapon_data below).
+	super._ready()
+
+	ammo = max_ammo
 	cooldown_timer.wait_time = cooldown_time
+
+func _apply_weapon_data() -> void:
+	super._apply_weapon_data()
+
+	if weapon_data == null:
+		return
+
+	# A resource that leaves projectile_scene empty keeps this gun's own scene.
+	if weapon_data.projectile_scene != null:
+		projectile_scene = weapon_data.projectile_scene
+
+	projectile_velocity = weapon_data.projectile_velocity
+	projectile_range = weapon_data.projectile_range
+	cooldown_time = weapon_data.cooldown_time
+	max_ammo = weapon_data.max_ammo
 
 func use() -> void:
 	if not allow_shoot:

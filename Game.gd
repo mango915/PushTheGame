@@ -4,6 +4,12 @@ var Player = preload("res://actors/Player.tscn")
 
 @export var map_scene: PackedScene = preload("res://maps/Map1.tscn")
 
+# Movement feel and match rules. The host's copy is the one that counts: it is
+# shipped to every peer in _do_game_setup() and rebuilt there before any player
+# is spawned. Remote players are simulated locally from their replayed input
+# buffer, so peers running different numbers drift apart with no error anywhere.
+@export var game_settings: GameSettings = preload("res://resources/default_game_settings.tres")
+
 @onready var map: Node2D = $Map
 @onready var players_node := $Players
 @onready var camera := $Camera2D
@@ -19,21 +25,41 @@ signal player_dead (peer_id)
 signal game_over_signal (peer_id)
 
 func game_start(players: Dictionary) -> void:
+	# Resources do not serialize over RPC safely, so the settings travel as a
+	# plain Dictionary and are rebuilt on each peer.
+	var settings_data: Dictionary = get_game_settings().to_dict()
+
 	if GameState.online_play:
-		rpc('_do_game_setup', players)
+		rpc('_do_game_setup', players, settings_data)
 	else:
-		_do_game_setup(players)
+		_do_game_setup(players, settings_data)
+
+func get_game_settings() -> GameSettings:
+	if game_settings == null:
+		game_settings = GameSettings.new()
+	return game_settings
 
 # Initializes the game so that it is ready to really start.
-@rpc("any_peer", "call_local") func _do_game_setup(players: Dictionary) -> void:
+@rpc("any_peer", "call_local") func _do_game_setup(players: Dictionary, settings_data: Dictionary = {}) -> void:
 	get_tree().set_pause(true)
+
+	# Adopt the host's tuning before spawning anyone. from_dict() builds a fresh
+	# resource rather than mutating the preloaded default, which the resource
+	# cache would otherwise keep mutated for the rest of the process.
+	if not settings_data.is_empty():
+		game_settings = GameSettings.from_dict(settings_data)
 
 	if game_started:
 		game_stop()
 
 	game_started = true
 	game_over = false
-	players_alive = players
+	# duplicate(): in local play, and on the host in online play (this is a
+	# call_local RPC), `players` is the very dictionary Main.gd owns. Without
+	# the copy, players_alive.erase() on a death also silently erases from
+	# Main.players. It self-heals today only because Main rebuilds that dict
+	# each round.
+	players_alive = players.duplicate()
 
 	reload_map()
 
@@ -41,6 +67,9 @@ func game_start(players: Dictionary) -> void:
 	for peer_id in players:
 		var other_player = Player.instantiate()
 		other_player.name = str(peer_id)
+		# Assigned before the node enters the tree so its first physics frame
+		# already uses the host's tuning.
+		other_player.settings = game_settings
 		players_node.add_child(other_player)
 
 		other_player.set_multiplayer_authority(peer_id)

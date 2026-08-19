@@ -6,13 +6,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 "Push The Game" — a 2-4 player online arena brawler in **Godot 4.2** (GDScript), forked from Heroic Labs' `fishgame-godot` Nakama demo. Multiplayer runs over a [Nakama](https://heroiclabs.com/) server via the bundled `addons/com.heroiclabs.nakama` SDK.
 
-**Version drift to be aware of:** `project.godot` declares `config/features=("4.2")` and all scripts use Godot 4 syntax (`@onready`, `@export`, `@rpc`, `CharacterBody2D`, `Callable`), but `README.md`, `.github/workflows/godot-export.yml`, and `.gitlab-ci.yml` still reference Godot 3.2.3 and the old "fishgame" naming. The CI export jobs are stale — they will not build this project as-is. Trust `project.godot`, not the README.
+**This was a sloppy Godot 3 → 4 port.** The dominant bug class is calls into APIs that no longer exist: they parse fine and only fail on the frame they finally run. A large batch has been fixed (see git log), but assume more are lurking in code paths nothing exercises yet. `export_presets.cfg` still carries Godot 3 platform names (`Mac OSX`, `HTML5`, `Linux/X11`) and needs regenerating from the editor before any build is trustworthy.
 
 ## Commands
 
 There is no test suite, linter, or package manager in this repo; the Godot editor is the toolchain.
 
 ```bash
+# Regression harness -- run this before and after any change (see below)
+./scripts/check.sh
+
 # Open in the editor (macOS)
 /Applications/Godot.app/Contents/MacOS/Godot --path .
 
@@ -27,6 +30,18 @@ docker-compose up -d      # Nakama on :7350, console on :7351
 ```
 
 Two-player local play needs no server: Title screen → "Play Local" wires `player1_*` / `player2_*` input actions to two players in the same window.
+
+### The regression harness
+
+`scripts/check.sh` is the only safety net — there is no unit-test framework. Four gates: **parse** every non-addon script, **boot** `Main.tscn` headless, **play** a full local 2-player round (including a forced death and round end), and **units**, which auto-discovers `tests/*Test.tscn`.
+
+Test scenes follow one convention: print `[tag] OK:` / `[tag] FAIL:` lines, then `print("[tag] %d assertion(s) failed" % _failures)`, then `get_tree().quit(0)`. Drop a new `tests/FooTest.tscn` in and the harness picks it up. Assert on *invariants*, not just absence of crashes — most bugs here are silently wrong behavior, not errors.
+
+Three Godot 4.2 quirks the harness had to work around, all of which cost real time:
+- **There is no `--import` flag.** Passing one is silently ignored and the engine just runs the game forever.
+- **`--headless --editor` imports correctly but never exits** (`--quit`/`--quit-after` do not end the editor's import pass). The harness watches `.godot/imported` until it settles, then stops it.
+- **`--quit-after` counts render frames**, which in headless run far faster than the 60 Hz physics tick. Anything counting physics frames must bound itself.
+- **`--check-only` parses each script in isolation with no autoloads registered**, so every reference to `GameState`/`Online`/`OnlineMatch`/`Util` reports "Identifier not found". The parse gate filters those; it only meaningfully catches syntax errors.
 
 ## Server configuration
 
@@ -53,6 +68,11 @@ The leaderboard module `nakama/data/modules/fish_game.lua` is mounted into the c
 - **`Camera.gd`** — recomputes position and zoom every physics frame to frame all live players; limits are set from `Map.get_map_rect()` on map reload.
 - **`maps/Map.gd`** — maps expose `PlayerStartPositions/Player1..4` markers and broadcast `map_start`/`map_stop` to the `map_object` group. `Game.map_scene` selects the map (`Map1.tscn` by default).
 
+### Getting online
+Playing online needs no account. `Online.authenticate_device()` signs in silently with a stable per-installation id (persisted in `user://profile.cfg` alongside the display name); email/password remains only as a fallback in `ConnectionScreen`. Server host/port live in `user://settings.cfg` and override the defaults at the top of `Online.gd`, so pointing at a different Nakama is a settings change, not a code change.
+
+Hosting uses **named matches**: `NakamaMultiplayerBridge.join_named_match(code)` is create-or-join, so `OnlineMatch.host_room()` and `join_room()` are the same call and the first player in becomes host. That is where the four-character room code comes from. The sharp edge: a generated code that collides with a live match would silently drop the would-be host into a stranger's game, so `MatchScreen` checks it actually came out as peer 1 and retries with a fresh code otherwise.
+
 ### Player: state machine + networking
 `actors/Player.gd` (`CharacterBody2D`) delegates behaviour to the `snopek-state-machine` addon: `$StateMachine` with child `State` nodes in `actors/player-states/` (Idle, Move, Jump, Fall, Duck, Slide, Hurt, Dead). States access the player as `host = $"../.."`, transition with `get_parent().change_state("Name", info_dict)`, and inherit from each other (`Jump.gd extends Move.gd`, `Move.gd extends Idle.gd`) — shared movement logic lives up that chain. The `StateMachine` node's `_physics_process` is **disabled** and driven manually from `Player._physics_process` so input → state → movement ordering is deterministic.
 
@@ -75,6 +95,16 @@ else:
 ```
 
 When adding gameplay features, keep both branches working — local 2-player mode has no multiplayer peer at all, so an unguarded `rpc()` breaks it.
+
+## Tuning, weapons and rules are data
+
+Two `Resource` types hold what used to be magic numbers. Change these rather than editing scripts:
+
+- **`resources/GameSettings.gd`** (+ `resources/default_game_settings.tres`) — movement and throw tuning (speed, acceleration, friction, jump, gravity, terminal velocity, knockback, throw vectors) plus match rules `rounds_to_win` and `sync_delay`. `Player.gd` keeps getter-only properties under the original names (`host.speed`, `host.friction`, …) so `actors/player-states/*.gd` needs no changes. `gravity = 0` is a sentinel meaning "use `physics/2d/default_gravity`".
+  **The host's settings are replicated to every peer** in `Game._do_game_setup` (serialized via `to_dict()`, rebuilt with `from_dict()`) before any player spawns. This is load-bearing, not a nicety: remote players are simulated locally from a replayed input buffer, so peers running different numbers desync silently, with no error anywhere. Add a field to `GameSettings.FIELDS` and it replicates automatically.
+- **`resources/WeaponData.gd`** (+ `gun_weapon.tres`, `sword_weapon.tres`) — per-weapon values (projectile scene/velocity/range, cooldown, ammo, carry position, bounce). `Pickup._apply_weapon_data()` copies them in `_ready`; subclasses override it and call `super()` first. A weapon with no resource assigned keeps its script defaults.
+
+Adding a weapon: make a `.tres` from `WeaponData`, duplicate a pickup scene, point it at the resource, and override `use()`.
 
 ## Conventions
 

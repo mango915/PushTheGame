@@ -60,8 +60,29 @@ filter_errors() {
 #     (--quit / --quit-after do not terminate the editor's import pass).
 # So: run the editor, watch .godot/imported until the file count stops growing,
 # then stop it.
+# A new `class_name` is not usable until Godot regenerates
+# .godot/global_script_class_cache.cfg. Assets alone being imported is not
+# enough -- scripts referencing the new type fail with "Could not find type X"
+# until the editor runs again. So check the cache actually knows about every
+# class_name declared in the project.
+class_cache_is_current() {
+	local cache="$PROJECT_DIR/.godot/global_script_class_cache.cfg"
+	[ -f "$cache" ] || return 1
+
+	while IFS= read -r declared; do
+		grep -q "\"class\": &\"$declared\"" "$cache" 2>/dev/null || return 1
+	done < <(grep -rhoE '^class_name[[:space:]]+[A-Za-z_][A-Za-z0-9_]*' \
+		--include='*.gd' "$PROJECT_DIR" \
+		--exclude-dir=addons --exclude-dir=.godot 2>/dev/null \
+		| awk '{print $2}' | sort -u)
+
+	return 0
+}
+
 ensure_imported() {
-	if [ -d "$PROJECT_DIR/.godot/imported" ] && [ "$(ls "$PROJECT_DIR/.godot/imported" | wc -l)" -gt 0 ]; then
+	if [ -d "$PROJECT_DIR/.godot/imported" ] \
+		&& [ "$(ls "$PROJECT_DIR/.godot/imported" | wc -l)" -gt 0 ] \
+		&& class_cache_is_current; then
 		return
 	fi
 

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="GameSettings" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/GameSettings.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+speed = 350.0
+acceleration = 2000.0
+friction = 1500.0
+sliding_friction = 400.0
+jump_speed = 700.0
+glide_speed = -100.0
+terminal_velocity = 1000.0
+push_back_speed = 50.0
+throw_velocity = 300.0
+throw_upward_velocity = 500.0
+throw_vector_mix = 0.5
+throw_vector_max_length = 700.0
+throw_torque = 10.0
+rounds_to_win = 5
+sync_delay = 3
+gravity = 0.0

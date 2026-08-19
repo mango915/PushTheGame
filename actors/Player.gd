@@ -19,22 +19,85 @@ var skin_resources = [
 ]
 
 @export var player_skin : PlayerSkin = PlayerSkin.BLUE: set = set_player_skin
-@export var speed : float = 350.0
-@export var acceleration : float = 2000.0
-@export var friction : float = 1500.0
-@export var sliding_friction : float = 400.0
-@export var jump_speed : float = 700.0
-@export var glide_speed : float = -100.0
-@export var terminal_velocity : float = 1000.0
-@export var push_back_speed : float = 50.0
-@export var throw_velocity : float = 300.0
-@export var throw_upward_velocity : float = 500.0
-@export var throw_vector_mix : float = 0.5
-@export var throw_vector_max_length : float = 700.0
-@export var throw_torque : float = 10.0
+
+# All movement/throw tuning lives in this resource (res://resources/GameSettings.gd).
+# Game.gd assigns the host's copy to every player on every peer, because remote
+# players are simulated locally from their replayed input buffer -- differing
+# numbers between peers desync the match with no error anywhere.
+@export var settings: GameSettings
+
 @export var invincible : bool = false
 @export var player_controlled : bool = false
 @export var input_prefix : String = "player1_"
+
+# The settings actually in force. A Player instantiated without one (a test, or
+# a scene dropped in by hand) falls back to the shipped defaults rather than
+# reading null.
+func get_settings() -> GameSettings:
+	if settings == null:
+		settings = GameSettings.new()
+	return settings
+
+# Read-only views onto the settings resource. These keep the property NAMES the
+# player-state scripts already use (host.speed, host.friction, host.throw_*, ...)
+# so actors/player-states/*.gd needs no changes.
+var speed: float:
+	get:
+		return get_settings().speed
+
+var acceleration: float:
+	get:
+		return get_settings().acceleration
+
+var friction: float:
+	get:
+		return get_settings().friction
+
+var sliding_friction: float:
+	get:
+		return get_settings().sliding_friction
+
+var jump_speed: float:
+	get:
+		return get_settings().jump_speed
+
+var glide_speed: float:
+	get:
+		return get_settings().glide_speed
+
+var terminal_velocity: float:
+	get:
+		return get_settings().terminal_velocity
+
+var push_back_speed: float:
+	get:
+		return get_settings().push_back_speed
+
+var throw_velocity: float:
+	get:
+		return get_settings().throw_velocity
+
+var throw_upward_velocity: float:
+	get:
+		return get_settings().throw_upward_velocity
+
+var throw_vector_mix: float:
+	get:
+		return get_settings().throw_vector_mix
+
+var throw_vector_max_length: float:
+	get:
+		return get_settings().throw_vector_max_length
+
+var throw_torque: float:
+	get:
+		return get_settings().throw_torque
+
+# 0 in the settings resource means "use the project's default gravity", which is
+# what this used to read directly.
+var gravity: float:
+	get:
+		return get_settings().get_gravity()
 
 signal player_dead ()
 
@@ -53,8 +116,6 @@ signal player_dead ()
 @onready var ducking_collision_shape := $DuckingCollisionShape
 @onready var sliding_collision_shape := $SlidingCollisionShape
 
-@onready var gravity: float = float(ProjectSettings.get_setting("physics/2d/default_gravity"))
-
 var flip_h := false: set = set_flip_h
 var show_gliding := false: set = set_show_gliding
 var show_sliding := false: set = set_show_sliding
@@ -69,7 +130,6 @@ var current_pickup_position: Marker2D
 const PlayerActions := ['left', 'right', 'down', 'jump', 'grab', 'use', 'blop']
 var input_buffer
 
-const SYNC_DELAY := 3
 var sync_forced := false
 var sync_counter: int = 0
 var sync_state_info := {}
@@ -271,7 +331,7 @@ func _physics_process(delta: float) -> void:
 		if player_controlled:
 			# Sync every so many physics frames.
 			sync_counter += 1
-			if sync_forced or input_buffer_changed or sync_counter >= SYNC_DELAY:
+			if sync_forced or input_buffer_changed or sync_counter >= get_settings().sync_delay:
 				sync_counter = 0
 				sync_forced = false
 				rpc("update_remote_player", input_buffer.buffer, state_machine.current_state.name, sync_state_info, global_position, vector, body_sprite.frame, flip_h, show_gliding, show_sliding, pass_through_one_way_platforms)

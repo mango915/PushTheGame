@@ -1,5 +1,10 @@
 extends Pickup
 
+# The sword has no numbers of its own: everything tunable about it (where the
+# player carries it, how much a thrown sword bounces) lives in the shared block
+# of its WeaponData, which Pickup._apply_weapon_data() applies. See
+# resources/sword_weapon.tres.
+
 @onready var animation_player = $AnimationPlayer
 @onready var sounds = $Sounds
 

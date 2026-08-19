@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/WeaponData.gd" id="1"]
+[ext_resource type="PackedScene" path="res://pickups/Projectile.tscn" id="2"]
+
+[resource]
+script = ExtResource("1")
+weapon_name = "Gun"
+pickup_position = 0
+bounce = 0.1
+projectile_scene = ExtResource("2")
+projectile_velocity = 1200.0
+projectile_range = 400.0
+cooldown_time = 0.3
+max_ammo = 3

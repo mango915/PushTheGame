@@ -14,6 +14,11 @@ enum PickupPosition {
 
 @export var pickup_position : PickupPosition = PickupPosition.FRONT
 
+# Optional per-weapon tuning. When left unassigned every value below keeps the
+# default declared in this script (or in the subclass), so a weapon scene built
+# before WeaponData existed behaves exactly as it always did.
+@export var weapon_data: WeaponData = null
+
 enum PickupState {
 	FREE = 0,
 	PICKED_UP,
@@ -38,7 +43,17 @@ var bounce := 0.1
 signal picked_up()
 
 func _ready():
-	pass
+	_apply_weapon_data()
+
+# Copy the shared tunables out of weapon_data. Subclasses override this to pull
+# their own fields and must call super() first. Called from _ready(), so a
+# subclass that defines its own _ready() has to call super._ready().
+func _apply_weapon_data() -> void:
+	if weapon_data == null:
+		return
+
+	pickup_position = weapon_data.pickup_position as PickupPosition
+	bounce = weapon_data.bounce
 
 func can_pickup() -> bool:
 	return pickup_state == PickupState.FREE or pickup_state == PickupState.THROWN
