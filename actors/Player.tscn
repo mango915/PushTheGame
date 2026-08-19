@@ -1,6 +1,6 @@
 [gd_scene load_steps=46 format=3 uid="uid://d0hkj3kxla3cu"]
 
-[ext_resource type="Texture2D" uid="uid://24j34m2e7nqe" path="res://assets/sprites/whale_orange.png" id="1"]
+[ext_resource type="Texture2D" uid="uid://24j34m2e7nqe" path="res://assets/doodle/sprites/char_butter.png" id="1"]
 [ext_resource type="Script" path="res://actors/player-states/Hurt.gd" id="2"]
 [ext_resource type="Script" path="res://actors/player-states/Dead.gd" id="3"]
 [ext_resource type="Script" path="res://actors/player-states/Duck.gd" id="4"]
@@ -42,25 +42,14 @@ size = Vector2(38, 16)
 [sub_resource type="Animation" id="6"]
 resource_name = "Blop"
 length = 0.5
-tracks/0/type = "value"
+
+tracks/0/type = "method"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("BodySprite:frame")
+tracks/0/path = NodePath(".")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
-"update": 1,
-"values": [140, 141, 142, 143, 144]
-}
-tracks/1/type = "method"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath(".")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
 "times": PackedFloat32Array(0.2),
 "transitions": PackedFloat32Array(1),
 "values": [{
@@ -68,203 +57,70 @@ tracks/1/keys = {
 "method": &"_play_blop_sound"
 }]
 }
-
 [sub_resource type="Animation" id="7"]
 length = 0.4
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("BodySprite:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 1,
-"values": [98, 99, 100, 101]
-}
 
 [sub_resource type="Animation" id="8"]
 resource_name = "Duck"
 length = 0.2
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("BodySprite:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [112, 113]
-}
 
 [sub_resource type="Animation" id="9"]
 length = 0.1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("BodySprite:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [56]
-}
 
 [sub_resource type="Animation" id="10"]
 length = 0.4
 loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("BodySprite:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 1,
-"values": [42, 43, 44, 45]
-}
 
 [sub_resource type="Animation" id="11"]
 length = 0.3
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("BodySprite:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 1,
-"values": [84, 85, 86]
-}
 
 [sub_resource type="Animation" id="12"]
 length = 0.7
 loop_mode = 1
+
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("BodySprite:frame")
+tracks/0/path = NodePath("FrontPickupPosition:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
 "update": 1,
-"values": [0, 1, 2, 3, 4, 5, 6]
+"values": [Vector2(-2, -20), Vector2(-2, -19), Vector2(-2, -17), Vector2(-2, -16), Vector2(-2, -17), Vector2(-2, -19), Vector2(-2, -20)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("FrontPickupPosition:position")
+tracks/1/path = NodePath("BackPickupPosition:position")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
 "times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
 "update": 1,
-"values": [Vector2(-2, -20), Vector2(-2, -19), Vector2(-2, -17), Vector2(-2, -16), Vector2(-2, -17), Vector2(-2, -19), Vector2(-2, -20)]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("BackPickupPosition:position")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
-"update": 1,
 "values": [Vector2(14, -20), Vector2(14, -19), Vector2(14, -17), Vector2(14, -16), Vector2(14, -17), Vector2(14, -19), Vector2(14, -20)]
 }
-
 [sub_resource type="Animation" id="13"]
 length = 0.3
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("BodySprite:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 1,
-"values": [28, 29, 30]
-}
 
 [sub_resource type="Animation" id="14"]
 length = 0.2
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("BodySprite:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [70, 71]
-}
 
 [sub_resource type="Animation" id="15"]
 resource_name = "Slide"
 length = 0.4
 loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("BodySprite:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 1,
-"values": [126, 127, 128, 129]
-}
 
 [sub_resource type="Animation" id="16"]
 resource_name = "SlideFinished"
 length = 0.1
 loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("BodySprite:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [126]
-}
 
 [sub_resource type="Animation" id="17"]
 length = 0.6
 loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("BodySprite:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
-"update": 1,
-"values": [14, 15, 16, 17, 18, 19]
-}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_56ipo"]
 _data = {
@@ -284,6 +140,7 @@ _data = {
 
 [sub_resource type="Animation" id="18"]
 length = 0.2
+
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -332,9 +189,9 @@ tracks/3/keys = {
 "update": 0,
 "values": [Vector2(14, -20)]
 }
-
 [sub_resource type="Animation" id="19"]
 length = 0.2
+
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -383,10 +240,10 @@ tracks/3/keys = {
 "update": 0,
 "values": [Vector2(14, -20), Vector2(12, -20)]
 }
-
 [sub_resource type="Animation" id="20"]
 resource_name = "Slide"
 length = 0.1
+
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -435,7 +292,6 @@ tracks/3/keys = {
 "update": 1,
 "values": [Vector2(14, -10)]
 }
-
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_2cy1n"]
 _data = {
 "Idle": SubResource("18"),
@@ -452,14 +308,11 @@ script = ExtResource("9")
 position = Vector2(14, -20)
 
 [node name="BodySprite" type="Sprite2D" parent="."]
-position = Vector2(65, -47)
+position = Vector2(0, -34)
 texture = ExtResource("1")
-offset = Vector2(-65, 16)
-hframes = 7
-vframes = 22
-frame = 1
 
 [node name="FinSprite" type="Sprite2D" parent="."]
+visible = false
 position = Vector2(0, -31)
 texture = ExtResource("1")
 hframes = 7

@@ -5,19 +5,23 @@ extends RefCounted
 # picker and the player all agree. The order matches Player.PlayerSkin.
 
 const TEXTURES := [
-	"res://assets/sprites/whale_orange.png",
-	"res://assets/sprites/whale_green.png",
-	"res://assets/sprites/whale_blue.png",
-	"res://assets/sprites/whale_purple.png",
+	"res://assets/doodle/sprites/char_butter.png",
+	"res://assets/doodle/sprites/char_chili.png",
+	"res://assets/doodle/sprites/char_moody.png",
+	"res://assets/doodle/sprites/char_sprout.png",
 ]
 
-const NAMES := ["Coral", "Kelp", "Tide", "Abyss"]
+# Named for their faces: the expression is baked into each colour, so a
+# character has a temperament rather than being a palette swap.
+const NAMES := ["Butter", "Chili", "Moody", "Sprout"]
 
-# The whale sheets are 7x22 frames of 76x66. Frame 1 (top row, second column)
-# is the neutral idle pose, which is what the player scene shows at rest.
-const SHEET_COLUMNS := 7
-const FRAME_SIZE := Vector2(76, 66)
-const PORTRAIT_FRAME := 1
+# One sprite per character now, rather than a frame out of an animation sheet:
+# the Scribble characters have no animation frames at all, and motion comes from
+# squash and stretch in Player.gd instead. FRAME_SIZE is therefore the whole
+# image, and the portrait is the image itself.
+const SHEET_COLUMNS := 1
+const FRAME_SIZE := Vector2(48, 68)
+const PORTRAIT_FRAME := 0
 
 static func count() -> int:
 	return TEXTURES.size()
@@ -32,18 +36,15 @@ static func clamp_index(index: int) -> int:
 static func character_name(index: int) -> String:
 	return NAMES[clamp_index(index)]
 
-# A single-frame texture suitable for a UI swatch, cut out of the sheet.
+# A texture suitable for a UI swatch. Still returns an AtlasTexture so callers
+# (the lobby picker, the scoreboard) keep working unchanged; the region is just
+# the whole image now.
 static func get_portrait(index: int) -> AtlasTexture:
 	var sheet: Texture2D = load(TEXTURES[clamp_index(index)])
 	if sheet == null:
 		return null
 
-	var column := PORTRAIT_FRAME % SHEET_COLUMNS
-	var row := PORTRAIT_FRAME / SHEET_COLUMNS
-
 	var atlas := AtlasTexture.new()
 	atlas.atlas = sheet
-	atlas.region = Rect2(
-		Vector2(column, row) * FRAME_SIZE,
-		FRAME_SIZE)
+	atlas.region = Rect2(Vector2.ZERO, FRAME_SIZE)
 	return atlas

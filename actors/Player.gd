@@ -13,10 +13,10 @@ enum PlayerSkin {
 }
 
 var skin_resources = [
-	preload("res://assets/sprites/whale_orange.png"),
-	preload("res://assets/sprites/whale_green.png"),
-	preload("res://assets/sprites/whale_blue.png"),
-	preload("res://assets/sprites/whale_purple.png"),
+	preload("res://assets/doodle/sprites/char_butter.png"),
+	preload("res://assets/doodle/sprites/char_chili.png"),
+	preload("res://assets/doodle/sprites/char_moody.png"),
+	preload("res://assets/doodle/sprites/char_sprout.png"),
 ]
 
 @export var player_skin : PlayerSkin = PlayerSkin.BLUE: set = set_player_skin
@@ -227,7 +227,12 @@ func _ready():
 	state_machine.set_physics_process(false)
 
 	body_sprite.texture = skin_resources[player_skin]
-	fin_sprite.texture = skin_resources[player_skin]
+	# The whales had a separate fin sprite; the Scribble characters are one
+	# piece, so it is hidden rather than removed -- Player.tscn is shared and
+	# other code still resolves the node.
+	if fin_sprite != null:
+		fin_sprite.visible = false
+	_set_squash(1.0, 1.0, true)
 	reset_state()
 
 func set_player_skin(_player_skin: int) -> void:
@@ -306,6 +311,19 @@ func _process(_delta: float) -> void:
 	if _name_label != null:
 		_update_name_label()
 
+	_update_squash(_delta)
+	_update_flash(_delta)
+
+	# Lean into a run, and level out when not moving. Reads as weight without
+	# needing a walk cycle the art does not have.
+	if body_sprite != null:
+		var lean := 0.0
+		if is_on_floor() and absf(vector.x) > 20.0:
+			lean = clampf(vector.x / max(1.0, speed), -1.0, 1.0) * 0.16
+			if flip_h:
+				lean = -lean
+		body_sprite.rotation = lerpf(body_sprite.rotation, lean, clampf(10.0 * _delta, 0.0, 1.0))
+
 func set_flip_h(_flip_h: bool) -> void:
 	if flip_h != _flip_h:
 		flip_h = _flip_h
@@ -341,8 +359,97 @@ func set_show_sliding(_show_sliding: bool) -> void:
 		else:
 			pickup_animation_player.play("Idle")
 
+# ---------------------------------------------------------------------------
+# Squash and stretch
+#
+# The Scribble characters are a single static sprite each -- no animation frames
+# at all, where the whales had 154. So motion comes from the TRANSFORM instead:
+# a body stretches as it leaves the ground, squashes as it lands, leans into a
+# run, and flinches when hit.
+#
+# Purely cosmetic. Nothing here is read by physics, by the state machine or by
+# the sync -- a remote player is replayed from their input buffer and arrives at
+# these poses on its own, so none of it has to travel over the wire.
+#
+# Applied to BodySprite rather than to the player: the player's own scale.x
+# carries flip_h, and the pickup AnimationPlayer animates that same scale, so
+# squashing there would fight both.
+# ---------------------------------------------------------------------------
+
+# Where the sprite sits when unsquashed. Scaling happens about the FEET, not the
+# sprite centre, so a squashed body stays planted instead of sinking.
+const BODY_REST_Y := -34.0
+# How fast the current pose chases the target. High enough to feel snappy,
+# low enough that a landing still reads as a bounce.
+const SQUASH_RESPONSE := 14.0
+
+var _squash := Vector2.ONE
+var _squash_target := Vector2.ONE
+
+# Downward speed at the moment of the last landing, so a drop from a great
+# height lands harder than a hop off a kerb. Every landing used to squash by
+# exactly the same amount, which reads as weightless.
+var _impact_speed := 0.0
+
+func _set_squash(x: float, y: float, immediate: bool = false) -> void:
+	_squash_target = Vector2(x, y)
+	if immediate:
+		_squash = _squash_target
+
+# A brief tint, so a hit reads on the frame it happens rather than only through
+# the state change. Purely cosmetic, like the squash.
+const FLASH_SECONDS := 0.12
+var _flash_left := 0.0
+var _flash_color := Color.WHITE
+
+func _flash(color: Color) -> void:
+	_flash_color = color
+	_flash_left = FLASH_SECONDS
+
+func _update_flash(delta: float) -> void:
+	if body_sprite == null:
+		return
+	if _flash_left <= 0.0:
+		if body_sprite.modulate != Color.WHITE:
+			body_sprite.modulate = Color.WHITE
+		return
+	_flash_left -= delta
+	body_sprite.modulate = _flash_color if _flash_left > 0.0 else Color.WHITE
+
+func _update_squash(delta: float) -> void:
+	if body_sprite == null:
+		return
+	_squash = _squash.lerp(_squash_target, clampf(SQUASH_RESPONSE * delta, 0.0, 1.0))
+	body_sprite.scale = _squash
+	body_sprite.position.y = BODY_REST_Y * _squash.y
+
 func play_animation(name) -> void:
 	sprite_animation_player.play(name)
+
+	# The pose each state reads as. Landing and being hit are one-shot impulses
+	# -- set immediately and allowed to recover -- while the rest are targets
+	# the body eases towards.
+	match name:
+		"Jump", "Glide":
+			_set_squash(0.86, 1.18)
+		"Fall":
+			_set_squash(0.92, 1.10)
+		"Land":
+			# Scaled by how fast we were falling. A hop barely registers; a drop
+			# from the top of the arena flattens you.
+			var hit := clampf(_impact_speed / maxf(1.0, terminal_velocity), 0.0, 1.0)
+			_set_squash(lerpf(1.05, 1.34, hit), lerpf(0.95, 0.66, hit), true)
+		"Duck":
+			_set_squash(1.18, 0.72)
+		"Slide", "SlideFinished":
+			_set_squash(1.30, 0.70)
+		"Hurt":
+			_set_squash(1.24, 0.80, true)
+			_flash(Color(1.6, 0.5, 0.5))
+		"Blop":
+			_set_squash(0.84, 1.16, true)
+		_:
+			_set_squash(1.0, 1.0)
 
 func get_current_animation() -> String:
 	return sprite_animation_player.current_animation
@@ -606,10 +713,18 @@ func _physics_process(delta: float) -> void:
 	vector.y += (gravity * delta)
 	if vector.y > terminal_velocity:
 		vector.y = terminal_velocity
+	var falling_at := vector.y
+	var was_airborne := not is_on_floor()
+
 	set_velocity(vector)
 	set_up_direction(Vector2.UP)
 	move_and_slide()
 	vector = velocity
+
+	# Landing impact, for the squash. Read from before the move because
+	# move_and_slide() zeroes the downward component on contact.
+	if was_airborne and is_on_floor() and falling_at > 0.0:
+		_impact_speed = falling_at
 
 	if GameState.online_play:
 		if player_controlled:

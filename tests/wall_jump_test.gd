@@ -34,6 +34,7 @@ func _ready() -> void:
 	await _check_kick()
 	await _check_disabled()
 	await _check_gated()
+	await _check_squash()
 
 	_world.queue_free()
 	await get_tree().process_frame
@@ -117,6 +118,52 @@ func _check_gated() -> void:
 	player.jump_blocked = true
 	_check("tar blocks wall jumping as well", player.can_wall_jump(), false)
 	player.jump_blocked = false
+
+	player.queue_free()
+	await get_tree().process_frame
+
+# The Scribble characters have no animation frames, so all motion is squash and
+# stretch on the sprite (Player._update_squash). It is purely cosmetic -- never
+# read by physics or sync -- but it is the only thing that makes the game look
+# alive, so a silent regression to "capsule stands perfectly still forever"
+# would be easy to miss.
+func _check_squash() -> void:
+	var player := _make_player()
+	player.set_physics_process(false)   # keep the state machine off the pose
+	await get_tree().process_frame
+
+	player.play_animation("Idle")
+	for i in range(20): await get_tree().process_frame
+	_check("idle is unsquashed", player._squash.round(), Vector2.ONE)
+
+	player.play_animation("Jump")
+	for i in range(20): await get_tree().process_frame
+	_check_true("jumping stretches the body (%.2f tall)" % player._squash.y,
+		player._squash.y > 1.05 and player._squash.x < 0.95)
+
+	player.play_animation("Duck")
+	for i in range(20): await get_tree().process_frame
+	_check_true("ducking squashes it (%.2f tall)" % player._squash.y,
+		player._squash.y < 0.85 and player._squash.x > 1.05)
+
+	# Scaling happens about the FEET. If it happened about the sprite centre a
+	# squashed body would sink into the floor and a stretched one would hover.
+	var squashed_y: float = player.body_sprite.position.y
+	player.play_animation("Idle")
+	for i in range(20): await get_tree().process_frame
+	_check_true("a squashed body stays planted (%.0f vs %.0f)"
+			% [squashed_y, player.body_sprite.position.y],
+		squashed_y > player.body_sprite.position.y)
+
+	# A drop from height must land harder than a hop.
+	player._impact_speed = 0.0
+	player.play_animation("Land")
+	var gentle: float = player._squash.y
+	player._impact_speed = player.terminal_velocity
+	player.play_animation("Land")
+	var hard: float = player._squash.y
+	_check_true("a long fall lands harder than a hop (%.2f vs %.2f)" % [hard, gentle],
+		hard < gentle)
 
 	player.queue_free()
 	await get_tree().process_frame
