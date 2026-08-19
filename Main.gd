@@ -33,6 +33,7 @@ func _ready() -> void:
 	# the wiring lives next to the handler that depends on it.
 	game.roster_updated.connect(Callable(self, "_on_Game_roster_updated"))
 	game.countdown_tick.connect(Callable(self, "_on_Game_countdown_tick"))
+	ui_layer.pause_menu.quit_to_menu.connect(Callable(self, "_on_PauseMenu_quit_to_menu"))
 
 	# The round clock lives in Game (it has to: the host drives it and RPCs the
 	# decisions), and the HUD lives in UILayer. These three are the whole bridge.
@@ -155,6 +156,11 @@ func _on_UILayer_back_button() -> void:
 		ui_layer.show_screen("TitleScreen")
 	else:
 		ui_layer.show_screen("MatchScreen")
+
+# Quitting from the pause menu is the same journey as the Back button: tear the
+# round down and return to whichever menu this mode came from.
+func _on_PauseMenu_quit_to_menu() -> void:
+	_on_UILayer_back_button()
 
 func _on_ReadyScreen_ready_pressed() -> void:
 	rpc("player_ready", get_tree().get_multiplayer().get_unique_id())
@@ -285,6 +291,9 @@ func stop_game(reset_score: bool = true) -> void:
 	if ui_layer.hud != null:
 		ui_layer.hud.hide_hud()
 	ui_layer.hide_countdown()
+	# close() before disabling, so a tree this menu paused is handed back running.
+	ui_layer.pause_menu.close()
+	ui_layer.pause_menu.enabled = false
 
 	game.game_stop()
 
@@ -300,6 +309,7 @@ func _on_game_started_signal() -> void:
 	# After hide_all(), which does not touch the scoreboard but does take the
 	# back button down with it.
 	_refresh_hud()
+	ui_layer.pause_menu.enabled = true
 
 	if not match_started:
 		match_started = true

@@ -57,12 +57,15 @@ func _ready() -> void:
 		# Show the real thing: a running match, not a menu. A trailing digit
 		# picks the seat count, so "local4" shoots a four-player couch match.
 		var seats := 2
-		var suffix := _target.substr(len("local"))
+		var suffix := _target.substr(len("local")).replace("+pause", "")
 		if suffix.is_valid_int():
 			seats = int(suffix)
 		main._on_TitleScreen_play_local(seats)
 		ui_layer.hide_all()
 		main._refresh_hud()
+		if _target.ends_with("+pause"):
+			ui_layer.pause_menu.enabled = true
+			ui_layer.pause_menu.open()
 	else:
 		ui_layer.show_screen(_target)
 

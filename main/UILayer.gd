@@ -2,6 +2,7 @@ extends CanvasLayer
 class_name UILayer
 
 const HudScript := preload("res://main/Hud.gd")
+const PauseMenuScript := preload("res://main/PauseMenu.gd")
 
 @onready var screens = $Screens
 @onready var message_label = $Overlay/Message
@@ -22,6 +23,11 @@ var hud: Control
 # The big centred number counting a round in. Also created here rather than in
 # Main.tscn, and also parented under Overlay so the screen stack does not own it.
 var countdown_label: Label
+
+# The in-match pause menu (main/PauseMenu.gd). Runs with PROCESS_MODE_ALWAYS and
+# owns the pause key itself -- see the note at the top of that file for why it
+# cannot live on Main.
+var pause_menu: Control
 
 signal change_screen (name, screen)
 signal back_button_pressed ()
@@ -61,6 +67,10 @@ func _ready() -> void:
 	countdown_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	countdown_label.visible = false
 	$Overlay.add_child(countdown_label)
+
+	pause_menu = PauseMenuScript.new()
+	pause_menu.name = "PauseMenu"
+	$Overlay.add_child(pause_menu)
 
 	for screen in screens.get_children():
 		if screen.has_method('_setup_screen'):
