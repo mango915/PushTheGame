@@ -75,6 +75,11 @@ func _check_launch() -> void:
 	zone.launch_speed = 1150.0
 	await get_tree().process_frame
 
+	# The pad also fires from its own _process for anyone overlapping it, and
+	# the player and zone are both at the origin here -- so it may already have
+	# launched during the frame above, leaving the rate limiter armed and this
+	# explicit call a no-op. Clear it so we are testing the pad, not the race.
+	zone._last_launch.clear()
 	player.vector = Vector2(0, 200.0)
 	zone._try_launch(player)
 
