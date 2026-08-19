@@ -1,6 +1,8 @@
 extends CanvasLayer
 class_name UILayer
 
+const HudScript := preload("res://main/Hud.gd")
+
 @onready var screens = $Screens
 @onready var message_label = $Overlay/Message
 @onready var back_button = $Overlay/BackButton
@@ -10,6 +12,12 @@ class_name UILayer
 # the player is warned before the arena starts trying to kill them.
 const ROUND_TIMER_COLOR_NORMAL := Color(0.976, 0.949, 0.855)
 const ROUND_TIMER_COLOR_WARNING := Color(1.0, 0.42, 0.32)
+
+# The in-match scoreboard (main/Hud.gd). Created here rather than in Main.tscn
+# so the whole thing lives in one script, and parented under Overlay so it is
+# NOT part of the Screens stack -- hide_screen()/hide_all() must not take the
+# scoreboard down mid-round. Main shows and hides it around the round.
+var hud: Control
 
 signal change_screen (name, screen)
 signal back_button_pressed ()
@@ -33,6 +41,10 @@ var current_screen_name: String = '': get = get_current_screen_name
 var _is_ready := false
 
 func _ready() -> void:
+	hud = HudScript.new()
+	hud.name = "Hud"
+	$Overlay.add_child(hud)
+
 	for screen in screens.get_children():
 		if screen.has_method('_setup_screen'):
 			screen._setup_screen(self)

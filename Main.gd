@@ -8,12 +8,19 @@ const LEADERBOARD_ID := 'push_the_game_wins'
 @onready var ready_screen = $UILayer/Screens/ReadyScreen
 @onready var music := $Music
 
+const MIN_LOCAL_PLAYERS := 2
+const MAX_LOCAL_PLAYERS := 4
+
 var players := {}
 
 var players_ready := {}
 var players_score := {}
 
 var match_started := false
+
+# How many seats a local match sets up, chosen on TitleScreen. Online play takes
+# its roster from OnlineMatch instead and ignores this.
+var local_player_count := MIN_LOCAL_PLAYERS
 
 func _ready() -> void:
 	OnlineMatch.error.connect(Callable(self, "_on_OnlineMatch_error"))
@@ -49,8 +56,12 @@ func _ready() -> void:
 # UI callbacks
 #####
 
-func _on_TitleScreen_play_local() -> void:
+# `player_count` comes from the selector on TitleScreen. Defaulted so that any
+# other caller (a test, or a connection made before the signal carried an
+# argument) still gets the original two-player behaviour.
+func _on_TitleScreen_play_local(player_count: int = 2) -> void:
 	GameState.online_play = false
+	local_player_count = clampi(player_count, MIN_LOCAL_PLAYERS, MAX_LOCAL_PLAYERS)
 
 	ui_layer.hide_screen()
 	ui_layer.show_back_button()
@@ -242,15 +253,18 @@ func start_game() -> void:
 		for peer_id in OnlineMatch.players:
 			characters[peer_id] = OnlineMatch.players[peer_id].character
 	else:
-		players = {
-			1: "Player1",
-			2: "Player2",
-		}
+		# One seat per local player. Game._do_game_setup walks this dictionary in
+		# order, spawning at PlayerStartPositions/PlayerN and assigning the
+		# playerN_ input prefix, so the peer ids have to be 1..N.
+		players = {}
+		for seat in range(1, local_player_count + 1):
+			players[seat] = "P%d" % seat
+
 		# Local players share one machine and cannot each pick, so give them
 		# distinct characters starting from whatever this profile chose.
 		var index := 0
 		for peer_id in players:
-			characters[peer_id] = (Online.character_index + index) % 4
+			characters[peer_id] = (Online.character_index + index) % Characters.count()
 			index += 1
 
 	game.game_start(players, characters)
@@ -267,6 +281,9 @@ func stop_game(reset_score: bool = true) -> void:
 		players_score.clear()
 
 	ui_layer.hide_round_timer()
+	if ui_layer.hud != null:
+		ui_layer.hud.hide_hud()
+
 	game.game_stop()
 
 func restart_game() -> void:
@@ -277,6 +294,10 @@ func _on_game_started_signal() -> void:
 	ui_layer.hide_screen()
 	ui_layer.hide_all()
 	ui_layer.show_back_button()
+
+	# After hide_all(), which does not touch the scoreboard but does take the
+	# back button down with it.
+	_refresh_hud()
 
 	if not match_started:
 		match_started = true
@@ -305,8 +326,45 @@ func _hide_message_later(text: String, seconds: float = 2.5) -> void:
 	await get_tree().create_timer(seconds).timeout
 	if ui_layer.message_label.text == text:
 		ui_layer.hide_message()
+# Rebuilds the scoreboard from the players actually spawned in the round.
+#
+# Reading the live nodes rather than a roster dictionary is what makes this work
+# identically in local and online play: Game._do_game_setup names each node
+# str(peer_id) and applies the character on every peer, so a client that never
+# called start_game() still has everything the scoreboard needs. It also means
+# no new data has to be added to any RPC.
+func _refresh_hud() -> void:
+	var hud = ui_layer.hud
+	if hud == null:
+		return
+
+	var entries := []
+	for child in game.players_node.get_children():
+		# Death explosions are parented into the same container.
+		if not child.has_method("pickup_or_throw"):
+			continue
+		var peer_id := int(str(child.name))
+		var display_name: String = child.player_name
+		if display_name == "":
+			display_name = players.get(peer_id, "P%d" % peer_id)
+		entries.append({
+			peer_id = peer_id,
+			name = display_name,
+			character = child.player_skin,
+			score = int(players_score.get(peer_id, 0)),
+		})
+
+	entries.sort_custom(func(a, b): return a.peer_id < b.peer_id)
+
+	hud.set_target(game.get_game_settings().rounds_to_win)
+	hud.set_players(entries)
+	hud.reset_alive()
+	hud.show_hud()
 
 func _on_player_dead(peer_id: int) -> void:
+	if ui_layer.hud != null:
+		ui_layer.hud.set_alive(peer_id, false)
+
 	if GameState.online_play:
 		var my_id = get_tree().get_multiplayer().get_unique_id()
 		if peer_id == my_id:
@@ -315,6 +373,8 @@ func _on_player_dead(peer_id: int) -> void:
 # Adds a round win to the scoreboard and reports the new total.
 func _record_win(peer_id: int) -> int:
 	players_score[peer_id] = int(players_score.get(peer_id, 0)) + 1
+	if ui_layer.hud != null:
+		ui_layer.hud.set_score(peer_id, players_score[peer_id])
 	return players_score[peer_id]
 
 func _on_game_over_signal(peer_id: int) -> void:

@@ -134,8 +134,22 @@ func _check_spawned_player() -> void:
 	# ...and it must still track the player as they move.
 	player.global_position = Vector2(400, -120)
 	player._update_name_label()
-	var dy: float = player._name_label.global_position.y - player.global_position.y
-	_check_true("the label sits above the player (offset %.0f)" % dy, dy < 0.0)
+	await get_tree().process_frame
+
+	# "Above the player" has to mean above the SPRITE, not merely above the
+	# origin. The origin is at the whale's feet and BodySprite spans roughly
+	# y = -64..+2 around it, so a label anywhere down to y = -64 is still drawn
+	# across the character's own body -- which is exactly where it used to sit,
+	# at y = -46, passing a `dy < 0` check the whole time.
+	var sprite_top: float = player.body_sprite.position.y \
+		+ player.body_sprite.offset.y \
+		- (Characters.FRAME_SIZE.y * 0.5)
+	var label_bottom: float = player._name_label.global_position.y \
+		+ player._name_label.size.y \
+		- player.global_position.y
+	_check_true("the label clears the sprite (bottom %.0f, sprite top %.0f)"
+			% [label_bottom, sprite_top],
+		label_bottom <= sprite_top)
 	_check_true("the label follows the player horizontally",
 		absf(player._name_label.global_position.x - 400.0) < 60.0)
 

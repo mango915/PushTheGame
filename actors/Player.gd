@@ -225,10 +225,19 @@ func set_player_skin(_player_skin: int) -> void:
 # counter-scaling does NOT work: flipping negates the player's scale.x, and the
 # pickup AnimationPlayer re-animates that scale, so the label would be left
 # mirrored whenever an animation reset the flip.
-# Clear of the sprite, not on top of it. The whale frame is 66px tall and the
-# body sprite sits above the player's origin, so -46 put the text across the
-# character's back.
-const NAME_LABEL_OFFSET := Vector2(0, -82)
+# Where the label's BOTTOM edge sits, in the player's own coordinates.
+#
+# The player's origin is at their FEET: StandingCollisionShape is 56 tall at
+# y = -28 (so the body spans y = -56..0), and BodySprite is 76x66 centred at
+# y = -31 (so the whale occupies y = -64..+2). This was -46, which is two thirds
+# of the way UP the sprite -- the name rendered across the character's own body,
+# where it was close to unreadable against the art. Clearing the sprite top puts
+# it on the flat background instead.
+const NAME_LABEL_BOTTOM := -70.0
+
+# Used for the frame before the Label has been laid out and reports a real size.
+const NAME_LABEL_FALLBACK_CHAR_WIDTH := 7.0
+const NAME_LABEL_FALLBACK_HEIGHT := 18.0
 
 var player_name: String = ""
 var _name_label: Label
@@ -243,10 +252,10 @@ func set_player_name(_player_name: String) -> void:
 		_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		_name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		_name_label.add_theme_font_size_override("font_size", 12)
-		_name_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.92))
+		_name_label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
 		# A dark outline keeps the name readable against both the pale water and
 		# the dark terrain.
-		_name_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.75))
+		_name_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
 		_name_label.add_theme_constant_override("outline_size", 4)
 		_name_label.z_index = 10
 		add_child(_name_label)
@@ -260,8 +269,16 @@ func _update_name_label() -> void:
 
 	var width := _name_label.size.x
 	if width <= 0.0:
-		width = float(len(player_name)) * 7.0
-	_name_label.global_position = global_position + NAME_LABEL_OFFSET - Vector2(width * 0.5, 0)
+		width = float(len(player_name)) * NAME_LABEL_FALLBACK_CHAR_WIDTH
+	var height := _name_label.size.y
+	if height <= 0.0:
+		height = NAME_LABEL_FALLBACK_HEIGHT
+
+	# A Label is positioned by its top-left corner, so the height has to come
+	# off for NAME_LABEL_BOTTOM to mean the bottom of the text.
+	_name_label.global_position = global_position \
+		+ Vector2(0, NAME_LABEL_BOTTOM) \
+		- Vector2(width * 0.5, height)
 
 func _process(_delta: float) -> void:
 	# top_level means the label does not follow us automatically.
