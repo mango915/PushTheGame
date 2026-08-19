@@ -24,6 +24,9 @@ signal game_started_signal ()
 signal player_dead (peer_id)
 signal game_over_signal (peer_id)
 
+func _ready() -> void:
+	reload_game_settings()
+
 func game_start(players: Dictionary) -> void:
 	# Resources do not serialize over RPC safely, so the settings travel as a
 	# plain Dictionary and are rebuilt on each peer.
@@ -38,6 +41,11 @@ func get_game_settings() -> GameSettings:
 	if game_settings == null:
 		game_settings = GameSettings.new()
 	return game_settings
+
+# Re-read the player's saved tuning. Called at startup and whenever the settings
+# screen saves, so a change takes effect on the next round without a restart.
+func reload_game_settings() -> void:
+	game_settings = GameSettings.load_saved()
 
 # Initializes the game so that it is ready to really start.
 @rpc("any_peer", "call_local") func _do_game_setup(players: Dictionary, settings_data: Dictionary = {}) -> void:

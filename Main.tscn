@@ -15,6 +15,7 @@
 [ext_resource type="AudioStream" uid="uid://dfeknvjjx0wiu" path="res://assets/music/FISHSTICKS.ogg" id="13"]
 [ext_resource type="PackedScene" path="res://main/screens/LeaderboardScreen.tscn" id="14"]
 [ext_resource type="PackedScene" path="res://main/screens/CreditsScreen.tscn" id="15"]
+[ext_resource type="PackedScene" path="res://main/screens/SettingsScreen.tscn" id="20"]
 [ext_resource type="Script" path="res://main/screens/TransparentButton.gd" id="17"]
 [ext_resource type="Texture2D" uid="uid://wqifmham4jn0" path="res://assets/ui/mute.png" id="18"]
 [ext_resource type="Texture2D" uid="uid://cvjrremywfuyx" path="res://assets/ui/close.png" id="19"]
@@ -75,6 +76,9 @@ grow_vertical = 2
 [node name="CreditsScreen" parent="UILayer/Screens" instance=ExtResource("15")]
 visible = false
 anchors_preset = 0
+
+[node name="SettingsScreen" parent="UILayer/Screens" instance=ExtResource("20")]
+visible = false
 
 [node name="Overlay" type="Control" parent="UILayer"]
 visible = false

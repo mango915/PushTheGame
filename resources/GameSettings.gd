@@ -99,3 +99,79 @@ static func from_dict(data: Dictionary) -> GameSettings:
 
 func duplicate_settings() -> GameSettings:
 	return from_dict(to_dict())
+
+
+#####
+# Persistence
+#
+# The in-game Settings screen writes here, so a player can retune the game
+# without opening the editor. Stored as plain text under user:// next to the
+# server settings.
+#####
+
+const CONFIG_PATH := "user://settings.cfg"
+const CONFIG_SECTION := "gameplay"
+const DEFAULTS_PATH := "res://resources/default_game_settings.tres"
+
+# Start from the shipped defaults, then apply whatever the player saved.
+# Always returns a FRESH instance: mutating the preloaded .tres would leave the
+# resource cache holding those edits for the rest of the process.
+static func load_saved() -> GameSettings:
+	var settings: GameSettings
+	var defaults = load(DEFAULTS_PATH)
+	if defaults is GameSettings:
+		settings = defaults.duplicate_settings()
+	else:
+		settings = GameSettings.new()
+
+	var config := ConfigFile.new()
+	if config.load(CONFIG_PATH) == OK:
+		var data := {}
+		for field in FIELDS:
+			if config.has_section_key(CONFIG_SECTION, field):
+				data[field] = config.get_value(CONFIG_SECTION, field)
+		settings.apply_dict(data)
+
+	return settings
+
+# Writes only the gameplay section, leaving the server settings that Online.gd
+# keeps in the same file untouched.
+func save_to_config() -> void:
+	var config := ConfigFile.new()
+	config.load(CONFIG_PATH)
+	for field in FIELDS:
+		config.set_value(CONFIG_SECTION, field, get(field))
+	config.save(CONFIG_PATH)
+
+# Forget any saved tuning and go back to the shipped values.
+static func clear_saved() -> void:
+	var config := ConfigFile.new()
+	if config.load(CONFIG_PATH) != OK:
+		return
+	if config.has_section(CONFIG_SECTION):
+		config.erase_section(CONFIG_SECTION)
+	config.save(CONFIG_PATH)
+
+#####
+# Derived values, for showing the player what a number actually does
+#####
+
+# Peak height of a jump, in pixels: v^2 / 2g.
+func get_jump_height() -> float:
+	var g := get_gravity()
+	if g <= 0.0:
+		return 0.0
+	return (jump_speed * jump_speed) / (2.0 * g)
+
+# Time from leaving the ground to landing again, in seconds: 2v / g.
+func get_jump_airtime() -> float:
+	var g := get_gravity()
+	if g <= 0.0:
+		return 0.0
+	return (2.0 * jump_speed) / g
+
+# How far a full-speed running jump carries, in pixels. This is the "jump
+# length" players actually feel, and it depends on THREE settings: jump_speed
+# and gravity set the airtime, and speed sets how far you travel during it.
+func get_jump_distance() -> float:
+	return speed * get_jump_airtime()
