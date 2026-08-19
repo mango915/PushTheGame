@@ -33,6 +33,51 @@ var skin_resources = [
 # The settings actually in force. A Player instantiated without one (a test, or
 # a scene dropped in by hand) falls back to the shipped defaults rather than
 # reading null.
+# --- Map effect zones (objects/EffectZone.gd) -------------------------------
+#
+# Ice, tar and the like. Kept as a set rather than a flag so overlapping zones
+# compose correctly and leaving one does not cancel another.
+var _effect_zones: Array = []
+var speed_scale: float = 1.0
+var friction_scale: float = 1.0
+var jump_blocked: bool = false
+
+func enter_effect_zone(zone: Node) -> void:
+	if not _effect_zones.has(zone):
+		_effect_zones.append(zone)
+		_recompute_zone_effects()
+
+func exit_effect_zone(zone: Node) -> void:
+	if _effect_zones.has(zone):
+		_effect_zones.erase(zone)
+		_recompute_zone_effects()
+
+func _recompute_zone_effects() -> void:
+	speed_scale = 1.0
+	friction_scale = 1.0
+	jump_blocked = false
+
+	# Prune anything freed since we last looked (a map can be torn down while
+	# a player is still standing in one of its zones).
+	var live := []
+	for zone in _effect_zones:
+		if not is_instance_valid(zone):
+			continue
+		live.append(zone)
+		match zone.effect:
+			EffectZone.Effect.SLIPPERY:
+				friction_scale = min(friction_scale, zone.friction_scale)
+			EffectZone.Effect.STICKY:
+				speed_scale = min(speed_scale, zone.speed_scale)
+				jump_blocked = true
+	_effect_zones = live
+
+# Called by a launch pad once it has set our upward velocity.
+func launch_from_zone() -> void:
+	if state_machine.current_state != null and state_machine.current_state.name != "Jump":
+		state_machine.change_state("Jump", { "launched": true })
+	sounds.play("Jump")
+
 func get_settings() -> GameSettings:
 	if settings == null:
 		settings = GameSettings.new()
@@ -43,7 +88,7 @@ func get_settings() -> GameSettings:
 # so actors/player-states/*.gd needs no changes.
 var speed: float:
 	get:
-		return get_settings().speed
+		return get_settings().speed * speed_scale
 
 var acceleration: float:
 	get:
@@ -51,11 +96,11 @@ var acceleration: float:
 
 var friction: float:
 	get:
-		return get_settings().friction
+		return get_settings().friction * friction_scale
 
 var sliding_friction: float:
 	get:
-		return get_settings().sliding_friction
+		return get_settings().sliding_friction * friction_scale
 
 var jump_speed: float:
 	get:

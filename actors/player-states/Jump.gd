@@ -2,6 +2,12 @@ extends "res://actors/player-states/Move.gd"
 
 func _state_enter(info: Dictionary) -> void:
 	host.play_animation("Jump")
+
+	# A launch pad has already set our upward velocity (and played its own
+	# sound); overwriting it here would cap a bounce at a normal jump.
+	if info.get("launched", false):
+		return
+
 	host.sounds.play("Jump")
 	host.vector.y = -host.jump_speed
 	

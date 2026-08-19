@@ -10,7 +10,7 @@ func _state_physics_process(delta: float) -> void:
 	_check_pickup_or_throw_or_use()
 	
 	var input_vector = _get_player_input_vector()
-	if host.input_buffer.is_action_just_pressed("jump"):
+	if host.input_buffer.is_action_just_pressed("jump") and not host.jump_blocked:
 		if host.is_on_floor():
 			get_parent().change_state("Jump", {
 				"input_vector": input_vector,

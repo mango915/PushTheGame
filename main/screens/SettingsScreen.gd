@@ -15,6 +15,10 @@ extends "res://main/Screen.gd"
 const LABEL_WIDTH := 190
 const VALUE_WIDTH := 70
 
+const COLOR_BACKGROUND := Color(0.055, 0.098, 0.161)
+const COLOR_HEADING := Color(0.976, 0.949, 0.855)
+const COLOR_HINT := Color(0.514, 0.706, 0.784)
+
 # field, label, minimum, maximum, step
 const ROWS := [
 	["speed", "Run speed", 50.0, 900.0, 10.0],
@@ -53,10 +57,15 @@ func _show_screen(_info: Dictionary = {}) -> void:
 func _build_ui() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 
+	var background := ColorRect.new()
+	background.set_anchors_preset(Control.PRESET_FULL_RECT)
+	background.color = COLOR_BACKGROUND
+	add_child(background)
+
 	var margin := MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	margin.add_theme_constant_override("margin_left", 40)
-	margin.add_theme_constant_override("margin_right", 40)
+	margin.add_theme_constant_override("margin_right", 58)
 	margin.add_theme_constant_override("margin_top", 20)
 	margin.add_theme_constant_override("margin_bottom", 60)
 	add_child(margin)
@@ -122,12 +131,14 @@ func _heading(text: String) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.add_theme_font_size_override("font_size", 24)
+	label.add_theme_color_override("font_color", COLOR_HEADING)
 	return label
 
 func _hint(text: String) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.add_theme_font_size_override("font_size", 14)
+	label.add_theme_color_override("font_color", COLOR_HINT)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return label
 
