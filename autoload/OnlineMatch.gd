@@ -24,6 +24,10 @@ var nakama_socket: NakamaSocket: set = _set_nakama_socket
 
 var players: Dictionary
 
+# Short, human-readable room code for host/join. Nakama match ids are UUIDs,
+# which nobody can read out loud; a named match gives us a code instead.
+var room_code: String = ''
+
 enum MatchState {
 	LOBBY = 0,
 	MATCHING = 1,
@@ -124,6 +128,38 @@ func create_match(_nakama_socket: NakamaSocket) -> void:
 
 	nakama_multiplayer_bridge.create_match()
 
+# Characters chosen to be unambiguous when read aloud or typed: no O/0, I/1,
+# S/5, Z/2.
+const ROOM_CODE_CHARS := 'ABCDEFGHJKLMNPQRTUVWXY346789'
+const ROOM_CODE_LENGTH := 4
+
+static func generate_room_code() -> String:
+	var code := ''
+	for i in range(ROOM_CODE_LENGTH):
+		code += ROOM_CODE_CHARS[randi() % ROOM_CODE_CHARS.length()]
+	return code
+
+# Host a room under a short code. Nakama named matches are create-or-join, so
+# this is the same call the joiner makes -- whoever arrives first becomes host.
+func host_room(_nakama_socket: NakamaSocket, _room_code: String = '') -> String:
+	leave()
+	_set_nakama_socket(_nakama_socket)
+	match_mode = MatchMode.CREATE
+	room_code = _room_code.strip_edges().to_upper()
+	if room_code == '':
+		room_code = generate_room_code()
+
+	nakama_multiplayer_bridge.join_named_match(room_code)
+	return room_code
+
+func join_room(_nakama_socket: NakamaSocket, _room_code: String) -> void:
+	leave()
+	_set_nakama_socket(_nakama_socket)
+	match_mode = MatchMode.JOIN
+	room_code = _room_code.strip_edges().to_upper()
+
+	nakama_multiplayer_bridge.join_named_match(room_code)
+
 func join_match(_nakama_socket: NakamaSocket, _match_id: String) -> void:
 	leave()
 	_set_nakama_socket(_nakama_socket)
@@ -185,6 +221,7 @@ func leave(close_socket: bool = false) -> void:
 	# Initialize all the variables to their default state.
 	# (match_id is derived from the bridge -- see get_match_id.)
 	players = {}
+	room_code = ''
 	matchmaker_ticket = ''
 	match_state = MatchState.LOBBY
 	match_mode = MatchMode.NONE

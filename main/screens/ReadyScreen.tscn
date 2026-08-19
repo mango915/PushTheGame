@@ -38,13 +38,13 @@ theme_override_constants/separation = 0
 
 [node name="Label" type="Label" parent="Panel/MatchIDContainer"]
 layout_mode = 2
-text = "Match ID:"
+text = "Room code:"
 
 [node name="MatchID" type="LineEdit" parent="Panel/MatchIDContainer"]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-text = "XXXX-XXXX-XXXX-XXXX"
+text = "XXXX"
 editable = false
 
 [node name="MatchCopyButton" type="Button" parent="Panel/MatchIDContainer"]

@@ -192,7 +192,21 @@ gate_units() {
 		local name log
 		name="$(basename "$scene" .tscn)"
 		log="$OUT_DIR/unit-$name.log"
-		"$GODOT" --headless --path . "$scene" >"$log" 2>&1
+
+		# Watchdog: a scene whose script fails to load never reaches its own
+		# get_tree().quit(), so it would hang here forever.
+		"$GODOT" --headless --path . "$scene" >"$log" 2>&1 &
+		local pid=$!
+		local waited=0
+		while kill -0 "$pid" 2>/dev/null && [ "$waited" -lt 90 ]; do
+			sleep 2; waited=$((waited + 2))
+		done
+		if kill -0 "$pid" 2>/dev/null; then
+			echo "  WARNING: $name hung; killed after ${waited}s."
+			kill -9 "$pid" 2>/dev/null
+			FAILED=$((FAILED + 1))
+		fi
+		wait "$pid" 2>/dev/null
 
 		echo "$name:"
 		sed 's/\x1b\[[0-9;]*m//g' "$log" | grep -aE '\] (OK|FAIL):' | sed 's/^/  /'

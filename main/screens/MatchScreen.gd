@@ -59,26 +59,47 @@ func _start_matchmaking() -> void:
 	OnlineMatch.start_matchmaking(Online.nakama_socket, data)
 
 func _create_match() -> void:
-	OnlineMatch.create_match(Online.nakama_socket)
+	# Hosts under a short generated room code rather than a raw match UUID, so
+	# the host has something they can read out to a friend.
+	_host_attempts = 0
+	OnlineMatch.host_room(Online.nakama_socket)
 
 func _join_match() -> void:
-	var match_id = join_match_id_control.text.strip_edges()
-	if match_id == '':
-		ui_layer.show_message("Need to paste Match ID to join")
+	var code = join_match_id_control.text.strip_edges()
+	if code == '':
+		ui_layer.show_message("Enter a room code to join")
 		return
-	if not match_id.ends_with('.'):
-		match_id += '.'
 
-	OnlineMatch.join_match(Online.nakama_socket, match_id)
+	OnlineMatch.join_room(Online.nakama_socket, code)
+
+# Named matches are create-or-join, so a generated code that happens to collide
+# with a live match drops the would-be host into a stranger's game instead of
+# hosting. Detect that (we asked to host but are not peer 1) and retry with a
+# fresh code.
+const MAX_HOST_ATTEMPTS := 5
+var _host_attempts := 0
 
 func _on_OnlineMatch_joined(match_id: String, match_mode: int):
+	if match_mode == OnlineMatch.MatchMode.CREATE:
+		var my_peer_id = get_tree().get_multiplayer().get_unique_id()
+		if my_peer_id != 1:
+			_host_attempts += 1
+			if _host_attempts < MAX_HOST_ATTEMPTS:
+				OnlineMatch.leave()
+				OnlineMatch.host_room(Online.nakama_socket)
+				return
+			ui_layer.show_message("Could not find a free room code")
+			OnlineMatch.leave()
+			return
+
 	var info = {
 		players = OnlineMatch.players,
 		clear = true,
 	}
 
 	if match_mode != OnlineMatch.MatchMode.MATCHMAKER:
-		info['match_id'] = match_id
+		# Show the room code, not the underlying match UUID.
+		info['match_id'] = OnlineMatch.room_code if OnlineMatch.room_code != '' else match_id
 
 	ui_layer.show_screen("ReadyScreen", info)
 
