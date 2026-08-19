@@ -1,5 +1,8 @@
 extends Node2D
 
+# Must match the id created in nakama/data/modules/fish_game.lua.
+const LEADERBOARD_ID := 'push_the_game_wins'
+
 @onready var game = $Game
 @onready var ui_layer: UILayer = $UILayer
 @onready var ready_screen = $UILayer/Screens/ReadyScreen
@@ -150,7 +153,7 @@ func _on_game_started_signal() -> void:
 
 func _on_player_dead(peer_id: int) -> void:
 	if GameState.online_play:
-		var my_id = get_tree().get_unique_id()
+		var my_id = get_tree().get_multiplayer().get_unique_id()
 		if peer_id == my_id:
 			ui_layer.show_message("You lose!")
 
@@ -174,7 +177,9 @@ func update_wins_leaderboard() -> void:
 		# If our session has expired, then wait until a new session is setup.
 		await Online.session_connected
 
-	Online.nakama_client.write_leaderboard_record_async(Online.nakama_session, 'push_the_game_wins', 1)
+	var result = await Online.nakama_client.write_leaderboard_record_async(Online.nakama_session, LEADERBOARD_ID, 1)
+	if result.is_exception():
+		push_warning("Failed to record leaderboard win: %s" % str(result))
 
 @rpc("any_peer", "call_local") func show_winner(name: String, peer_id: int = 0, score: int = 0, is_match: bool = false) -> void:
 	if is_match:
@@ -189,7 +194,7 @@ func update_wins_leaderboard() -> void:
 	if GameState.online_play:
 		if is_match:
 			stop_game()
-			if peer_id != 0 and peer_id == get_tree().get_unique_id():
+			if peer_id != 0 and peer_id == get_tree().get_multiplayer().get_unique_id():
 				update_wins_leaderboard()
 			ui_layer.show_screen("MatchScreen")
 		else:
@@ -203,6 +208,3 @@ func update_wins_leaderboard() -> void:
 func _on_Music_song_finished(song) -> void:
 	if not music.current_song.playing:
 		music.play_random()
-
-func _on_game_player_dead(peer_id):
-	pass # Replace with function body.

@@ -20,6 +20,9 @@ var _nakama_socket_connecting := false
 signal session_changed (nakama_session)
 signal session_connected (nakama_session)
 signal socket_connected (nakama_socket)
+signal socket_error (message)
+# Emitted after a connection attempt resolves, either way.
+signal socket_settled ()
 
 func _set_readonly_variable(_value) -> void:
 	pass
@@ -55,17 +58,35 @@ func set_nakama_session(_nakama_session: NakamaSession) -> void:
 	if nakama_session and not nakama_session.is_exception() and not nakama_session.is_expired():
 		emit_signal("session_connected", nakama_session)
 
-func connect_nakama_socket() -> void:
+# Returns true once the socket is usable, false if connecting failed.
+#
+# Callers should await the return value rather than awaiting the
+# socket_connected signal: on failure that signal never fires, so awaiting it
+# hangs the caller forever.
+func connect_nakama_socket() -> bool:
 	if nakama_socket != null:
-		return
+		return true
 	if _nakama_socket_connecting:
-		return
+		# Another caller is already connecting; wait for whichever way it lands.
+		await socket_settled
+		return nakama_socket != null
+
 	_nakama_socket_connecting = true
 	nakama_socket = Nakama.create_socket_from(nakama_client)
 	var connected : NakamaAsyncResult = await nakama_socket.connect_async(nakama_session)
 	_nakama_socket_connecting = false
 
+	# Previously this emitted socket_connected unconditionally, so callers
+	# happily went on to drive a socket that had failed to connect.
+	if connected.is_exception():
+		nakama_socket = null
+		emit_signal("socket_error", str(connected))
+		emit_signal("socket_settled")
+		return false
+
 	emit_signal("socket_connected", nakama_socket)
+	emit_signal("socket_settled")
+	return true
 
 func is_nakama_socket_connected() -> bool:
 	return nakama_socket != null && nakama_socket.is_connected_to_host()

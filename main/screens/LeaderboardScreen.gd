@@ -24,6 +24,7 @@ func _show_screen(info: Dictionary = {}) -> void:
 	if result.is_exception():
 		ui_layer.show_message("Unable to retrieve leaderboard")
 		ui_layer.show_screen("MatchScreen")
+		return
 	
 	clear_records()
 	for record in result.records:

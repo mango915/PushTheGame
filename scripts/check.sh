@@ -12,6 +12,7 @@
 #   scripts/check.sh parse        parse gate only
 #   scripts/check.sh boot         boot gate only
 #   scripts/check.sh play         local-play gate only
+#   scripts/check.sh state        OnlineMatch state gate only
 #
 # Exit code 0 = no errors found. Non-zero = errors (printed to stdout).
 
@@ -35,7 +36,7 @@ mkdir -p "$OUT_DIR"
 
 # Patterns that indicate a real GDScript/engine failure. Kept deliberately tight
 # so that ordinary engine chatter does not produce false positives.
-ERROR_PATTERN='SCRIPT ERROR|Nonexistent function|Invalid call|Invalid access|Invalid get index|Invalid set index|Attempt to call|Parse Error|Compile Error|Cannot call method|Trying to assign|out of bounds|Condition "[^"]*" is true|USER ERROR|ERROR: |\[smoke\] FAIL'
+ERROR_PATTERN='\[state\] FAIL|SCRIPT ERROR|Nonexistent function|Invalid call|Invalid access|Invalid get index|Invalid set index|Attempt to call|Parse Error|Compile Error|Cannot call method|Trying to assign|out of bounds|Condition "[^"]*" is true|USER ERROR|ERROR: |\[smoke\] FAIL'
 
 # Engine noise that matches the patterns above but is not a defect in our code.
 # Add narrowly and with a comment.
@@ -85,7 +86,7 @@ ensure_imported() {
 # Gate 1: parse every non-addon script.
 # ---------------------------------------------------------------------------
 gate_parse() {
-	hr; echo "GATE 1/3: parse"; hr
+	hr; echo "GATE 1/4: parse"; hr
 	local log="$OUT_DIR/parse.log"
 	: >"$log"
 	local count=0
@@ -97,8 +98,15 @@ gate_parse() {
 	done < <(find . -name '*.gd' -not -path './addons/*' -not -path './.godot/*' | sort)
 
 	echo "Parsed $count scripts."
+
+	# --check-only parses each script in isolation, with no autoloads
+	# registered, so every reference to GameState/Online/OnlineMatch/Util
+	# reports "Identifier not found" and cascades into "Compilation failed".
+	# Those are artifacts of the gate, not defects. Syntax errors still show up
+	# distinctly as "Parse Error", which is what this gate is actually for.
 	local errors
-	errors="$(filter_errors <"$log")"
+	errors="$(filter_errors <"$log" \
+		| grep -avE 'Compile Error|Compilation failed|Identifier not found')"
 	if [ -n "$errors" ]; then
 		echo "PARSE ERRORS:"
 		echo "$errors"
@@ -112,7 +120,7 @@ gate_parse() {
 # Gate 2: boot the real main scene and sit on the title screen.
 # ---------------------------------------------------------------------------
 gate_boot() {
-	hr; echo "GATE 2/3: boot Main.tscn"; hr
+	hr; echo "GATE 2/4: boot Main.tscn"; hr
 	local log="$OUT_DIR/boot.log"
 	"$GODOT" --headless --path . --quit-after 300 Main.tscn >"$log" 2>&1
 
@@ -131,7 +139,7 @@ gate_boot() {
 # Gate 3: drive local 2-player mode for ~10 seconds of game time.
 # ---------------------------------------------------------------------------
 gate_play() {
-	hr; echo "GATE 3/3: local play"; hr
+	hr; echo "GATE 3/4: local play"; hr
 	local log="$OUT_DIR/play.log"
 
 	# The smoke test counts *physics* frames and quits itself. --quit-after
@@ -167,14 +175,42 @@ gate_play() {
 	fi
 }
 
+# ---------------------------------------------------------------------------
+# Gate 4: OnlineMatch state machine (no server required).
+# ---------------------------------------------------------------------------
+gate_state() {
+	hr; echo "GATE 4/4: online match state"; hr
+	local log="$OUT_DIR/state.log"
+	"$GODOT" --headless --path . tests/OnlineStateTest.tscn >"$log" 2>&1
+
+	grep -a '\[state\] OK' "$log" | sed 's/\x1b\[[0-9;]*m//g' | sed 's/^/  /'
+
+	if ! grep -aq 'assertion(s) failed' "$log"; then
+		echo "WARNING: state test did not run to completion."
+		FAILED=$((FAILED + 1))
+		return
+	fi
+
+	local errors
+	errors="$(filter_errors <"$log")"
+	if [ -n "$errors" ]; then
+		echo "STATE ERRORS:"
+		echo "$errors" | sed 's/\x1b\[[0-9;]*m//g'
+		FAILED=$((FAILED + 1))
+	else
+		echo "OK - online match state intact."
+	fi
+}
+
 ensure_imported
 
 case "${1:-all}" in
 	parse) gate_parse ;;
 	boot)  gate_boot ;;
 	play)  gate_play ;;
-	all)   gate_parse; gate_boot; gate_play ;;
-	*) echo "Unknown gate: $1 (use parse|boot|play|all)"; exit 2 ;;
+	state) gate_state ;;
+	all)   gate_parse; gate_boot; gate_play; gate_state ;;
+	*) echo "Unknown gate: $1 (use parse|boot|play|state|all)"; exit 2 ;;
 esac
 
 hr

@@ -26,8 +26,10 @@ func _on_match_button_pressed(mode) -> void:
 
 	# Connect socket to realtime Nakama API if not connected.
 	if not Online.is_nakama_socket_connected():
-		Online.connect_nakama_socket()
-		await Online.socket_connected
+		ui_layer.show_message("Connecting...")
+		if not await Online.connect_nakama_socket():
+			ui_layer.show_message("Could not reach the server")
+			return
 
 	ui_layer.hide_message()
 

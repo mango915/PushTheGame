@@ -10,11 +10,19 @@ var client_version := 'dev'
 var nakama_multiplayer_bridge: NakamaMultiplayerBridge
 
 # Nakama variables:
-var match_id: String: get = get_match_id, set = _set_readonly_variable
-var matchmaker_ticket: String: set = _set_readonly_variable
+#
+# NOTE: these used to be declared with `set = _set_readonly_variable` -- a setter
+# with an empty body -- to make them read-only from outside this class. GDScript
+# setters also intercept writes from *inside* the class, so every assignment
+# below was silently discarded: match_state never left LOBBY, leave() never
+# cleared the player list, and the matchmaker ticket was never recorded. Only
+# in-place mutation (players[id] = ...) worked, which is why this half-functioned.
+# They are plain vars now; treat them as read-only from outside.
+var match_id: String: get = get_match_id
+var matchmaker_ticket: String
 var nakama_socket: NakamaSocket: set = _set_nakama_socket
 
-var players: Dictionary: set = _set_readonly_variable
+var players: Dictionary
 
 enum MatchState {
 	LOBBY = 0,
@@ -24,7 +32,7 @@ enum MatchState {
 	READY = 4,
 	PLAYING = 5,
 }
-var match_state: int = MatchState.LOBBY: get = get_match_state, set = _set_readonly_variable
+var match_state: int = MatchState.LOBBY: get = get_match_state
 
 enum MatchMode {
 	NONE = 0,
@@ -32,7 +40,7 @@ enum MatchMode {
 	JOIN = 2,
 	MATCHMAKER = 3,
 }
-var match_mode: int = MatchMode.NONE: get = get_match_mode, set = _set_readonly_variable
+var match_mode: int = MatchMode.NONE: get = get_match_mode
 
 signal error (message)
 signal disconnected ()
@@ -80,9 +88,6 @@ static func unserialize_players(_players: Dictionary) -> Dictionary:
 		result[key] = Player.from_dict(_players[key])
 	return result
 
-func _set_readonly_variable(_value) -> void:
-	pass
-
 func _set_nakama_socket(_nakama_socket: NakamaSocket) -> void:
 
 	if nakama_socket == _nakama_socket:
@@ -96,7 +101,7 @@ func _set_nakama_socket(_nakama_socket: NakamaSocket) -> void:
 		nakama_multiplayer_bridge.match_join_error.disconnect(Callable(self, "_on_match_join_error"))
 		nakama_multiplayer_bridge.leave()
 		nakama_multiplayer_bridge = null
-		get_tree().network_peer = null
+		get_tree().get_multiplayer().multiplayer_peer = null
 
 	nakama_socket = _nakama_socket
 
@@ -105,7 +110,6 @@ func _set_nakama_socket(_nakama_socket: NakamaSocket) -> void:
 		nakama_multiplayer_bridge = NakamaMultiplayerBridge.new(nakama_socket)
 		nakama_multiplayer_bridge.match_joined.connect(Callable(self, "_on_match_joined"))
 		nakama_multiplayer_bridge.match_join_error.connect(Callable(self, "_on_match_join_error"))
-		nakama_socket.received_match_presence.connect(Callable(self,"_on_network_peer_connected"))
 		get_tree().get_multiplayer().set_multiplayer_peer(nakama_multiplayer_bridge.multiplayer_peer)
 
 func _ready() -> void:
@@ -179,8 +183,9 @@ func leave(close_socket: bool = false) -> void:
 			_set_nakama_socket(null)
 
 	# Initialize all the variables to their default state.
-	match_id = ''
+	# (match_id is derived from the bridge -- see get_match_id.)
 	players = {}
+	matchmaker_ticket = ''
 	match_state = MatchState.LOBBY
 	match_mode = MatchMode.NONE
 
@@ -216,18 +221,24 @@ func _check_enough_players() -> void:
 func _on_match_joined() -> void:
 	var my_peer_id = get_tree().get_multiplayer().get_unique_id()
 	var presence: NakamaRTAPI.UserPresence = nakama_multiplayer_bridge.get_user_presence_for_peer(my_peer_id)
-	print( presence )
 	var player = Player.from_presence(presence, my_peer_id)
 	players[my_peer_id] = player
 	emit_signal("match_joined", nakama_multiplayer_bridge.match_id, match_mode)
 
-#The master and mastersync rpc behavior is not officially supported anymore. Try using another keyword or making custom logic using get_multiplayer().get_remote_sender_id()
-@rpc func _boot_with_error(msg: String) -> void:
+# Connected in _set_nakama_socket. Without this, every failed create/join threw
+# "Nonexistent function" instead of surfacing the error to the player.
+func _on_match_join_error(exception) -> void:
+	var message := "Unable to join match"
+	if exception != null:
+		message = str(exception)
+	leave()
+	emit_signal("error", message)
+
+@rpc("authority", "call_remote", "reliable") func _boot_with_error(msg: String) -> void:
 	leave()
 	emit_signal("error", msg)
 
-#The master and mastersync rpc behavior is not officially supported anymore. Try using another keyword or making custom logic using get_multiplayer().get_remote_sender_id()
-@rpc func _check_client_version(host_client_version: String) -> void:
+@rpc("authority", "call_remote", "reliable") func _check_client_version(host_client_version: String) -> void:
 	if client_version != host_client_version:
 		leave()
 		emit_signal("error", "Client version doesn't match host")
