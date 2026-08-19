@@ -1,7 +1,9 @@
-image: barichello/godot-ci:3.2.3
+image: barichello/godot-ci:4.2.1
+
+# NOTE: not validated against Godot 4 -- see .github/workflows/godot-export.yml.
 
 variables:
-  EXPORT_NAME: fish-game
+  EXPORT_NAME: push-the-game
 
 stages:
   - export
@@ -20,7 +22,7 @@ windows:
   stage: export
   script:
     - mkdir -v -p build/windows
-    - godot -v --export "Windows Desktop" ./build/windows/$EXPORT_NAME.exe
+    - godot -v --headless --export-release "Windows Desktop" ./build/windows/$EXPORT_NAME.exe
   artifacts:
     name: $EXPORT_NAME-$CI_JOB_NAME
     paths:
@@ -31,7 +33,7 @@ linux:
   stage: export
   script:
     - mkdir -v -p build/linux
-    - godot -v --export "Linux/X11" ./build/linux/$EXPORT_NAME.x86_64
+    - godot -v --headless --export-release "Linux/X11" ./build/linux/$EXPORT_NAME.x86_64
   artifacts:
     name: $EXPORT_NAME-$CI_JOB_NAME
     paths:
@@ -42,7 +44,7 @@ macosx:
   stage: export
   script:
     - mkdir -v -p build/macosx
-    - godot -v --export "Mac OSX" ./build/macosx/$EXPORT_NAME.zip
+    - godot -v --headless --export-release "Mac OSX" ./build/macosx/$EXPORT_NAME.zip
 
     # Extract the zip file since GitLab CI will zip it up again.
     - (cd ./build/macosx && unzip -a $EXPORT_NAME.zip && rm $EXPORT_NAME.zip)
@@ -56,7 +58,7 @@ web:
   stage: export
   script:
     - mkdir -v -p build/web
-    - godot -v --export "HTML5" ./build/web/index.html
+    - godot -v --headless --export-release "HTML5" ./build/web/index.html
   artifacts:
     name: $EXPORT_NAME-$CI_JOB_NAME
     paths:

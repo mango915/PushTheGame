@@ -61,8 +61,10 @@ Playing the game from source
 
 You'll need:
 
-* [Godot](https://godotengine.org/download) 3.2.3 or later.
-* A Nakama server (version 2.15.0 or later) to connect to.
+* [Godot](https://godotengine.org/download) **4.2** (the project declares
+  `config/features = "4.2"` and the scripts use Godot 4 syntax throughout).
+* A Nakama server to connect to. The bundled `docker-compose.yml` runs
+  Nakama 3.20.1 against CockroachDB.
 
 The easiest way to setup a Nakama server locally for testing/learning purposes is [via Docker](https://heroiclabs.com/docs/install-docker-quickstart/), and in fact, there is a `docker-compose.yml` included in the source code of "Fish Game".
 
@@ -76,12 +78,22 @@ docker-compose up -d
 
 1. Download the source code to your computer.
 2. Open Godot and "Import" the project.
-3. (Optional) Edit the
-[autoload/Online.gd](https://github.com/heroiclabs/fishgame-godot/blob/main/autoload/Online.gd)
-file and replace the variables at the top with the right values for your Nakama server.
-If you're running a Nakama server locally with the default settings, then you
-shouldn't need to change anything.
+3. (Optional) Point the game at your own Nakama server. The defaults live at
+the top of `autoload/Online.gd`, but they are overridden at runtime by
+`user://settings.cfg`, so you can change the server without editing code.
 4. Press F5 or click the play button in the upper-right corner to start the game.
+
+You do **not** need to create an account to play online. The game signs in
+silently using a per-installation device id (`autoload/Online.gd`), and stores
+your display name in `user://profile.cfg`. Email/password sign-in is still
+available as a fallback for existing accounts.
+
+### Hosting a game ###
+
+Click **Play Online**, then **HOST**. You get a four-character room code; anyone
+who enters that code under **Room code** joins your game. Codes deliberately
+avoid look-alike characters (no O/0, I/1, S/5, Z/2) so they survive being read
+out loud.
 
 ### Setting up the leaderboard ###
 
@@ -89,7 +101,31 @@ If you didn't use the `docker-compose.yml` included with "Fish Game", then the "
 
 To do that, copy the `nakama/data/modules/fish_game.lua` file to the `modules/` directory where your Nakama server keeps its data, and then restart your Nakama server.
 
+_Note: the leaderboard id in that module must match `Main.LEADERBOARD_ID`. They disagreed for a long time, which silently disabled the leaderboard entirely._
+
 _Note: The game will play fine without the leaderboard._
+
+Running the checks
+------------------
+
+There is no unit-test framework in this project; `scripts/check.sh` is the
+regression harness. It parses every script, boots the game headless, drives a
+full local 2-player round (including a death and a round end), and runs the
+scene-based tests under `tests/`:
+
+```
+./scripts/check.sh          # all gates
+./scripts/check.sh play     # just the local-play gate
+```
+
+It exists because this project was ported from Godot 3, and the dominant bug
+class -- calls into APIs that no longer exist -- parses fine and only fails on
+the frame it finally runs.
+
+_Note: `export_presets.cfg` still carries Godot 3 platform names (`Mac OSX`,
+`HTML5`, `Linux/X11`), and the CI workflows have not been validated against
+Godot 4. Regenerate the presets from the editor's Export dialog before relying
+on a build._
 
 License
 -------
