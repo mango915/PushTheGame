@@ -10,23 +10,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-There is no test suite, linter, or package manager in this repo; the Godot editor is the toolchain.
+There is no linter or package manager in this repo; the Godot editor is the toolchain and
+`scripts/check.sh` is the test runner (see "The regression harness" below).
+
+The engine is **Godot 4.2** specifically. Do not run this project through a newer Godot —
+opening it in 4.3+ migrates `project.godot` and the `.godot` cache in place. The commands
+below assume `godot` resolves to a 4.2.x binary on `PATH`; on macOS that is
+`/Applications/Godot.app/Contents/MacOS/Godot`, and `scripts/check.sh` honours a `GODOT`
+environment variable if it is somewhere else.
 
 ```bash
 # Regression harness -- run this before and after any change (see below)
 ./scripts/check.sh
 
-# Open in the editor (macOS)
-/Applications/Godot.app/Contents/MacOS/Godot --path .
+# Open in the editor
+godot --path .
 
 # Run the game headless-ish from CLI (main scene is Main.tscn)
-/Applications/Godot.app/Contents/MacOS/Godot --path . Main.tscn
+godot --path . Main.tscn
 
 # Local Nakama server + CockroachDB (required for "Play Online")
-docker-compose up -d      # Nakama on :7350, console on :7351
+docker compose up -d      # Nakama on :7350, console on :7351
 
-# Export a build (presets in export_presets.cfg: "Windows Desktop", "Linux/X11", "Mac OSX", "HTML5")
-/Applications/Godot.app/Contents/MacOS/Godot --path . --export-release "Mac OSX" ./build/macosx/game.zip
+# Export a build. NOTE: export_presets.cfg still carries Godot 3 platform names
+# ("Mac OSX", "HTML5", "Linux/X11") and must be regenerated from the editor's
+# Export dialog before any build from it is trustworthy.
+godot --path . --export-release "Linux/X11" ./build/linux/game.x86_64
 ```
 
 Two-player local play needs no server: Title screen → "Play Local" wires `player1_*` / `player2_*` input actions to two players in the same window.
@@ -45,11 +54,12 @@ Note `tests/net_multiplayer.tscn` is deliberately **not** named `*Test.tscn` —
 
 Test scenes follow one convention: print `[tag] OK:` / `[tag] FAIL:` lines, then `print("[tag] %d assertion(s) failed" % _failures)`, then `get_tree().quit(0)`. Drop a new `tests/FooTest.tscn` in and the harness picks it up. Assert on *invariants*, not just absence of crashes — most bugs here are silently wrong behavior, not errors.
 
-Three Godot 4.2 quirks the harness had to work around, all of which cost real time:
+Godot 4.2 quirks the harness had to work around, all of which cost real time:
 - **There is no `--import` flag.** Passing one is silently ignored and the engine just runs the game forever.
 - **`--headless --editor` imports correctly but never exits** (`--quit`/`--quit-after` do not end the editor's import pass). The harness watches `.godot/imported` until it settles, then stops it.
 - **`--quit-after` counts render frames**, which in headless run far faster than the 60 Hz physics tick. Anything counting physics frames must bound itself.
 - **`--check-only` parses each script in isolation with no autoloads registered**, so every reference to `GameState`/`Online`/`OnlineMatch`/`Util` reports "Identifier not found". The parse gate filters those; it only meaningfully catches syntax errors.
+- **Some engine `ERROR:` lines are a test's success condition, not a failure.** `check.sh` greps for a bare `ERROR: `, so two classes of shutdown/expected chatter are filtered in `IGNORE_PATTERN` — each with a comment saying why. `Couldn't create an ENet host` is emitted *by* the LAN tests that deliberately provoke a refused bind. `Resources still in use at exit` / `ObjectDB instances leaked at exit` fire because every scene in `tests/` calls `get_tree().quit()` the moment its assertions finish, leaving that frame's deferred `queue_free()` calls unprocessed by construction — it tracks teardown timing, not the game, and was observed hopping between scenes on consecutive runs of an identical tree. Before adding to that list, check the error is genuinely not about the product; a real leak check would be its own test asserting on `Performance.get_monitor(OBJECT_COUNT)`.
 
 ## Server configuration
 
@@ -57,7 +67,7 @@ Three Godot 4.2 quirks the harness had to work around, all of which cost real ti
 
 `autoload/Build.gd` is **generated** — `scripts/generate-build-variables.sh` overwrites it in CI from `NAKAMA_HOST` / `NAKAMA_PORT` / `NAKAMA_SERVER_KEY` env vars and stamps `OnlineMatch.client_version` with the commit SHA (the matchmaker refuses to pair clients with mismatched `client_version`). Never hand-edit it.
 
-The leaderboard module `nakama/data/modules/fish_game.lua` is mounted into the container by `docker-compose.yml`. Note: it creates a leaderboard named `fish_game_wins`, but `Main.gd` and `LeaderboardScreen.gd` read/write `push_the_game_wins` — the leaderboard silently does nothing until these agree. `/nakama/data/` is gitignored apart from the tracked lua module.
+The leaderboard module `nakama/data/modules/fish_game.lua` is mounted into the container by `docker-compose.yml`. It creates a leaderboard named `push_the_game_wins`, which is what `Main.gd` (`LEADERBOARD_ID`) and `LeaderboardScreen.gd` read and write — these three must agree or the leaderboard silently does nothing. `/nakama/data/` is gitignored apart from the tracked lua module.
 
 ## Architecture
 

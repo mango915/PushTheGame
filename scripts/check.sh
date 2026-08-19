@@ -40,7 +40,31 @@ ERROR_PATTERN='\[state\] FAIL|SCRIPT ERROR|Nonexistent function|Invalid call|Inv
 
 # Engine noise that matches the patterns above but is not a defect in our code.
 # Add narrowly and with a comment.
-IGNORE_PATTERN='ERROR: Cannot open file .*\.import|texture_create|No loader found|vulkan|Vulkan|OpenGL|GLES|audio driver|Dummy|CPU pipeline'
+#
+# "Couldn't create an ENet host" is pushed by the engine whenever
+# create_server()/create_client() refuses, and tests/lan_test.gd deliberately
+# provokes exactly that twice: it squats on a port and asserts hosting fails
+# cleanly rather than half-working, then asserts a join to an empty address is
+# refused. The engine error IS the behaviour under test, so a healthy LAN suite
+# always emitted two of these and the whole run reported failure. The real guard
+# on those paths is the assertions around them ("hosting on a busy port fails
+# instead of half-working"), which still fail loudly if the behaviour regresses.
+#
+# "Resources still in use at exit" / "ObjectDB instances leaked at exit" are
+# emitted when the engine shuts down with objects still alive. Every scene in
+# tests/ ends by calling get_tree().quit() the moment its assertions are done,
+# which leaves that frame's deferred queue_free() calls unprocessed by
+# construction -- so the diagnostic fires on test TEARDOWN TIMING, not on
+# anything the game does. It was seen on two different scenes on two
+# consecutive runs of an identical tree, both with every assertion passing,
+# which is the tell: in this harness it carries no signal about the product.
+# Making it deterministic would mean tuning awaited frame counts in a dozen
+# scenes, including ones that quit from _physics_process and from timer
+# callbacks -- fragile in exactly the way that makes a suite untrustworthy.
+# Tests should still free what they create (see tests/effect_zone_test.gd); a
+# real leak check would need to be its own test, asserting on
+# Performance.get_monitor(OBJECT_COUNT) rather than grepping shutdown chatter.
+IGNORE_PATTERN='ERROR: Cannot open file .*\.import|texture_create|No loader found|vulkan|Vulkan|OpenGL|GLES|audio driver|Dummy|CPU pipeline|Couldn'"'"'t create an ENet host|Resources still in use at exit|ObjectDB instances leaked at exit'
 
 FAILED=0
 

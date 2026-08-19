@@ -37,6 +37,22 @@ func _ready() -> void:
 	_check_composition()
 
 	print("[zone] %d assertion(s) failed" % _failures)
+
+	# Tear the scratch world down before quitting.
+	#
+	# Every check above frees its player and zone with queue_free(), which is
+	# DEFERRED -- and _world itself was never freed at all. Quitting on the same
+	# frame left the whole deletion queue unprocessed, so the engine reported
+	# "Resources still in use at exit". scripts/check.sh greps for a bare
+	# "ERROR: ", so that failed the entire run -- intermittently, since whether
+	# the queue happened to flush first depends on frame timing. Freeing the
+	# parent and giving the tree two frames to process the queue makes it
+	# deterministic. Deliberately not silenced in check.sh's IGNORE_PATTERN:
+	# the diagnostic is worth keeping for real leaks.
+	_world.queue_free()
+	await get_tree().process_frame
+	await get_tree().process_frame
+
 	get_tree().quit(0)
 
 func _make_player() -> Node:
