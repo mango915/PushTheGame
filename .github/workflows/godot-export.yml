@@ -1,10 +1,12 @@
 name: "godot-export"
 
 # NOTE: this workflow has NOT been validated against Godot 4. The project was
-# ported from Godot 3 and export_presets.cfg still carries Godot 3 platform
-# names ("Mac OSX", "HTML5", "Linux/X11"), which Godot 4 does not use.
-# Regenerate the presets from the editor's Export dialog and fix the preset
-# names in the steps below before trusting a build from here.
+# ported from Godot 3. The export PLATFORM names in export_presets.cfg have been
+# corrected for Godot 4 ("macOS", "Web", "Linux" -- verified against 4.7.2), and
+# the preset names in the steps below match, but the per-preset OPTION keys in
+# that file are still Godot 3 vintage. Regenerate the presets from the editor's
+# Export dialog before trusting a build from here. The Godot version pinned
+# below (4.2.1) is also older than the 4.7.2 the project targets.
 on:
   push:
     branches:
@@ -72,7 +74,7 @@ jobs:
       - name: Linux Build
         run: |
           mkdir -v -p build/linux
-          godot -v --headless --export-release "Linux/X11" ./build/linux/$EXPORT_NAME.x86_64
+          godot -v --headless --export-release "Linux" ./build/linux/$EXPORT_NAME.x86_64
       - name: Tar files
         run: tar -cvf ./build/$EXPORT_NAME-linux.tar ./build/linux/
       - name: Upload Artifact
@@ -104,7 +106,7 @@ jobs:
       - name: Mac Build
         run: |
           mkdir -v -p build/macosx
-          godot -v --headless --export-release "Mac OSX" ./build/macosx/$EXPORT_NAME.zip
+          godot -v --headless --export-release "macOS" ./build/macosx/$EXPORT_NAME.zip
       - name: Upload Artifact
         uses: actions/upload-artifact@v1
         with:
@@ -127,7 +129,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: Fish Game (Godot) ${{ github.ref }}
+          release_name: Push The Game ${{ github.ref }}
           draft: true
           prerelease: false
       - name: Download artifacts
@@ -145,7 +147,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/fishgame-godot-windows.zip
+          asset_path: ./build/${{ env.EXPORT_NAME }}-windows.zip
           asset_name: ${{ env.EXPORT_NAME }}-windows.zip
           asset_content_type: application/zip
       - name: Upload Linux build to release
@@ -154,7 +156,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/fishgame-godot-linux.zip
+          asset_path: ./build/${{ env.EXPORT_NAME }}-linux.zip
           asset_name: ${{ env.EXPORT_NAME }}-linux.zip
           asset_content_type: application/zip
       - name: Upload MacOS build to release
@@ -163,7 +165,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/fishgame-godot-macosx/fishgame-godot.zip
+          asset_path: ./artifacts/${{ env.EXPORT_NAME }}-macosx/${{ env.EXPORT_NAME }}.zip
           asset_name: ${{ env.EXPORT_NAME }}-macosx.zip
           asset_content_type: application/zip
 

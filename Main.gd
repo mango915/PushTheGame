@@ -1,6 +1,6 @@
 extends Node2D
 
-# Must match the id created in nakama/data/modules/fish_game.lua.
+# Must match the id created in nakama/data/modules/push_the_game.lua.
 const LEADERBOARD_ID := 'push_the_game_wins'
 
 @onready var game = $Game
@@ -25,6 +25,12 @@ func _ready() -> void:
 	# a client who is in the round. Connected in code rather than in Main.tscn so
 	# the wiring lives next to the handler that depends on it.
 	game.roster_updated.connect(Callable(self, "_on_Game_roster_updated"))
+
+	# The round clock lives in Game (it has to: the host drives it and RPCs the
+	# decisions), and the HUD lives in UILayer. These three are the whole bridge.
+	game.round_clock_changed.connect(Callable(self, "_on_Game_round_clock_changed"))
+	game.sudden_death_warning.connect(Callable(self, "_on_Game_sudden_death_warning"))
+	game.sudden_death_started.connect(Callable(self, "_on_Game_sudden_death_started"))
 
 	# Accepting a Steam invite has to switch the game into online mode by
 	# itself: the player never passed through the title screen's PLAY ONLINE
@@ -112,6 +118,11 @@ func _on_UILayer_change_screen(name: String, _screen) -> void:
 		ui_layer.hide_back_button()
 	else:
 		ui_layer.show_back_button()
+
+	# A screen being up means a menu or the lobby, never a running round.
+	# set_round_time() enforces the same rule every frame; this just makes the
+	# HUD disappear on the very frame the screen appears.
+	ui_layer.hide_round_timer()
 
 	if name != 'ReadyScreen':
 		if match_started:
@@ -255,6 +266,7 @@ func stop_game(reset_score: bool = true) -> void:
 	if reset_score:
 		players_score.clear()
 
+	ui_layer.hide_round_timer()
 	game.game_stop()
 
 func restart_game() -> void:
@@ -269,6 +281,30 @@ func _on_game_started_signal() -> void:
 	if not match_started:
 		match_started = true
 		music.play_random()
+
+# The HUD is a pure mirror of Game's clock: it is redrawn from whatever the
+# round clock last reported, and hidden the moment that clock stops. Nothing
+# here decides anything, so a client cannot show a different countdown from the
+# host's for longer than one sync interval.
+func _on_Game_round_clock_changed(seconds_left: float, running: bool, sudden_death: bool) -> void:
+	ui_layer.set_round_time(seconds_left, running, sudden_death)
+
+func _on_Game_sudden_death_warning(seconds_left: float) -> void:
+	var text := "Sudden death in %d..." % int(ceil(maxf(0.0, seconds_left)))
+	ui_layer.show_message(text)
+	_hide_message_later(text)
+
+func _on_Game_sudden_death_started() -> void:
+	var text := "SUDDEN DEATH - the arena is flooding!"
+	ui_layer.show_message(text)
+	_hide_message_later(text)
+
+# Clears a transient notice, but only if nothing more important (a death, a
+# winner, a player leaving) has taken the message label over in the meantime.
+func _hide_message_later(text: String, seconds: float = 2.5) -> void:
+	await get_tree().create_timer(seconds).timeout
+	if ui_layer.message_label.text == text:
+		ui_layer.hide_message()
 
 func _on_player_dead(peer_id: int) -> void:
 	if GameState.online_play:

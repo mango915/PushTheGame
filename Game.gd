@@ -32,6 +32,14 @@ var players_setup := {}
 signal game_started_signal ()
 signal player_dead (peer_id)
 signal game_over_signal (peer_id)
+# Round clock state for the HUD. Emitted on every peer, every frame the clock is
+# alive, plus once with running = false whenever it is stopped or reset.
+signal round_clock_changed (seconds_left, running, sudden_death)
+# Raised on each peer the moment sudden death begins, for the warning message.
+signal sudden_death_started ()
+# Raised once, SUDDEN_DEATH_WARNING_SECONDS before the clock expires, so the
+# player is told what is about to happen rather than just dying.
+signal sudden_death_warning (seconds_left)
 # Carries the round's roster to every peer. Only the host ever calls
 # Main.start_game(), so Main.players used to stay empty on clients for the whole
 # match; _do_game_setup is the one place that reaches every peer with the roster.
@@ -46,6 +54,45 @@ var _waiting_for_setup := false
 # Bumped whenever a round is set up or torn down, so the watchdog of an earlier
 # round cannot start (or unpause) a round that has since been replaced.
 var _setup_generation := 0
+
+#####
+# Round clock and sudden death
+#
+# Rounds used to be able to stall forever: two players who never reach each
+# other keep the match hostage. The clock bounds a round, and when it runs out
+# the arena itself finishes the job.
+#
+# HOST-AUTHORITATIVE. Every peer runs a copy of the countdown, but ONLY so the
+# HUD has a smooth number to draw. A peer never decides anything from it: the
+# host is the only one that fires _do_sudden_death_start, exactly as it is the
+# only one that picks the map and ships the settings in _do_game_setup. Peers
+# also have their remaining time overwritten by the host once a second, so a
+# client whose display has drifted is pulled back rather than diverging for the
+# whole round.
+#####
+
+const SuddenDeathZoneScript := preload("res://objects/SuddenDeathZone.gd")
+
+# How often the host tells everyone what the clock really says.
+const CLOCK_SYNC_INTERVAL := 1.0
+
+# The HUD turns red and the message warns from here on, so sudden death is never
+# a surprise.
+const SUDDEN_DEATH_WARNING_SECONDS := 10.0
+
+# Fallback play area when a map reports a degenerate rect (Map2 does): the
+# bounding box of the living players, grown by this much on every side, so the
+# tide still has something to sweep and the round still resolves.
+const FALLBACK_RECT_MARGIN := 500.0
+
+var round_clock_running := false
+var round_time_left := 0.0
+var sudden_death_active := false
+
+var _sudden_death_elapsed := 0.0
+var _clock_sync_countdown := 0.0
+var _sudden_death_warned := false
+var _sudden_death_zone: Node2D = null
 
 func _ready() -> void:
 	reload_game_settings()
@@ -98,6 +145,11 @@ func reload_game_settings() -> void:
 	# pausing first would immediately be undone here.
 	if game_started:
 		game_stop()
+
+	# Belt and braces: game_stop() above already does this, but it only runs
+	# when a previous round was in flight. A clock (or a tide) surviving into
+	# the next round is exactly the bug class this file keeps producing.
+	_reset_round_clock()
 
 	get_tree().set_pause(true)
 
@@ -200,7 +252,15 @@ func _watch_setup(generation: int) -> void:
 	emit_signal("game_started_signal")
 	get_tree().set_pause(false)
 
+	# Started HERE and not in _do_game_setup: setup pauses the tree and waits on
+	# the handshake (up to SETUP_TIMEOUT_SECONDS), so a clock started there
+	# would have the countdown eaten by the handshake -- and on a slow peer the
+	# round could reach sudden death before anyone had moved.
+	_start_round_clock()
+
 func game_stop() -> void:
+	_reset_round_clock()
+
 	if map.has_method('map_stop'):
 		map.map_stop()
 
@@ -285,5 +345,202 @@ func _on_player_dead(peer_id) -> void:
 
 	if not game_over and players_alive.size() == 1:
 		game_over = true
+		# The round is decided, so the clock and any sudden-death hazard stop
+		# here -- not when the next round is set up. A tide left running would
+		# keep rising (and killing) through the two seconds of "X wins this
+		# round!", and the HUD would keep counting down over the menus.
+		_stop_round_clock()
 		var player_keys = players_alive.keys()
 		emit_signal("game_over_signal", player_keys[0])
+	elif not game_over and players_alive.is_empty():
+		# Nobody left and no winner declared: the round would sit there forever.
+		# Sudden death makes this reachable in a way it was not before -- the
+		# tide can take the last two players within the same handful of frames,
+		# and a death that arrives while the roster is already down to one
+		# lands here. Deaths are still processed one at a time, so the player
+		# who died LAST is the survivor by the only measure available, and
+		# awarding them the round keeps Main's scoring flow completely normal.
+		game_over = true
+		_stop_round_clock()
+		emit_signal("game_over_signal", peer_id)
+
+#####
+# Round clock and sudden death
+#####
+
+# True when this peer is allowed to DECIDE things about the clock, as opposed to
+# merely displaying it. In local play there is only one machine; online, the
+# host is the single source of truth (peer id 1).
+func _is_clock_authority() -> bool:
+	if not GameState.online_play:
+		return true
+	var tree := get_tree()
+	if tree == null:
+		return true
+	return tree.get_multiplayer().is_server()
+
+# Called from _do_game_start(), i.e. once the round is genuinely running.
+func _start_round_clock() -> void:
+	var limit := float(get_game_settings().round_time_limit)
+	if limit <= 0.0:
+		# 0 disables the feature outright: no countdown, no HUD, no sudden
+		# death -- the behaviour the game had before the clock existed.
+		_reset_round_clock()
+		return
+
+	round_time_left = limit
+	round_clock_running = true
+	sudden_death_active = false
+	_sudden_death_elapsed = 0.0
+	_sudden_death_warned = false
+	_clock_sync_countdown = CLOCK_SYNC_INTERVAL
+	emit_signal("round_clock_changed", round_time_left, true, false)
+
+# Stops the countdown and clears the hazard, but does not pretend the round
+# never happened -- used when the round ENDS (someone won).
+func _stop_round_clock() -> void:
+	round_clock_running = false
+	sudden_death_active = false
+	_sudden_death_elapsed = 0.0
+	_sudden_death_warned = false
+	_clear_sudden_death_zone()
+	emit_signal("round_clock_changed", 0.0, false, false)
+
+func _reset_round_clock() -> void:
+	round_time_left = 0.0
+	_clock_sync_countdown = 0.0
+	_stop_round_clock()
+
+func _clear_sudden_death_zone() -> void:
+	if _sudden_death_zone == null:
+		return
+	# The tide must stop killing on the FRAME the round ends -- otherwise it
+	# keeps rising through the two seconds of "X wins this round!" and takes the
+	# winner with it. It cannot simply be freed here: this is reached from
+	# inside a physics callback (body_entered -> die() -> game over), and Godot
+	# refuses to remove a collision object while it is flushing queries. So it
+	# is made inert immediately and deleted on the next idle frame.
+	if is_instance_valid(_sudden_death_zone):
+		if _sudden_death_zone.has_method("deactivate"):
+			_sudden_death_zone.deactivate()
+		_sudden_death_zone.queue_free()
+	_sudden_death_zone = null
+
+func _process(delta: float) -> void:
+	# The tree is paused for the whole setup handshake, so _process does not run
+	# then and the clock cannot tick behind a frozen frame.
+	if not round_clock_running:
+		return
+
+	if sudden_death_active:
+		_process_sudden_death(delta)
+		return
+
+	round_time_left = maxf(0.0, round_time_left - delta)
+	emit_signal("round_clock_changed", round_time_left, true, false)
+
+	# Cosmetic, and therefore fired locally on every peer rather than RPCed:
+	# each peer's countdown is pulled back into line by the host once a second,
+	# so they all cross the threshold within a second of each other.
+	if not _sudden_death_warned and round_time_left <= SUDDEN_DEATH_WARNING_SECONDS:
+		_sudden_death_warned = true
+		emit_signal("sudden_death_warning", round_time_left)
+
+	if not _is_clock_authority():
+		# A client that reaches zero on its own just sits at zero showing
+		# 0:00 until the host says otherwise. It must NOT start sudden death:
+		# two peers each deciding that independently is how hazards end up in
+		# different places on different machines.
+		return
+
+	if GameState.online_play:
+		_clock_sync_countdown -= delta
+		if _clock_sync_countdown <= 0.0:
+			_clock_sync_countdown = CLOCK_SYNC_INTERVAL
+			rpc("_sync_round_clock", round_time_left)
+
+	if round_time_left <= 0.0:
+		if GameState.online_play:
+			rpc("_do_sudden_death_start")
+		else:
+			_do_sudden_death_start()
+
+func _process_sudden_death(delta: float) -> void:
+	_sudden_death_elapsed += delta
+
+	# The tide's position is a pure function of the time since sudden death
+	# began, so every peer draws it in the same place from the single start
+	# message -- no per-frame position syncing, nothing to drift.
+	var duration := maxf(0.5, float(get_game_settings().sudden_death_duration))
+	var progress := clampf(_sudden_death_elapsed / duration, 0.0, 1.0)
+	if _sudden_death_zone != null and is_instance_valid(_sudden_death_zone):
+		_sudden_death_zone.set_progress(progress)
+
+	emit_signal("round_clock_changed", 0.0, true, true)
+
+# The host's authoritative reading of the clock. Peers adopt it; nobody else may
+# send it.
+@rpc("any_peer", "call_local") func _sync_round_clock(seconds_left: float) -> void:
+	if not _sender_is_host():
+		return
+	if not round_clock_running or sudden_death_active:
+		return
+	round_time_left = maxf(0.0, seconds_left)
+
+# The one decision that starts the hazard, made by the host and broadcast.
+@rpc("any_peer", "call_local") func _do_sudden_death_start() -> void:
+	if not _sender_is_host():
+		return
+	if sudden_death_active or not round_clock_running:
+		return
+
+	sudden_death_active = true
+	round_time_left = 0.0
+	_sudden_death_elapsed = 0.0
+	_spawn_sudden_death_zone()
+
+	emit_signal("sudden_death_started")
+	emit_signal("round_clock_changed", 0.0, true, true)
+
+# Only peer 1 (or a purely local call, sender 0) may drive the clock.
+func _sender_is_host() -> bool:
+	var tree := get_tree()
+	if tree == null:
+		return true
+	var sender := tree.get_multiplayer().get_remote_sender_id()
+	return sender == 0 or sender == 1
+
+func _spawn_sudden_death_zone() -> void:
+	_clear_sudden_death_zone()
+
+	var zone: Node2D = SuddenDeathZoneScript.new()
+	zone.name = "SuddenDeath"
+	add_child(zone)
+	zone.setup(_get_sudden_death_rect())
+	_sudden_death_zone = zone
+
+# The area the tide has to cover, in global pixels.
+func _get_sudden_death_rect() -> Rect2:
+	var rect := Rect2()
+	if map != null and map.has_method("get_map_rect"):
+		rect = map.get_map_rect()
+	if rect.size.x > 0.0 and rect.size.y > 0.0:
+		return rect
+
+	# A map whose tilemaps report nothing usable (maps/Map2.tscn does) would
+	# otherwise leave sudden death with no geometry and the round unresolvable.
+	# Fall back to the box the players are actually standing in.
+	push_warning("Map reported an empty rect; sudden death falls back to the players' bounds.")
+	var bounds := Rect2()
+	var found := false
+	for child in players_node.get_children():
+		if not child.has_method("pickup_or_throw"):
+			continue
+		if not found:
+			bounds = Rect2(child.global_position, Vector2.ZERO)
+			found = true
+		else:
+			bounds = bounds.expand(child.global_position)
+	if not found:
+		bounds = Rect2(Vector2.ZERO, Vector2.ZERO)
+	return bounds.grow(FALLBACK_RECT_MARGIN)

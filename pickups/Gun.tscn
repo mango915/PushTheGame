@@ -87,6 +87,8 @@ tracks/2/keys = {
 [node name="Gun" instance=ExtResource( 2 )]
 script = ExtResource( 3 )
 weapon_data = ExtResource( 7 )
+throw_damage_speed = 420.0
+throw_self_immunity = 0.35
 
 [node name="GunSprite" type="Sprite2D" parent="." index="0"]
 position = Vector2( 14, -4 )

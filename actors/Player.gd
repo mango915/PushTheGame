@@ -1,6 +1,7 @@
 extends CharacterBody2D
 
 var ExplodeEffect: PackedScene = preload("res://actors/ExplodeEffect.tscn")
+var CorpseScene: PackedScene = preload("res://actors/Corpse.tscn")
 var InputBuffer: RefCounted = preload("res://components/InputBuffer.gd")
 
 enum PlayerSkin {
@@ -224,7 +225,10 @@ func set_player_skin(_player_skin: int) -> void:
 # counter-scaling does NOT work: flipping negates the player's scale.x, and the
 # pickup AnimationPlayer re-animates that scale, so the label would be left
 # mirrored whenever an animation reset the flip.
-const NAME_LABEL_OFFSET := Vector2(0, -46)
+# Clear of the sprite, not on top of it. The whale frame is 66px tall and the
+# body sprite sits above the player's origin, so -46 put the text across the
+# character's back.
+const NAME_LABEL_OFFSET := Vector2(0, -82)
 
 var player_name: String = ""
 var _name_label: Label
@@ -447,6 +451,38 @@ func hurt(node: Node2D) -> void:
 		push_back_vector = push_back_vector,
 	})
 
+# --- Death cosmetics ---------------------------------------------------------
+#
+# The corpse and the gibs are decoration. They are spawned from
+# _explode_and_free(), which every peer already reaches (see _do_die() and
+# force_remove()), and they are never networked themselves -- see the header of
+# actors/Corpse.gd.
+
+# The last push this player took, remembered only so the corpse can be flung the
+# same way. Recorded by actors/player-states/Hurt.gd rather than by hurt():
+# Hitbox only calls hurt() on the victim's own peer, but the Hurt state and its
+# info dictionary are replicated to every peer through update_remote_player(), so
+# recording it in the state is the one place that runs everywhere.
+var last_hit_vector := Vector2.ZERO
+
+# push_back_speed is tuned for how far a hit shoves a LIVING player (50 px/s by
+# default), which is nowhere near enough to throw a body. These turn it into a
+# launch without touching the gameplay number.
+const CORPSE_IMPULSE_SCALE := 7.0
+const CORPSE_LAUNCH_UP := 260.0
+
+# How much of the dying player's own momentum the body keeps.
+const CORPSE_MOMENTUM := 0.5
+
+# The player's origin is at its feet; the sprite is drawn a frame's worth above
+# it (BodySprite sits at (0, -31) once its position and offset are combined).
+# The corpse's origin is the middle of its sprite so that it tumbles about its
+# body rather than about a point under its chin.
+const CORPSE_SPAWN_OFFSET := Vector2(0, -31)
+
+func note_hit(push_back_vector: Vector2) -> void:
+	last_hit_vector = push_back_vector
+
 func die() -> void:
 	if GameState.online_play:
 		if is_multiplayer_authority():
@@ -475,12 +511,45 @@ func force_remove() -> void:
 	_explode_and_free()
 
 func _explode_and_free() -> void:
+	var parent := get_parent()
+
+	# Exactly ONE explosion per death. This used to be spawned here AND in
+	# Dead._state_enter(); tests/smoke_test.gd and tests/ragdoll_test.gd both
+	# count the CPUParticles2D children of the Players container to keep it that
+	# way, which is also why the gibs are a child of the corpse and not of the
+	# container.
 	var explosion = ExplodeEffect.instantiate()
-	get_parent().add_child(explosion)
+	parent.add_child(explosion)
 	explosion.global_position = global_position
+
+	_spawn_corpse(parent)
 
 	queue_free()
 	emit_signal("player_dead")
+
+# Drops a cosmetic ragdoll where the player just died.
+#
+# Parented next to the explosion, in the Players container, for two reasons: it
+# is what the death effect already does, and that container is emptied by
+# Game.game_stop() at the end of every round, so bodies never outlive their
+# match. It is safe there because nothing treats the container's children as
+# players without asking first -- Camera.gd and Game/smoke-test code filter on
+# has_method("pickup_or_throw"), and a corpse deliberately has no such method.
+func _spawn_corpse(parent: Node) -> void:
+	if parent == null or CorpseScene == null:
+		return
+
+	var corpse = CorpseScene.instantiate()
+	parent.add_child(corpse)
+	corpse.global_position = global_position + CORPSE_SPAWN_OFFSET
+
+	var impulse := last_hit_vector * CORPSE_IMPULSE_SCALE
+	if impulse.length() > 0.0:
+		# Hit deaths pop upward as well as away; a quiet death (drowning in the
+		# round timer, a disconnect, a fall) just drops the body.
+		impulse += Vector2.UP * CORPSE_LAUNCH_UP
+
+	corpse.setup(player_skin, vector * CORPSE_MOMENTUM, impulse, flip_h)
 
 func _play_blop_sound() -> void:
 	sounds.play("Blop")

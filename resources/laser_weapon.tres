@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/WeaponData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+weapon_name = "Laser"
+pickup_position = 0
+bounce = 0.1
+cooldown_time = 2.5
+max_ammo = 4
+throw_damage_speed = 420.0
+throw_self_immunity = 0.35
+beam_range = 1600.0
+beam_duration = 0.16

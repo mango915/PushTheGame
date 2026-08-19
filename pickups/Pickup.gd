@@ -19,6 +19,29 @@ enum PickupPosition {
 # before WeaponData existed behaves exactly as it always did.
 @export var weapon_data: WeaponData = null
 
+# --- Thrown-weapon damage ---------------------------------------------------
+#
+# A weapon in flight is a weapon: an empty gun still kills, and disarming
+# someone by throwing something at them hands them your ammo. The numbers live
+# on WeaponData (see throw_damage_speed / throw_self_immunity) so a heavy sword
+# can stay lethal much later into its arc than a light gun; the values here are
+# the fallback for a scene with no resource assigned, and each weapon scene
+# overrides them in the inspector.
+#
+# 0 disables thrown damage for this weapon entirely (the explosives use it --
+# they have their own, much louder, way of killing you).
+@export var throw_damage_speed: float = 0.0
+
+# Seconds after release during which the thrower is immune to their own throw.
+# Player.hurt() already refuses damage from a weapon the victim is HOLDING;
+# once thrown it is no longer held, so the same protection has to be spelled
+# out here or every throw would kill the thrower on the release frame.
+@export var throw_self_immunity: float = 0.35
+
+# The 1-BASED physics layer the players are on ("Player" in project.godot).
+# Matches the collision_mask of 2 that every Hitbox in the game uses.
+const PLAYER_COLLISION_LAYER := 2
+
 enum PickupState {
 	FREE = 0,
 	PICKED_UP,
@@ -40,10 +63,20 @@ var linear_velocity := Vector2.ZERO
 var angular_velocity := 0.0
 var bounce := 0.1
 
+# Who let go of us, and for how much longer they are safe from it.
+var thrown_by: Node2D = null
+var throw_immunity_left := 0.0
+
+# Built in code from this pickup's own collision shapes, so that every weapon
+# scene gets thrown damage without each of them having to gain a hitbox node.
+# Null when throw_damage_speed is 0.
+var thrown_hitbox: Area2D = null
+
 signal picked_up()
 
 func _ready():
 	_apply_weapon_data()
+	_build_thrown_hitbox()
 
 # Copy the shared tunables out of weapon_data. Subclasses override this to pull
 # their own fields and must call super() first. Called from _ready(), so a
@@ -54,6 +87,14 @@ func _apply_weapon_data() -> void:
 
 	pickup_position = weapon_data.pickup_position as PickupPosition
 	bounce = weapon_data.bounce
+
+	# 0 means "the resource does not care", so the scene's own value survives.
+	# See the note at the bottom of WeaponData.gd: gun_weapon.tres and
+	# sword_weapon.tres predate these fields and serialize them as 0.
+	if weapon_data.throw_damage_speed > 0.0:
+		throw_damage_speed = weapon_data.throw_damage_speed
+	if weapon_data.throw_self_immunity > 0.0:
+		throw_self_immunity = weapon_data.throw_self_immunity
 
 func can_pickup() -> bool:
 	return pickup_state == PickupState.FREE or pickup_state == PickupState.THROWN
@@ -77,6 +118,12 @@ func throw(_throw_position: Vector2, _throw_vector: Vector2, _throw_torque: floa
 	_on_throw()
 
 	pickup_state = PickupState.THROWING
+	# Captured BEFORE player is cleared: this is who must not be killed by their
+	# own release. Player.hurt() covers a weapon still in the victim's hands;
+	# from here on the weapon is nobody's, so the grace period below is the only
+	# thing between a thrower and their own sword.
+	thrown_by = player
+	throw_immunity_left = throw_self_immunity
 	player = null
 
 	throw_position = _throw_position
@@ -90,6 +137,12 @@ func use() -> void:
 	pass
 
 func _physics_process(delta: float) -> void:
+	# Ticked before the early returns, so a pickup that is caught mid-flight (or
+	# put to sleep) does not freeze its thrower's grace period and hand it back
+	# to them on the next throw.
+	if throw_immunity_left > 0.0:
+		throw_immunity_left = maxf(0.0, throw_immunity_left - delta)
+
 	if sleeping:
 		return
 	if pickup_state == PickupState.PICKED_UP or pickup_state == PickupState.WORN:
@@ -144,3 +197,123 @@ func _physics_process(delta: float) -> void:
 	if pickup_state == PickupState.THROWN:
 		_on_throw_finished()
 		pickup_state = PickupState.FREE
+
+# ---------------------------------------------------------------------------
+# Thrown-weapon damage
+#
+# The pickup body itself is on the "Pickup" layer and masks only Environment +
+# OneWayPlatforms (see Pickup.tscn), so it flies straight through players and
+# must not stop doing so -- a thrown weapon that bounced off people would be a
+# different game. Detection therefore goes through a separate Area2D built here
+# from this pickup's own collision shapes, so every weapon scene gets thrown
+# damage without any of them having to gain a hitbox node by hand.
+#
+# It deliberately does NOT reuse components/Hitbox.gd: a Hitbox hurts on contact
+# unconditionally, and a thrown weapon must only hurt while it is actually
+# travelling fast enough.
+# ---------------------------------------------------------------------------
+
+func _build_thrown_hitbox() -> void:
+	if throw_damage_speed <= 0.0:
+		return
+
+	var area := Area2D.new()
+	area.name = "ThrownHitbox"
+	# Detect players; be invisible to everything that scans for areas.
+	area.collision_layer = 0
+	area.collision_mask = 0
+	area.set_collision_mask_value(PLAYER_COLLISION_LAYER, true)
+	area.monitorable = false
+
+	# Only DIRECT children: the Sword's own Hitbox is a separate Area2D with its
+	# own polygon, and copying that here would make a thrown sword lethal over
+	# its swing arc rather than its blade.
+	var shapes := 0
+	for child in get_children():
+		if child is CollisionShape2D:
+			var copy := CollisionShape2D.new()
+			copy.shape = child.shape
+			copy.transform = child.transform
+			copy.disabled = child.disabled
+			area.add_child(copy)
+			shapes += 1
+		elif child is CollisionPolygon2D:
+			var poly := CollisionPolygon2D.new()
+			poly.polygon = child.polygon
+			poly.transform = child.transform
+			poly.disabled = child.disabled
+			area.add_child(poly)
+			shapes += 1
+
+	if shapes == 0:
+		# Nothing to detect with; a weapon scene with no collision shape cannot
+		# be thrown at anyone in the first place.
+		area.free()
+		return
+
+	add_child(area)
+	area.body_entered.connect(_on_thrown_hitbox_body_entered)
+	thrown_hitbox = area
+
+# True while this pickup is a weapon rather than scenery: in flight, awake, and
+# still moving fast enough to hurt. Everything that stops being true here stops
+# the kill, which is what keeps a thrown weapon lying on the floor harmless.
+func is_thrown_lethal() -> bool:
+	if throw_damage_speed <= 0.0:
+		return false
+	if sleeping:
+		return false
+	if pickup_state != PickupState.THROWN:
+		return false
+	return linear_velocity.length() >= throw_damage_speed
+
+func _on_thrown_hitbox_body_entered(body: Node) -> void:
+	if not is_thrown_lethal():
+		return
+	if not body.has_method("hurt"):
+		return
+	if body == thrown_by and throw_immunity_left > 0.0:
+		return
+
+	# Same gate as components/Hitbox.gd: remote players are simulated locally
+	# from a replayed input buffer, so every peer sees this contact, but only
+	# the peer that owns the victim may act on it. It then syncs the resulting
+	# Hurt state to everyone else the ordinary way.
+	if GameState.online_play and not body.is_multiplayer_authority():
+		return
+
+	# Passing the hitbox (not `self`) keeps Player.hurt()'s "do not cut yourself
+	# with your own sword" test working: it compares current_pickup against
+	# node.get_parent(), which is this pickup.
+	body.hurt(thrown_hitbox)
+
+# ---------------------------------------------------------------------------
+# Round teardown
+#
+# Pickup.tscn is in the "map_object" group, so Map.map_stop() reaches every
+# loose weapon in the arena. Game.game_stop() only frees the PLAYERS; loose
+# pickups live under the map and survive until Game.reload_map() replaces the
+# whole map node -- which happens on a restart, but NOT when a match is
+# abandoned to the menu. Without these hooks a live mine or a burning grenade
+# would keep counting down on a map nobody is playing any more.
+# ---------------------------------------------------------------------------
+
+func map_object_start() -> void:
+	pass
+
+func map_object_stop() -> void:
+	# Stop simulating. Subclasses with a timer of their own override this and
+	# call super() -- see Explosive.gd.
+	sleeping = true
+
+# Takes this pickup out of its holder's hands, leaving Player.current_pickup in
+# a sane state. Used by anything that can destroy itself while being carried
+# (an explosive that cooks too long), because simply queue_free()-ing would
+# leave the player holding a freed node.
+func release_from_holder() -> void:
+	if player == null or not is_instance_valid(player):
+		return
+	var holder = player
+	if holder.get("current_pickup") == self:
+		# A plain local call, so Player._do_throw()'s sender check passes.
+		holder._do_throw()

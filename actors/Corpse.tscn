@@ -1,0 +1,50 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://actors/Corpse.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/whale_orange.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/kenney-platform-deluxe/request/rockSmall.png" id="3"]
+
+[sub_resource type="CircleShape2D" id="1"]
+radius = 20.0
+
+[node name="Corpse" type="CharacterBody2D"]
+collision_layer = 0
+collision_mask = 17
+script = ExtResource("1")
+
+[node name="BodySprite" type="Sprite2D" parent="."]
+texture = ExtResource("2")
+hframes = 7
+vframes = 22
+frame = 101
+
+[node name="FinSprite" type="Sprite2D" parent="."]
+texture = ExtResource("2")
+hframes = 7
+vframes = 22
+frame = 108
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("1")
+
+[node name="Gibs" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 10
+lifetime = 0.7
+one_shot = true
+explosiveness = 1.0
+local_coords = false
+texture = ExtResource("3")
+emission_shape = 1
+emission_sphere_radius = 8.0
+direction = Vector2(0, -1)
+spread = 180.0
+gravity = Vector2(0, 1400)
+initial_velocity_min = 180.0
+initial_velocity_max = 420.0
+angular_velocity_min = -720.0
+angular_velocity_max = 720.0
+damping_min = 20.0
+damping_max = 60.0
+scale_amount_min = 0.25
+scale_amount_max = 0.6

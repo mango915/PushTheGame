@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://pickups/Pickup.tscn" id="1"]
+[ext_resource type="Script" path="res://pickups/Grenade.gd" id="2"]
+[ext_resource type="Resource" path="res://resources/grenade_weapon.tres" id="3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/kings_and_pigs/09-Bomb/Bomb Off.png" id="4"]
+
+[sub_resource type="CircleShape2D" id="1"]
+radius = 15.0
+
+[node name="Grenade" instance=ExtResource("1")]
+script = ExtResource("2")
+weapon_data = ExtResource("3")
+
+[node name="Sprite2D" type="Sprite2D" parent="." index="0"]
+position = Vector2(0, -8)
+scale = Vector2(0.72, 0.72)
+texture = ExtResource("4")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." index="1"]
+position = Vector2(0, -8)
+shape = SubResource("1")
+
+[node name="HeldPosition" parent="." index="2"]
+position = Vector2(0, -8)

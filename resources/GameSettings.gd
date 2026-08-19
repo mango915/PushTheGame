@@ -30,6 +30,8 @@ const FIELDS := [
 	"throw_vector_max_length",
 	"throw_torque",
 	"rounds_to_win",
+	"round_time_limit",
+	"sudden_death_duration",
 	"sync_delay",
 	"gravity",
 ]
@@ -54,6 +56,22 @@ const FIELDS := [
 @export_group("Match rules")
 ## Round wins needed to take the whole match (Main.gd).
 @export var rounds_to_win: int = 5
+## Seconds a round may last before sudden death begins (Game.gd). 0 disables the
+## round clock entirely, which is the pre-clock behaviour: rounds run forever.
+##
+## 90s is deliberately generous. A normal round of a push-'em-off game is over
+## in 20-40 seconds, so this only ever fires when the round has genuinely
+## stalled -- two players camping opposite corners, or one player who cannot
+## finish the other off. It must never cut a real fight short.
+@export var round_time_limit: float = 90.0
+## Seconds sudden death takes to make the WHOLE arena lethal (Game.gd).
+##
+## The rising kill zone reaches the top of the map rect after this long, so this
+## is a hard upper bound on how much longer a round can possibly last once the
+## clock has expired: round_time_limit + sudden_death_duration. 20s is long
+## enough to scramble for the high ground and fight over it, short enough that
+## the round cannot drag.
+@export var sudden_death_duration: float = 20.0
 ## Physics frames between forced position syncs for the local player (Player.gd).
 @export var sync_delay: int = 3
 ## Downward acceleration applied to players.

@@ -1,0 +1,27 @@
+[gd_scene load_steps=4 format=3]
+
+; Inherits res://pickups/Gun.tscn: same barrel, same CooldownTimer, same
+; "Shoot" animation with the method track that calls _fire_projectile(). Only
+; the script, the tuning resource and the look differ -- the firing flow is
+; Gun.gd's, reused rather than copied.
+
+[ext_resource type="PackedScene" path="res://pickups/Gun.tscn" id="1"]
+[ext_resource type="Script" path="res://pickups/Shotgun.gd" id="2"]
+[ext_resource type="Resource" path="res://resources/shotgun_weapon.tres" id="3"]
+
+[node name="Shotgun" instance=ExtResource("1")]
+script = ExtResource("2")
+weapon_data = ExtResource("3")
+throw_damage_speed = 420.0
+throw_self_immunity = 0.35
+
+[node name="GunSprite" parent="." index="0"]
+modulate = Color(1, 0.55, 0.25, 1)
+scale = Vector2(1.2, 1.35)
+
+[node name="MuzzleFlashSprite" parent="." index="1"]
+modulate = Color(1, 0.8, 0.35, 1)
+scale = Vector2(1.5, 1.5)
+
+[node name="ProjectilePosition" parent="." index="3"]
+position = Vector2(48, -4)

@@ -1,0 +1,17 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://pickups/LaserBeam.gd" id="1_kaf7c"]
+
+[node name="LaserBeam" type="Line2D" unique_id=764441196]
+z_index = 5
+width = 3.0
+begin_cap_mode = 2
+end_cap_mode = 2
+script = ExtResource("1_kaf7c")
+
+[node name="Glow" type="Line2D" parent="." unique_id=726327551]
+show_behind_parent = true
+width = 11.0
+default_color = Color(0.35, 0.95, 1, 0.35)
+begin_cap_mode = 2
+end_cap_mode = 2

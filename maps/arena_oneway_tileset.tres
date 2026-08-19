@@ -1,59 +1,35 @@
-[gd_resource type="TileSet" load_steps=3 format=3]
+[gd_resource type="TileSet" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/sprites/kings_and_pigs/14-TileSets/Terrain (32x32).png" id="1_hgvdh"]
+[ext_resource type="Texture2D" path="res://assets/sprites/kings_and_pigs/14-TileSets/Terrain (32x32).png" id="1_m7w5w"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7osls"]
-texture = ExtResource("1_hgvdh")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0yh1a"]
+texture = ExtResource("1_m7w5w")
 2:10/0 = 0
-2:10/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-2:10/0/physics_layer_0/angular_velocity = 0.0
 2:10/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 2:10/0/physics_layer_0/polygon_0/one_way = true
 3:10/0 = 0
-3:10/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-3:10/0/physics_layer_0/angular_velocity = 0.0
 3:10/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 3:10/0/physics_layer_0/polygon_0/one_way = true
 4:10/0 = 0
-4:10/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-4:10/0/physics_layer_0/angular_velocity = 0.0
 4:10/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 4:10/0/physics_layer_0/polygon_0/one_way = true
 5:10/0 = 0
-5:10/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-5:10/0/physics_layer_0/angular_velocity = 0.0
 5:10/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 5:10/0/physics_layer_0/polygon_0/one_way = true
 6:10/0 = 0
-6:10/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-6:10/0/physics_layer_0/angular_velocity = 0.0
 6:10/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 6:10/0/physics_layer_0/polygon_0/one_way = true
 7:10/0 = 0
-7:10/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-7:10/0/physics_layer_0/angular_velocity = 0.0
 7:10/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 7:10/0/physics_layer_0/polygon_0/one_way = true
 2:11/0 = 0
-2:11/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-2:11/0/physics_layer_0/angular_velocity = 0.0
 3:11/0 = 0
-3:11/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-3:11/0/physics_layer_0/angular_velocity = 0.0
 4:11/0 = 0
-4:11/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-4:11/0/physics_layer_0/angular_velocity = 0.0
 5:11/0 = 0
-5:11/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-5:11/0/physics_layer_0/angular_velocity = 0.0
 6:11/0 = 0
-6:11/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-6:11/0/physics_layer_0/angular_velocity = 0.0
 7:11/0 = 0
-7:11/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-7:11/0/physics_layer_0/angular_velocity = 0.0
 
 [resource]
 physics_layer_0/collision_layer = 16
 physics_layer_0/collision_mask = 0
-sources/1 = SubResource("TileSetAtlasSource_7osls")
+sources/1 = SubResource("TileSetAtlasSource_0yh1a")

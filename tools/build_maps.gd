@@ -50,6 +50,10 @@ const GENERATOR_SCENE := "res://objects/TimedGeneratorFlat.tscn"
 const EFFECT_ZONE_SCRIPT := "res://objects/EffectZone.gd"
 const GUN := "res://pickups/Gun.tscn"
 const SWORD := "res://pickups/Sword.tscn"
+const SHOTGUN := "res://pickups/Shotgun.tscn"
+const GRENADE := "res://pickups/Grenade.tscn"
+const MINE := "res://pickups/Mine.tscn"
+const LASER := "res://pickups/Laser.tscn"
 
 const TERRAIN_TILESET_PATH := "res://maps/arena_tileset.tres"
 const ONEWAY_TILESET_PATH := "res://maps/arena_oneway_tileset.tres"
@@ -314,13 +318,13 @@ func arena1_spec() -> Dictionary:
 		"generators": [
 			{"pos": Vector2(161, 832), "pickup": SWORD},
 			{"pos": Vector2(1217, 832), "pickup": SWORD},
-			{"pos": Vector2(641, 576), "pickup": SWORD},
-			{"pos": Vector2(737, 576), "pickup": SWORD},
-			{"pos": Vector2(225, 448), "pickup": GUN},
-			{"pos": Vector2(1153, 448), "pickup": GUN},
+			{"pos": Vector2(641, 576), "pickup": GRENADE},
+			{"pos": Vector2(737, 576), "pickup": MINE},
+			{"pos": Vector2(225, 448), "pickup": SHOTGUN},
+			{"pos": Vector2(1153, 448), "pickup": SHOTGUN},
 			{"pos": Vector2(129, 192), "pickup": GUN},
 			{"pos": Vector2(1249, 192), "pickup": GUN},
-			{"pos": Vector2(689, 128), "pickup": GUN},   # crow's nest reward
+			{"pos": Vector2(689, 128), "pickup": LASER},   # crow's nest reward
 		],
 		"zones": [
 			# Visible death in the mouth of the floor pit, so the hazard reads
@@ -397,11 +401,11 @@ func arena2_spec() -> Dictionary:
 		"generators": [
 			{"pos": Vector2(449, 896), "pickup": SWORD},
 			{"pos": Vector2(737, 896), "pickup": SWORD},
-			{"pos": Vector2(161, 512), "pickup": SWORD},
-			{"pos": Vector2(1025, 512), "pickup": SWORD},
-			{"pos": Vector2(129, 256), "pickup": GUN},
-			{"pos": Vector2(1057, 256), "pickup": GUN},
-			{"pos": Vector2(593, 128), "pickup": GUN},   # crown reward
+			{"pos": Vector2(161, 512), "pickup": SHOTGUN},
+			{"pos": Vector2(1025, 512), "pickup": SHOTGUN},
+			{"pos": Vector2(129, 256), "pickup": GRENADE},
+			{"pos": Vector2(1057, 256), "pickup": GRENADE},
+			{"pos": Vector2(593, 128), "pickup": LASER},   # crown reward
 		],
 		"zones": [
 			{"effect": "KILL", "rect": Rect2(320, 912, 128, 40)},    # left pit

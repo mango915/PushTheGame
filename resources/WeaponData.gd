@@ -46,3 +46,73 @@ extends Resource
 
 # Shots before the weapon is spent; a spent gun disintegrates when thrown.
 @export var max_ammo: int = 3
+
+# ---------------------------------------------------------------------------
+# Everything below was added for the Duck-Game-style weapon set. All of it uses
+# the same convention as `projectile_scene` above:
+#
+#     a value of 0 means "leave whatever the weapon script/scene already has".
+#
+# That matters because the two weapons that shipped first (gun_weapon.tres and
+# sword_weapon.tres) predate these fields and therefore serialize them as their
+# defaults. If 0 were applied literally, adding a field here would silently
+# switch a behaviour off on every existing weapon. The no-op default for each
+# field is chosen so that a weapon which never sets it plays exactly as before.
+# ---------------------------------------------------------------------------
+
+# --- Thrown-weapon damage (Pickup.gd) --------------------------------------
+
+## Speed (px/s) a THROWN weapon must still be travelling at to kill on contact.
+## Lower = deadlier, because the weapon stays lethal further into its arc: a
+## heavy sword should sit well below a light gun. A thrown weapon that has
+## slowed below this -- or come to rest -- is harmless, so weapons lying on the
+## floor are not instant death.
+@export var throw_damage_speed: float = 0.0
+
+## Seconds after release during which the THROWER cannot be hit by their own
+## throw. Mirrors the "you cannot cut yourself with your own sword" rule in
+## Player.hurt(), which only covers a weapon still in your hands.
+@export var throw_self_immunity: float = 0.0
+
+# --- Spread weapons (Gun.gd) -----------------------------------------------
+
+## Projectiles per shot. 1 (the default) is an ordinary single-shot gun.
+@export var pellet_count: int = 0
+
+## Total width of the pellet fan, in degrees.
+@export var spread_degrees: float = 0.0
+
+## Horizontal shove applied to a player hit by one of this weapon's
+## projectiles, on top of GameSettings.push_back_speed. This is what makes a
+## shotgun able to push someone into a pit.
+@export var knockback: float = 0.0
+
+## Upward component of that shove, so victims are lofted rather than scraped
+## along the floor.
+@export var knockback_up: float = 0.0
+
+## Backwards shove applied to the SHOOTER when the weapon fires.
+@export var recoil: float = 0.0
+
+# --- Explosives (Explosive.gd / Grenade.gd / Mine.gd) ----------------------
+
+## Seconds from the fuse being lit to the blast.
+@export var fuse_time: float = 0.0
+
+## Radius (px) inside which the blast kills, thrower included.
+@export var blast_radius: float = 0.0
+
+## Seconds a dropped mine spends inert before it can trigger, so it cannot be
+## used as a suicide-place weapon.
+@export var arm_delay: float = 0.0
+
+## Radius (px) at which an armed mine notices a player and detonates.
+@export var trigger_radius: float = 0.0
+
+# --- Hitscan (Laser.gd) ----------------------------------------------------
+
+## How far the beam reaches, in px. Should span the arena.
+@export var beam_range: float = 0.0
+
+## How long the beam graphic stays on screen, in seconds.
+@export var beam_duration: float = 0.0

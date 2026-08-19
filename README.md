@@ -1,21 +1,34 @@
-"Push The Game" for Godot
-=====================
+Push The Game
+=============
 
-**"Push The Game" for Godot** is a 2-4 player online game built in the
-[Godot](https://godotengine.org/) game engine, created as a demonstration of
-[Nakama](https://heroiclabs.com/), an open-source scalable game server.
+**Push The Game** is a 2-4 player online arena brawler built in the
+[Godot](https://godotengine.org/) game engine, by **Jakub Skowronski**,
+**Stefano Mancone** and **Alessandro Compagnucci**.
+
+It is built on top of ["Fish Game"](https://github.com/heroiclabs/fishgame-godot),
+Heroic Labs' [Nakama](https://heroiclabs.com/) demo by David Snopek — see the
+[License](#license) section for the full attribution.
 
 ![Animated GIF showing gameplay](assets/screenshots/gameplay.gif)
 
-You can download playable builds for Windows, Linux and MacOS from the
-[Releases page](https://github.com/heroiclabs/fishgame-godot/releases).
+There are no published builds yet; run it from source (see
+[Playing the game from source](#playing-the-game-from-source) below). The export
+presets and CI workflows have not been validated end to end.
 
-**"Push The Game"** demonstrates the following Nakama features:
+Multiplayer works three ways, and everything above the transport layer
+(`Main.gd`, `Game.gd`, `ReadyScreen`) is peer-id based and does not know which
+one is in use:
 
-- [User authentication](https://heroiclabs.com/docs/authentication/)
-- [Matchmaking](https://heroiclabs.com/docs/gameplay-matchmaker/)
-- [Leaderboards](https://heroiclabs.com/docs/gameplay-leaderboards/)
-- [Realtime Multiplayer](https://heroiclabs.com/docs/gameplay-multiplayer-realtime/)
+| Mode | Needs | Where it lives |
+| --- | --- | --- |
+| Online (room codes, matchmaking, leaderboard) | a [Nakama](https://heroiclabs.com/) server | `autoload/Online.gd`, `autoload/OnlineMatch.gd` |
+| Same wi-fi (LAN) | nothing at all | `autoload/LanMatch.gd` |
+| Steam (friends & invites) | the GodotSteam extension + the Steam client | `autoload/SteamMatch.gd`, see [docs/steam.md](docs/steam.md) |
+
+The Nakama path uses [user authentication](https://heroiclabs.com/docs/authentication/),
+[matchmaking](https://heroiclabs.com/docs/gameplay-matchmaker/),
+[leaderboards](https://heroiclabs.com/docs/gameplay-leaderboards/) and
+[realtime multiplayer](https://heroiclabs.com/docs/gameplay-multiplayer-realtime/).
 
 The game design is heavily inspired by [Duck Game](https://store.steampowered.com/app/312530/Duck_Game/).
 
@@ -26,18 +39,20 @@ Controls
 
 #### Gamepad: ####
 
-- **D-PAD** or **LEFT ANALOG STICK** = move your fish
+- **D-PAD** or **LEFT ANALOG STICK** = move
 - **A (XBox)** or **Cross (PS)** = jump
 - **Y (XBox)** or **Triangle (PS)** = pickup/throw weapon
 - **X (XBox)** or **Square (PS)** = use weapon
-- **B (Xbox)** or **Circle (PS)** = blub
+- **B (Xbox)** or **Circle (PS)** = blop
 
 #### Keyboard: ####
 
-- **W**, **A**, **S**, **D** = move your fish
+- **A**, **D** = move left/right
+- **W** = jump
+- **S** = down
 - **C** = pickup/throw weapon
 - **V** = use weapon
-- **E** = blub
+- **E** = blop
 
 ### Playing Locally ###
 
@@ -49,10 +64,10 @@ Controls
 
 | Action               | Player 1                   | Player 2   |
 | -------------------- | -------------------------- | ---------- |
-| move your fish       | **W**, **A**, **S**, **D** | Arrow keys |
+| move                 | **W**, **A**, **S**, **D** | Arrow keys |
 | pickup/throw weapon  | **C**                      | **L**      |
 | use weapon           | **V**                      | **;**      |
-| blub                 | **E**                      | **P**      |
+| blop                 | **E**                      | **P**      |
 
 Playing the game from source
 ----------------------------
@@ -63,16 +78,24 @@ You'll need:
 
 * [Godot](https://godotengine.org/download) **4.7.2** (the project declares
   `config/features = "4.7"` and the scripts use Godot 4 syntax throughout).
-* A Nakama server to connect to. The bundled `docker-compose.yml` runs
-  Nakama 3.20.1 against CockroachDB.
+* For online play, a Nakama server to connect to. The bundled
+  `docker-compose.yml` runs Nakama 3.20.1 against CockroachDB.
+  LAN play needs no server at all.
 
-The easiest way to setup a Nakama server locally for testing/learning purposes is [via Docker](https://heroiclabs.com/docs/install-docker-quickstart/), and in fact, there is a `docker-compose.yml` included in the source code of "Fish Game".
+The easiest way to set up a Nakama server locally for testing/learning purposes
+is [via Docker](https://heroiclabs.com/docs/install-docker-quickstart/), and
+there is a `docker-compose.yml` included in the source code of Push The Game.
 
-So, if you have [Docker Compose](https://docs.docker.com/compose/install/) installed on your system, all you need to do is navigate to the directory where you put the "Fish Game" source code and run this command:
+So, if you have [Docker Compose](https://docs.docker.com/compose/install/)
+installed on your system, all you need to do is navigate to the directory where
+you put the Push The Game source code and run this command:
 
 ```
-docker-compose up -d
+docker compose up -d
 ```
+
+That brings up the Nakama API on `:7350` and the admin console on
+<http://127.0.0.1:7351> (admin/password).
 
 ### Running the game from source ###
 
@@ -88,20 +111,42 @@ silently using a per-installation device id (`autoload/Online.gd`), and stores
 your display name in `user://profile.cfg`. Email/password sign-in is still
 available as a fallback for existing accounts.
 
-### Hosting a game ###
+### Hosting a game over the internet ###
 
 Click **Play Online**, then **HOST**. You get a four-character room code; anyone
 who enters that code under **Room code** joins your game. Codes deliberately
 avoid look-alike characters (no O/0, I/1, S/5, Z/2) so they survive being read
 out loud.
 
+### Playing over LAN ###
+
+On the same wi-fi you need no server, no account and no room code. Click
+**Play Online**, then **HOST LAN** to host, or **FIND GAMES** on the other
+machines: hosts announce themselves over a UDP broadcast beacon and show up in
+the list ready to join, so nobody has to type an IP address
+(`autoload/LanMatch.gd`). This is LAN only by design — playing across the
+internet without port forwarding is what the Nakama mode is for.
+
+### Playing over Steam ###
+
+The Steam section of the match screen (**HOST ON STEAM**, **Steam friends**,
+invites) is wired up but disabled unless the GodotSteam extension is installed,
+which this repository does not ship. It says so on screen. See
+[docs/steam.md](docs/steam.md) — and note that none of the Steam code has yet
+been run against a real Steam client.
+
 ### Setting up the leaderboard ###
 
-If you didn't use the `docker-compose.yml` included with "Fish Game", then the "Leaderboard" won't work until you first create it on your server.
+If you didn't use the `docker-compose.yml` included with Push The Game, then the
+"Leaderboard" won't work until you first create it on your server.
 
-To do that, copy the `nakama/data/modules/fish_game.lua` file to the `modules/` directory where your Nakama server keeps its data, and then restart your Nakama server.
+To do that, copy the `nakama/data/modules/push_the_game.lua` file to the
+`modules/` directory where your Nakama server keeps its data, and then restart
+your Nakama server.
 
-_Note: the leaderboard id in that module must match `Main.LEADERBOARD_ID`. They disagreed for a long time, which silently disabled the leaderboard entirely._
+_Note: the leaderboard id in that module (`push_the_game_wins`) must match
+`Main.LEADERBOARD_ID`. They disagreed for a long time, which silently disabled
+the leaderboard entirely._
 
 _Note: The game will play fine without the leaderboard._
 
@@ -122,18 +167,51 @@ It exists because this project was ported from Godot 3, and the dominant bug
 class -- calls into APIs that no longer exist -- parses fine and only fails on
 the frame it finally runs.
 
-_Note: `export_presets.cfg` still carries Godot 3 platform names (`Mac OSX`,
-`HTML5`, `Linux/X11`), and the CI workflows have not been validated against
-Godot 4. Regenerate the presets from the editor's Export dialog before relying
-on a build._
+_Note: the export presets now carry the Godot 4 platform names (`Windows
+Desktop`, `Linux`, `macOS`, `Web`, each verified to load under 4.7.2), but the
+per-preset option keys in `export_presets.cfg` are still Godot 3 vintage, and
+the CI workflows have not been validated against Godot 4. Regenerate the presets
+from the editor's Export dialog before relying on a build._
+
+Credits
+-------
+
+Push The Game is by **Jakub Skowronski**, **Stefano Mancone** and
+**Alessandro Compagnucci**.
+
+It is based on ["Fish Game"](https://github.com/heroiclabs/fishgame-godot),
+whose original programming is by [David Snopek](https://www.snopekgames.com) of
+Snopek Games. The art is by Orlando Herrera a.k.a.
+[Pixel Frog](https://pixelfrog-store.itch.io/), the music and sound are by
+Jakob T. Rypdal, and the [Monogram](https://datagoblin.itch.io/monogram) font is
+by Vinícius Menézio. The same credits are shown in-game on the Credits screen.
 
 License
 -------
 
-This project is licensed under the Apache 2.0 License, with the following exceptions: 
+This project is licensed under the Apache 2.0 License (see [LICENSE.txt](LICENSE.txt)),
+with the following exceptions:
 
-* The font (in [assets/fonts/](https://github.com/heroiclabs/fishgame-godot/blob/main/assets/fonts)) and a handful of art assets (in [assets/kenney-platform-deluxe/](https://github.com/heroiclabs/fishgame-godot/blob/main/assets/kenney-platform-deluxe)) originate from CC0 sources (see [CREDITS-CC0.txt](https://github.com/heroiclabs/fishgame-godot/blob/main/CREDITS-CC0.txt)).
-* The remaining art, music and sound assets are licensed under the [CC BY-NC License](https://github.com/heroiclabs/fishgame-godot/blob/main/assets/LICENSE.txt).
-* The [Snopek State Machine](https://gitlab.com/snopek-games/godot-state-machine) included in [addons/snopek-state-machine/](https://github.com/heroiclabs/fishgame-godot/tree/main/addons/snopek-state-machine) is licensed under the MIT License.
-* Most of the UI code (included in [main/](https://github.com/heroiclabs/fishgame-godot/tree/main/main)) and some other auxilary code files originate from the [WebRTC and Nakama addon for Godot](https://gitlab.com/snopek-games/godot-nakama-webrtc), which is licensed under the MIT License.
+* The font (in [assets/fonts/](assets/fonts)) and a handful of art assets (in
+  [assets/kenney-platform-deluxe/](assets/kenney-platform-deluxe)) originate
+  from CC0 sources: [Monogram](https://datagoblin.itch.io/monogram) by Vinícius
+  Menézio, and the Platformer Art Complete Pack by
+  [Kenney](https://www.kenney.nl/) (see
+  [assets/kenney-platform-deluxe/license.txt](assets/kenney-platform-deluxe/license.txt)).
+* The remaining art, music and sound assets are licensed under the
+  [CC BY-NC License](assets/LICENSE.txt) — art by Orlando Herrera a.k.a.
+  [Pixel Frog](https://pixelfrog-store.itch.io/), music and sound by Jakob T.
+  Rypdal.
+* The [Snopek State Machine](https://gitlab.com/snopek-games/godot-state-machine)
+  included in [addons/snopek-state-machine/](addons/snopek-state-machine) is
+  licensed under the MIT License.
+* Most of the UI code (included in [main/](main)) and some other auxiliary code
+  files originate from the
+  [WebRTC and Nakama addon for Godot](https://gitlab.com/snopek-games/godot-nakama-webrtc),
+  which is licensed under the MIT License.
 
+The codebase derives from
+["Fish Game" for Godot](https://github.com/heroiclabs/fishgame-godot) © Heroic
+Labs, originally written by David Snopek / Snopek Games and licensed under
+Apache 2.0. That notice, and every attribution above, is preserved deliberately:
+both Apache 2.0 and CC BY-NC require it.

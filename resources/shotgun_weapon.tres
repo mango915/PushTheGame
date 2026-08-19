@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/WeaponData.gd" id="1"]
+[ext_resource type="PackedScene" path="res://pickups/Projectile.tscn" id="2"]
+
+[resource]
+script = ExtResource("1")
+weapon_name = "Shotgun"
+pickup_position = 0
+bounce = 0.15
+projectile_scene = ExtResource("2")
+projectile_velocity = 1500.0
+projectile_range = 190.0
+cooldown_time = 0.8
+max_ammo = 2
+throw_damage_speed = 420.0
+throw_self_immunity = 0.35
+pellet_count = 6
+spread_degrees = 26.0
+knockback = 900.0
+knockback_up = 340.0
+recoil = 260.0

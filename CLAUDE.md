@@ -4,9 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-"Push The Game" — a 2-4 player online arena brawler in **Godot 4.7.2** (GDScript), forked from Heroic Labs' `fishgame-godot` Nakama demo. Multiplayer runs over a [Nakama](https://heroiclabs.com/) server via the bundled `addons/com.heroiclabs.nakama` SDK.
+"Push The Game" — a 2-4 player online arena brawler in **Godot 4.7.2** (GDScript), by Jakub Skowronski, Stefano Mancone and Alessandro Compagnucci (<https://github.com/mango915/PushTheGame>). Multiplayer runs over a [Nakama](https://heroiclabs.com/) server via the bundled `addons/com.heroiclabs.nakama` SDK.
 
-**This was a sloppy Godot 3 → 4 port.** The dominant bug class is calls into APIs that no longer exist: they parse fine and only fail on the frame they finally run. A large batch has been fixed (see git log), but assume more are lurking in code paths nothing exercises yet. `export_presets.cfg` still carries Godot 3 platform names (`Mac OSX`, `HTML5`, `Linux/X11`) and needs regenerating from the editor before any build is trustworthy.
+**Provenance.** The codebase was forked from Heroic Labs' `fishgame-godot` Nakama demo ("Fish Game", by David Snopek / Snopek Games, Apache 2.0). That is accurate history and the attributions that come with it are load-bearing, not decoration: Apache 2.0 (code) and CC BY-NC (art/music) both *require* them. Never strip the Fish Game / Snopek Games derivation notice from `README.md`, the in-game Credits screen (`main/screens/CreditsScreen.tscn`), `LICENSE.txt` or `assets/LICENSE.txt`, nor the credits for Orlando Herrera (Pixel Frog, art), Jakob T. Rypdal (music/sound) or Vinícius Menézio (Monogram font). Rebranding means changing the *game's* identity and authorship, not deleting anyone's credit.
+
+`assets/music/FISHSTICKS.ogg` and the `Fishsticks` node in `Main.tscn` are a **track title by the composer**, not a leftover reference to the old game. Leave them alone.
+
+**This was a sloppy Godot 3 → 4 port.** The dominant bug class is calls into APIs that no longer exist: they parse fine and only fail on the frame they finally run. A large batch has been fixed (see git log), but assume more are lurking in code paths nothing exercises yet. `export_presets.cfg` had Godot 3 platform names; the platform/preset names are now the Godot 4 ones (`Windows Desktop`, `Linux`, `macOS`, `Web` — verified against 4.7.2 by loading each preset), but the per-preset **option keys** in that file are still Godot 3 vintage, so regenerate it from the editor's Export dialog before any build is trustworthy. `project.godot` likewise still carries dead Godot 3 sections (`[gdnative] singletons`, the `[importer_defaults] texture` block, and `quality/driver/driver_name="GLES2"` / `quality/2d/use_pixel_snap` / `vram_compression/import_etc` under `[rendering]`); Godot 4 ignores them.
+
+Several scenes are also still saved in the Godot 3 text format (`format=2`): `main/screens/{LeaderboardRecord,LeaderboardScreen,MatchScreen,PeerStatus}.tscn`. They load, but Godot-3-only properties in them are silently dropped — that is exactly how the Credits screen ended up rendering an unstyled fallback for months (see below).
 
 ## Commands
 
@@ -42,10 +48,11 @@ godot --path . Main.tscn
 # Local Nakama server + CockroachDB (required for "Play Online")
 docker compose up -d      # Nakama on :7350, console on :7351
 
-# Export a build. NOTE: export_presets.cfg still carries Godot 3 platform names
-# ("Mac OSX", "HTML5", "Linux/X11") and must be regenerated from the editor's
-# Export dialog before any build from it is trustworthy.
-godot --path . --export-release "Linux/X11" ./build/linux/game.x86_64
+# Export a build. NOTE: the preset PLATFORM names are correct for Godot 4 now
+# ("Windows Desktop", "Linux", "macOS", "Web"), but the per-preset option keys
+# in export_presets.cfg are still Godot 3 vintage and it should be regenerated
+# from the editor's Export dialog before any build from it is trustworthy.
+godot --path . --export-release "Linux" ./build/linux/push-the-game.x86_64
 ```
 
 Two-player local play needs no server: Title screen → "Play Local" wires `player1_*` / `player2_*` input actions to two players in the same window.
@@ -77,7 +84,7 @@ Godot quirks the harness had to work around, all of which cost real time:
 
 `autoload/Build.gd` is **generated** — `scripts/generate-build-variables.sh` overwrites it in CI from `NAKAMA_HOST` / `NAKAMA_PORT` / `NAKAMA_SERVER_KEY` env vars and stamps `OnlineMatch.client_version` with the commit SHA (the matchmaker refuses to pair clients with mismatched `client_version`). Never hand-edit it.
 
-The leaderboard module `nakama/data/modules/fish_game.lua` is mounted into the container by `docker-compose.yml`. It creates a leaderboard named `push_the_game_wins`, which is what `Main.gd` (`LEADERBOARD_ID`) and `LeaderboardScreen.gd` read and write — these three must agree or the leaderboard silently does nothing. `/nakama/data/` is gitignored apart from the tracked lua module.
+The leaderboard module `nakama/data/modules/push_the_game.lua` is mounted into the container by `docker-compose.yml`. It creates a leaderboard named `push_the_game_wins`, which is what `Main.gd` (`LEADERBOARD_ID`) and `LeaderboardScreen.gd` read and write — these three must agree or the leaderboard silently does nothing. `/nakama/data/` is gitignored apart from the tracked lua module.
 
 ## Architecture
 
@@ -97,6 +104,7 @@ The leaderboard module `nakama/data/modules/fish_game.lua` is mounted into the c
 - **`main/UILayer.gd` + `main/Screen.gd`** — a simple screen stack: all screens live under `UILayer/Screens`, are shown one at a time by node name (`ui_layer.show_screen("MatchScreen", info)`), and opt into `_setup_screen` / `_show_screen(info)` / `_hide_screen` hooks. New screens extend `res://main/Screen.gd`.
 - **`Camera.gd`** — recomputes position and zoom every physics frame to frame all live players; limits are set from `Map.get_map_rect()` on map reload.
 - **`maps/Map.gd`** — maps expose `PlayerStartPositions/Player1..4` markers and broadcast `map_start`/`map_stop` to the `map_object` group. `Game.map_scene` selects the map (`Map1.tscn` by default).
+- **`main/screens/CreditsScreen.tscn`** — the game's attribution surface; treat its content as licence compliance, not copy. It was a `format=2` (Godot 3) scene carrying the credits text **twice under the same `text` key** — a bbcode copy and a plain copy — so the last one won and the styled version never rendered, and its two `FontFile` sub-resources used the Godot 3 `font_data` property, which Godot 4 does not have. Converted to `format=3` with a single bbcode `text` and the theme's font; the colours and `[url]` links now actually show.
 
 ### Getting online
 Playing online needs no account. `Online.authenticate_device()` signs in silently with a stable per-installation id (persisted in `user://profile.cfg` alongside the display name); email/password remains only as a fallback in `ConnectionScreen`. Server host/port live in `user://settings.cfg` and override the defaults at the top of `Online.gd`, so pointing at a different Nakama is a settings change, not a code change.

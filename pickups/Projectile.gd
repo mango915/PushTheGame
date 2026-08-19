@@ -14,11 +14,17 @@ func _ready():
 	trail.set_as_top_level(true)
 	trail.global_position = Vector2(0, 0)
 
-func shoot(_start_position: Vector2, _vector: Vector2, _max_distance: float, _dud: bool) -> void:
+# _knockback/_knockback_up default to 0, so a caller that does not pass them
+# (or a weapon with none configured) produces exactly the projectile this scene
+# always fired.
+func shoot(_start_position: Vector2, _vector: Vector2, _max_distance: float, _dud: bool, _knockback: float = 0.0, _knockback_up: float = 0.0) -> void:
 	start_position = _start_position
 	vector = _vector
 	max_distance = _max_distance
 	dud = _dud
+
+	hitbox.knockback = _knockback
+	hitbox.knockback_up = _knockback_up
 	
 	global_position = _start_position
 	

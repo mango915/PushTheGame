@@ -1,0 +1,63 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="PackedScene" path="res://pickups/Pickup.tscn" id="1"]
+[ext_resource type="Script" path="res://pickups/Laser.gd" id="2"]
+[ext_resource type="Resource" path="res://resources/laser_weapon.tres" id="3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/gun.png" id="4"]
+[ext_resource type="Script" path="res://components/Sounds.gd" id="5"]
+[ext_resource type="AudioStream" path="res://assets/sounds/shoot.ogg" id="6"]
+[ext_resource type="AudioStream" path="res://assets/sounds/empty.wav" id="7"]
+
+[sub_resource type="CapsuleShape2D" id="1"]
+radius = 12.0
+height = 38.0
+
+[node name="Laser" instance=ExtResource("1")]
+script = ExtResource("2")
+weapon_data = ExtResource("3")
+throw_damage_speed = 420.0
+throw_self_immunity = 0.35
+
+[node name="LaserSprite" type="Sprite2D" parent="." index="0"]
+modulate = Color(0.45, 1, 1, 1)
+position = Vector2(14, -4)
+scale = Vector2(1.15, 0.9)
+texture = ExtResource("4")
+hframes = 4
+vframes = 5
+
+[node name="EmitterSprite" type="Sprite2D" parent="." index="1"]
+modulate = Color(0.6, 1, 1, 1)
+position = Vector2(36, -4)
+scale = Vector2(0.7, 0.7)
+texture = ExtResource("4")
+hframes = 4
+vframes = 5
+frame = 12
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." index="2"]
+rotation = 1.5708
+shape = SubResource("1")
+
+[node name="BeamOrigin" type="Marker2D" parent="." index="3"]
+position = Vector2(42, -4)
+
+[node name="CooldownTimer" type="Timer" parent="." index="4"]
+one_shot = true
+
+[node name="Sounds" type="Node" parent="." index="5"]
+script = ExtResource("5")
+
+[node name="Shoot" type="AudioStreamPlayer" parent="Sounds" index="0"]
+stream = ExtResource("6")
+volume_db = 4.0
+bus = &"Sound Effects"
+
+[node name="Empty" type="AudioStreamPlayer" parent="Sounds" index="1"]
+stream = ExtResource("7")
+bus = &"Sound Effects"
+
+[node name="HeldPosition" parent="." index="6"]
+position = Vector2(-17, 0)
+
+[connection signal="timeout" from="CooldownTimer" to="." method="_on_CooldownTimer_timeout"]

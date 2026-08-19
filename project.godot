@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="Push The Game"
+config/description="A 2-4 player online arena brawler by Jakub Skowronski, Stefano Mancone and Alessandro Compagnucci. Built on \"Fish Game\" by David Snopek / Snopek Games (Apache 2.0)."
 run/main_scene="res://Main.tscn"
 config/features=PackedStringArray("4.7")
 config/icon="res://icon.png"

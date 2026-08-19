@@ -72,6 +72,8 @@ tracks/1/keys = {
 script = ExtResource( 4 )
 pickup_position = 1
 weapon_data = ExtResource( 7 )
+throw_damage_speed = 260.0
+throw_self_immunity = 0.35
 
 [node name="Sprite2D" type="Sprite2D" parent="." index="0"]
 position = Vector2( 24, -39 )

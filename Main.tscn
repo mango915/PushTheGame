@@ -98,8 +98,25 @@ offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Overlay" type="Control" parent="UILayer"]
+[node name="RoundTimer" type="Label" parent="UILayer"]
 visible = false
+offset_left = -48.0
+offset_top = 0.0
+offset_right = 48.0
+offset_bottom = 20.0
+anchor_left = 0.5
+anchor_right = 0.5
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_fonts/font = ExtResource("8")
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.7)
+theme_override_constants/outline_size = 4
+text = "1:30"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Overlay" type="Control" parent="UILayer"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
