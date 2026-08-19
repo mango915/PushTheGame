@@ -26,6 +26,8 @@ const FIELDS := [
 	"push_back_speed",
 	"wall_jump_speed",
 	"wall_jump_push",
+	"coyote_time",
+	"jump_buffer_time",
 	"throw_velocity",
 	"throw_upward_velocity",
 	"throw_vector_mix",
@@ -56,6 +58,18 @@ const FIELDS := [
 ## a documented jump budget that tools/build_maps.gd and MapReachabilityTest
 ## both reason about.
 @export var wall_jump_speed: float = 560.0
+## Grace period after walking off a ledge during which a jump still works.
+##
+## Without it, stepping off a platform eats the jump entirely, and players read
+## that as the game dropping their input rather than as their own timing. Two
+## frames is imperceptible; six is generous without feeling like flight.
+@export var coyote_time: float = 0.10
+
+## How early a jump press is remembered, so pressing jump just before landing
+## jumps on touchdown instead of being thrown away. The same complaint from the
+## other side: the input was given, the game ignored it.
+@export var jump_buffer_time: float = 0.10
+
 ## Horizontal shove AWAY from the wall. This is what stops a wall jump being a
 ## ladder: you leave the wall whether you want to or not, and have to come back.
 @export var wall_jump_push: float = 320.0

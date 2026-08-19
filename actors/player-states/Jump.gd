@@ -20,7 +20,11 @@ func _state_physics_process(delta: float) -> void:
 	if _try_wall_jump():
 		return
 	
-	if host.is_on_floor():
+	# vector.y >= 0 matters: is_on_floor() reflects the LAST move_and_slide, so
+	# it is still true on the frame a jump starts. Without this a launch pad --
+	# which fires from _process, before any physics frame has moved the body --
+	# cancelled itself immediately and the whole ascent played out as a walk.
+	if host.is_on_floor() and host.vector.y >= 0.0:
 		get_parent().change_state("Idle", { landing = true })
 		return
 	

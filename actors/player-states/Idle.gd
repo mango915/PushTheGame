@@ -44,6 +44,13 @@ func _state_physics_process(delta: float) -> void:
 	if host.vector.y > 0:
 		get_parent().change_state("Fall")
 		return
+
+	# Launched, or otherwise airborne and still rising. Idle is a grounded
+	# state; staying in it meant a launch pad sent the player up four hundred
+	# pixels playing the walk cycle.
+	if not host.is_on_floor() and host.vector.y < 0:
+		get_parent().change_state("Jump", { "launched": true })
+		return
 	
 	var input_vector = _get_player_input_vector()
 	

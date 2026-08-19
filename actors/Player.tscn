@@ -62,9 +62,11 @@ length = 0.4
 
 [sub_resource type="Animation" id="8"]
 resource_name = "Duck"
+loop_mode = 1
 length = 0.2
 
 [sub_resource type="Animation" id="9"]
+loop_mode = 1
 length = 0.1
 
 [sub_resource type="Animation" id="10"]
@@ -103,6 +105,7 @@ tracks/1/keys = {
 "values": [Vector2(14, -20), Vector2(14, -19), Vector2(14, -17), Vector2(14, -16), Vector2(14, -17), Vector2(14, -19), Vector2(14, -20)]
 }
 [sub_resource type="Animation" id="13"]
+loop_mode = 1
 length = 0.3
 
 [sub_resource type="Animation" id="14"]
@@ -242,6 +245,7 @@ tracks/3/keys = {
 }
 [sub_resource type="Animation" id="20"]
 resource_name = "Slide"
+loop_mode = 1
 length = 0.1
 
 tracks/0/type = "value"

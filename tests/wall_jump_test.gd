@@ -35,6 +35,7 @@ func _ready() -> void:
 	await _check_disabled()
 	await _check_gated()
 	await _check_squash()
+	await _check_jump_assists()
 
 	_world.queue_free()
 	await get_tree().process_frame
@@ -164,6 +165,47 @@ func _check_squash() -> void:
 	var hard: float = player._squash.y
 	_check_true("a long fall lands harder than a hop (%.2f vs %.2f)" % [hard, gentle],
 		hard < gentle)
+
+	player.queue_free()
+	await get_tree().process_frame
+
+# Coyote time and jump buffering: two halves of the same complaint. Without
+# them, stepping off a ledge eats the jump and pressing jump a frame before
+# landing eats it, and both feel like the game dropped an input the player
+# definitely gave. Neither is visible in a screenshot, which is why they sat
+# missing.
+func _check_jump_assists() -> void:
+	var settings := GameSettings.new()
+	_check_true("there is a coyote window", settings.coyote_time > 0.0)
+	_check_true("there is a jump buffer", settings.jump_buffer_time > 0.0)
+	_check_true("both replicate to peers",
+		"coyote_time" in GameSettings.FIELDS and "jump_buffer_time" in GameSettings.FIELDS)
+
+	var player := _make_player()
+	await get_tree().process_frame
+
+	# Fresh in the air with no grace: no free jump.
+	player._coyote_left = 0.0
+	_check("no coyote jump once the grace is spent", player.can_coyote_jump(), false)
+
+	# Just stepped off: still owed one.
+	player._coyote_left = player.coyote_time
+	_check_true("a jump is owed just after leaving the ground", player.can_coyote_jump())
+	player.consume_coyote()
+	_check("the grace is spent once used", player.can_coyote_jump(), false)
+
+	# Tar refuses both, or a sticky pool becomes escapable by walking off its edge.
+	player._coyote_left = player.coyote_time
+	player.jump_blocked = true
+	_check("tar refuses a coyote jump too", player.can_coyote_jump(), false)
+
+	# A buffered press survives to the landing, and only fires once.
+	player._jump_buffer_left = player.jump_buffer_time
+	_check("tar refuses a buffered jump too", player.consume_buffered_jump(), false)
+	player.jump_blocked = false
+	player._jump_buffer_left = player.jump_buffer_time
+	_check_true("a press just before landing is honoured", player.consume_buffered_jump())
+	_check("...and only once", player.consume_buffered_jump(), false)
 
 	player.queue_free()
 	await get_tree().process_frame

@@ -23,7 +23,7 @@ const MainScene := preload("res://Main.tscn")
 var _out := "/tmp/ptg-capture"
 var _scenario := "run"
 var _frames := 120
-var _size := Vector2i(480, 270)
+var _size := Vector2i(640, 360)
 
 var _main: Node
 var _viewport: SubViewport
@@ -72,6 +72,44 @@ func _timeline() -> Dictionary:
 			}
 	return {}
 
+# One line of ground truth per physics frame. What the player IS, alongside the
+# frame that shows what they LOOK like -- a mismatch between the two is what a
+# feel bug actually is.
+func _sample(frame: int) -> String:
+	var row := {"f": frame}
+	var players := []
+	for child in _main.game.players_node.get_children():
+		if child.has_method("pickup_or_throw"):
+			players.append(child)
+	players.sort_custom(func(a, b): return str(a.name) < str(b.name))
+
+	var out := []
+	for p in players:
+		var held = p.current_pickup
+		var entry := {
+			"id": str(p.name),
+			"state": str(p.state_machine.current_state.name) if p.state_machine.current_state else "-",
+			"anim": str(p.get_current_animation()),
+			"x": snappedf(p.global_position.x, 0.1),
+			"y": snappedf(p.global_position.y, 0.1),
+			"vx": snappedf(p.vector.x, 0.1),
+			"vy": snappedf(p.vector.y, 0.1),
+			"floor": p.is_on_floor(),
+			"wall": p.is_on_wall(),
+			"blocked": p.jump_blocked,
+			"sqx": snappedf(p._squash.x, 0.01),
+			"sqy": snappedf(p._squash.y, 0.01),
+			"flip": p.flip_h,
+			"held": (held.get_script().resource_path.get_file() if held and held.get_script() else ""),
+		}
+		if held != null:
+			var hb = held.get_node_or_null("Hitbox")
+			if hb != null:
+				entry["hb"] = not hb.disabled
+		out.append(entry)
+	row["p"] = out
+	return JSON.stringify(row)
+
 func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
 	if args.size() > 0: _out = args[0]
@@ -105,6 +143,7 @@ func _ready() -> void:
 	_main._refresh_hud()
 
 	var timeline := _timeline()
+	var log_lines := PackedStringArray()
 	for f in range(_frames):
 		if timeline.has(f):
 			for entry in timeline[f]:
@@ -113,6 +152,7 @@ func _ready() -> void:
 				else:
 					Input.action_release(entry[0])
 		await get_tree().physics_frame
+		log_lines.append(_sample(f))
 		# One extra frame so the render reflects the physics tick just taken.
 		await RenderingServer.frame_post_draw
 		_viewport.get_texture().get_image().save_png("%s/f%04d.png" % [_out, f])
@@ -120,6 +160,11 @@ func _ready() -> void:
 	# Leave no action stuck down for whatever runs next.
 	for a in ["player1_left", "player1_right", "player1_jump", "player1_grab", "player1_use"]:
 		Input.action_release(a)
+
+	var f := FileAccess.open("%s/telemetry.jsonl" % _out, FileAccess.WRITE)
+	for line in log_lines:
+		f.store_line(line)
+	f.close()
 
 	print("[capture] %s: %d frames -> %s" % [_scenario, _frames, _out])
 	get_tree().quit(0)

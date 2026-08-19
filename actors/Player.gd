@@ -127,6 +127,53 @@ var wall_jump_push: float:
 	get:
 		return get_settings().wall_jump_push
 
+var coyote_time: float:
+	get:
+		return get_settings().coyote_time
+
+var jump_buffer_time: float:
+	get:
+		return get_settings().jump_buffer_time
+
+# --- Coyote time and jump buffering ----------------------------------------
+#
+# Two halves of the same complaint. Without coyote time, stepping off a ledge
+# eats the jump; without buffering, pressing jump a frame before landing eats
+# it. Both feel like the game dropped an input the player definitely gave, and
+# both are invisible in a screenshot.
+#
+# Counted in SECONDS off the physics delta rather than in frames, so they mean
+# the same thing if the tick rate ever changes.
+var _coyote_left := 0.0
+var _jump_buffer_left := 0.0
+
+# True while a jump is still allowed despite having left the ground.
+func can_coyote_jump() -> bool:
+	return _coyote_left > 0.0 and not jump_blocked
+
+# Spends the grace, so one ledge cannot be used for two jumps.
+func consume_coyote() -> void:
+	_coyote_left = 0.0
+
+# True if the player asked to jump just before touching down. Consumes it, so a
+# single press cannot be replayed on later landings.
+func consume_buffered_jump() -> bool:
+	if _jump_buffer_left <= 0.0 or jump_blocked:
+		return false
+	_jump_buffer_left = 0.0
+	return true
+
+func _update_jump_assists(delta: float) -> void:
+	if is_on_floor():
+		_coyote_left = coyote_time
+	else:
+		_coyote_left = maxf(0.0, _coyote_left - delta)
+
+	if input_buffer != null and input_buffer.is_action_just_pressed("jump"):
+		_jump_buffer_left = jump_buffer_time
+	else:
+		_jump_buffer_left = maxf(0.0, _jump_buffer_left - delta)
+
 # True when the player is airborne and pressed against a wall hard enough to
 # kick off it.
 #
@@ -391,9 +438,20 @@ var _squash_target := Vector2.ONE
 # exactly the same amount, which reads as weightless.
 var _impact_speed := 0.0
 
+# The squash of hitting the ground, scaled by how fast we were falling: a hop
+# barely registers, a drop from the top of the arena flattens you.
+#
+# Separate from the "Land" ANIMATION on purpose. Landing while holding a
+# direction goes Fall -> Move, which plays "Walk" and never touches "Land", so
+# running landings -- almost all of them in a platformer -- used to arrive with
+# no impact at all. The impulse belongs to the landing, not to one state.
+func land_impact() -> void:
+	var hit := clampf(_impact_speed / maxf(1.0, terminal_velocity), 0.0, 1.0)
+	_impulse_squash(lerpf(1.05, 1.34, hit), lerpf(0.95, 0.66, hit))
+
 # A jump the tar refused. Kicks the body once so the press is visibly received.
 func stuck_bump() -> void:
-	_set_squash(1.22, 0.82, true)
+	_impulse_squash(1.22, 0.82)
 	if sounds != null and sounds.has_node("Jump"):
 		sounds.play("Jump")
 
@@ -401,6 +459,17 @@ func _set_squash(x: float, y: float, immediate: bool = false) -> void:
 	_squash_target = Vector2(x, y)
 	if immediate:
 		_squash = _squash_target
+
+# A one-off hit: snap the body to a pose and let it spring straight back.
+#
+# Distinct from _set_squash(immediate) which also moves the TARGET, so the body
+# eases INTO the pose and stays there. That is right for a held pose like Duck,
+# and wrong for an impact -- a landing set the squashed pose as the target, so
+# the body kept compressing for as long as the Land animation ran and read as a
+# crouch rather than as hitting the ground.
+func _impulse_squash(x: float, y: float) -> void:
+	_squash = Vector2(x, y)
+	_squash_target = Vector2.ONE
 
 # A brief tint, so a hit reads on the frame it happens rather than only through
 # the state change. Purely cosmetic, like the squash.
@@ -452,19 +521,16 @@ func play_animation(name) -> void:
 		"Fall":
 			_set_squash(0.92, 1.10)
 		"Land":
-			# Scaled by how fast we were falling. A hop barely registers; a drop
-			# from the top of the arena flattens you.
-			var hit := clampf(_impact_speed / maxf(1.0, terminal_velocity), 0.0, 1.0)
-			_set_squash(lerpf(1.05, 1.34, hit), lerpf(0.95, 0.66, hit), true)
+			land_impact()
 		"Duck":
 			_set_squash(1.18, 0.72)
 		"Slide", "SlideFinished":
 			_set_squash(1.30, 0.70)
 		"Hurt":
-			_set_squash(1.24, 0.80, true)
+			_impulse_squash(1.24, 0.80)
 			_flash(Color(1.6, 0.5, 0.5))
 		"Blop":
-			_set_squash(0.84, 1.16, true)
+			_impulse_squash(0.84, 1.16)
 		_:
 			_set_squash(1.0, 1.0)
 
@@ -732,6 +798,7 @@ func _physics_process(delta: float) -> void:
 	if player_controlled:
 		input_buffer_changed = input_buffer.update_local()
 
+	_update_jump_assists(delta)
 	state_machine._physics_process(delta)
 
 	vector.y += (gravity * delta)
