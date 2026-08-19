@@ -40,6 +40,9 @@ func _ready() -> void:
 
 	print("[smoke] starting local play")
 	GameState.online_play = false
+	# This test counts PHYSICS frames, and the round countdown deliberately holds
+	# the tree paused -- during which no physics frame ticks at all.
+	_main.game.get_game_settings().round_countdown = 0.0
 	_main._on_TitleScreen_play_local()
 	_started = true
 

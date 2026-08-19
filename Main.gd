@@ -32,6 +32,7 @@ func _ready() -> void:
 	# a client who is in the round. Connected in code rather than in Main.tscn so
 	# the wiring lives next to the handler that depends on it.
 	game.roster_updated.connect(Callable(self, "_on_Game_roster_updated"))
+	game.countdown_tick.connect(Callable(self, "_on_Game_countdown_tick"))
 
 	# The round clock lives in Game (it has to: the host drives it and RPCs the
 	# decisions), and the HUD lives in UILayer. These three are the whole bridge.
@@ -283,6 +284,7 @@ func stop_game(reset_score: bool = true) -> void:
 	ui_layer.hide_round_timer()
 	if ui_layer.hud != null:
 		ui_layer.hud.hide_hud()
+	ui_layer.hide_countdown()
 
 	game.game_stop()
 
@@ -326,6 +328,25 @@ func _hide_message_later(text: String, seconds: float = 2.5) -> void:
 	await get_tree().create_timer(seconds).timeout
 	if ui_layer.message_label.text == text:
 		ui_layer.hide_message()
+# 3, 2, 1 while the tree is still paused, then a brief "GO!" once it is running.
+#
+# The label is cleared by the tick itself rather than by a timer started
+# elsewhere, so a round abandoned mid-countdown cannot leave a number stranded on
+# the menu behind it: every exit path calls game_stop(), which bumps the setup
+# generation and ends the countdown without another tick.
+const GO_FLASH_SECONDS := 0.6
+
+func _on_Game_countdown_tick(seconds_left: int) -> void:
+	if seconds_left > 0:
+		ui_layer.show_countdown(str(seconds_left))
+		return
+
+	ui_layer.show_countdown("GO!")
+	await get_tree().create_timer(GO_FLASH_SECONDS).timeout
+	# Another round may have started counting while this flash was on screen.
+	if ui_layer.countdown_label.text == "GO!":
+		ui_layer.hide_countdown()
+
 # Rebuilds the scoreboard from the players actually spawned in the round.
 #
 # Reading the live nodes rather than a roster dictionary is what makes this work

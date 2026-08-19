@@ -38,11 +38,13 @@ func _ready() -> void:
 
 	GameState.online_play = false
 	OnlineMatch.leave()
+	_main.game.get_game_settings().round_countdown = 0.0
 
 	_check_overlay_is_reachable()
 	await _check_local_player_counts()
 	await _check_scoreboard()
 	await _check_teardown()
+	await _check_countdown()
 
 	_main.stop_game()
 	_main.queue_free()
@@ -178,3 +180,83 @@ func _check_teardown() -> void:
 	await get_tree().process_frame
 	_check("the hud goes away with the match", hud.is_visible_in_tree(), false)
 	_check("teardown clears the scoreboard", _main.players_score.size(), 0)
+
+#####
+# 4. The round countdown
+#####
+
+# Game._do_game_setup() rebuilds game_settings into a FRESH instance every round
+# (GameSettings.from_dict, so the preloaded default is never mutated), which
+# means a reference held across a round start is stale and writing to it changes
+# nothing. Always re-fetch.
+func _set_countdown(seconds: float) -> void:
+	_main.game.get_game_settings().round_countdown = seconds
+
+func _check_countdown() -> void:
+	var ui = _main.ui_layer
+
+	# Zero means "no countdown at all", which is what every other test relies on
+	# to not be paced by it.
+	_set_countdown(0.0)
+	_main.stop_game()
+	await get_tree().process_frame
+	_main._on_TitleScreen_play_local(2)
+	await get_tree().process_frame
+	_check("a zero countdown does not pause the tree", get_tree().paused, false)
+	_check("a zero countdown shows no number",
+		ui.countdown_label.is_visible_in_tree(), false)
+
+	# A real countdown holds the round on a PAUSED tree -- the players are
+	# already spawned and visible, they just cannot act yet.
+	_set_countdown(2.0)
+	_main.stop_game()
+	await get_tree().process_frame
+	_main._on_TitleScreen_play_local(2)
+	await get_tree().process_frame
+
+	_check_true("the tree is held paused while counting in", get_tree().paused)
+	_check_true("the number is on screen", ui.countdown_label.is_visible_in_tree())
+	_check("the count starts at the configured length", ui.countdown_label.text, "2")
+	_check("players are already spawned before the count",
+		_players_in_round().size(), 2)
+
+	# ...and are properly dressed while the count holds them there. The label is
+	# top_level and re-placed from Player._process(), which does NOT run on a
+	# paused tree -- so if it is positioned before the player is moved to their
+	# spawn, it stays stranded at the origin for the whole countdown.
+	for player in _players_in_round():
+		var offset: Vector2 = player._name_label.global_position - player.global_position
+		_check_true("seat %s's name label is on the player, not the origin (%.0f, %.0f)"
+				% [player.name, offset.x, offset.y],
+			offset.length() < 120.0)
+
+	# ...and play actually begins when it runs out.
+	await get_tree().create_timer(2.6).timeout
+	_check("the tree is running once the count finishes", get_tree().paused, false)
+	_check("the count hands over to GO", ui.countdown_label.text, "GO!")
+
+	await get_tree().create_timer(_main.GO_FLASH_SECONDS + 0.3).timeout
+	_check("GO clears itself", ui.countdown_label.is_visible_in_tree(), false)
+
+	# Abandoning a round mid-count must not stitch a number onto the menu, and
+	# must not leave the tree paused -- a paused tree freezes the menu itself.
+	_set_countdown(5.0)
+	_main.stop_game()
+	await get_tree().process_frame
+	_main._on_TitleScreen_play_local(2)
+	await get_tree().process_frame
+	_check_true("counting in again", ui.countdown_label.is_visible_in_tree())
+
+	_main.stop_game()
+	await get_tree().process_frame
+	_check("leaving mid-count hides the number",
+		ui.countdown_label.is_visible_in_tree(), false)
+	_check("leaving mid-count leaves the tree running", get_tree().paused, false)
+
+	# The abandoned countdown must not come back and unpause (or re-show) later.
+	await get_tree().create_timer(1.5).timeout
+	_check("the abandoned count stays gone",
+		ui.countdown_label.is_visible_in_tree(), false)
+	_check("the abandoned count does not touch the tree later", get_tree().paused, false)
+
+	_set_countdown(0.0)

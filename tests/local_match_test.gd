@@ -47,6 +47,11 @@ func _ready() -> void:
 	GameState.online_play = false
 	OnlineMatch.leave()
 
+	# Rounds are paced by GameSettings.round_countdown, which holds the paused
+	# tree for a beat before play begins. Real play wants it; a test does not
+	# want its wall-clock decided by it.
+	_main.game.get_game_settings().round_countdown = 0.0
+
 	_check_roster_signal()
 	_check_setup_report_guard()
 	_check_ready_tally()

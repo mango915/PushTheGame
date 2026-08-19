@@ -19,6 +19,10 @@ const ROUND_TIMER_COLOR_WARNING := Color(1.0, 0.42, 0.32)
 # scoreboard down mid-round. Main shows and hides it around the round.
 var hud: Control
 
+# The big centred number counting a round in. Also created here rather than in
+# Main.tscn, and also parented under Overlay so the screen stack does not own it.
+var countdown_label: Label
+
 signal change_screen (name, screen)
 signal back_button_pressed ()
 
@@ -44,6 +48,19 @@ func _ready() -> void:
 	hud = HudScript.new()
 	hud.name = "Hud"
 	$Overlay.add_child(hud)
+
+	countdown_label = Label.new()
+	countdown_label.name = "Countdown"
+	countdown_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	countdown_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	countdown_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	countdown_label.add_theme_font_size_override("font_size", 64)
+	countdown_label.add_theme_color_override("font_color", Color(0.976, 0.949, 0.855))
+	countdown_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	countdown_label.add_theme_constant_override("outline_size", 10)
+	countdown_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	countdown_label.visible = false
+	$Overlay.add_child(countdown_label)
 
 	for screen in screens.get_children():
 		if screen.has_method('_setup_screen'):
@@ -91,6 +108,13 @@ func show_back_button() -> void:
 
 func hide_back_button() -> void:
 	back_button.visible = false
+
+func show_countdown(text: String) -> void:
+	countdown_label.text = text
+	countdown_label.visible = true
+
+func hide_countdown() -> void:
+	countdown_label.visible = false
 
 func hide_all() -> void:
 	hide_screen()

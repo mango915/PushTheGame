@@ -33,6 +33,7 @@ const FIELDS := [
 	"round_time_limit",
 	"sudden_death_duration",
 	"sync_delay",
+	"round_countdown",
 	"gravity",
 ]
 
@@ -74,6 +75,13 @@ const FIELDS := [
 @export var sudden_death_duration: float = 20.0
 ## Physics frames between forced position syncs for the local player (Player.gd).
 @export var sync_delay: int = 3
+## Seconds of held breath between a round being set up and play beginning.
+##
+## The tree is already paused from Game._do_game_setup() until the round starts,
+## so this costs nothing to hold: it is the beat in which four people on one
+## couch find their controllers and everyone sees which whale is theirs. 0 skips
+## it entirely, which is what the tests do so they are not paced by it.
+@export var round_countdown: float = 3.0
 ## Downward acceleration applied to players.
 ##
 ## 0 (the default) means "use the project's physics/2d/default_gravity", which

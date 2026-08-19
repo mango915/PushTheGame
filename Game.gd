@@ -44,6 +44,9 @@ signal sudden_death_warning (seconds_left)
 # Main.start_game(), so Main.players used to stay empty on clients for the whole
 # match; _do_game_setup is the one place that reaches every peer with the roster.
 signal roster_updated (players)
+# Counts down to the start of a round: 3, 2, 1, then 0 meaning "go". Main turns
+# it into the on-screen number.
+signal countdown_tick (seconds_left)
 
 # Upper bound on the setup handshake. _do_game_setup() pauses the tree and only
 # _do_game_start() unpauses it, so a peer dropping between the two RPCs used to
@@ -51,6 +54,10 @@ signal roster_updated (players)
 const SETUP_TIMEOUT_SECONDS := 15.0
 
 var _waiting_for_setup := false
+# Guards against a second countdown running alongside the first. _do_game_start
+# is an RPC and can also be invoked by the setup watchdog, so it is genuinely
+# reachable twice for one round.
+var _counting_down := false
 # Bumped whenever a round is set up or torn down, so the watchdog of an earlier
 # round cannot start (or unpause) a round that has since been replaced.
 var _setup_generation := 0
@@ -179,9 +186,14 @@ func reload_game_settings() -> void:
 
 		other_player.set_multiplayer_authority(peer_id)
 		other_player.set_player_skin(int(characters.get(peer_id, player_number - 1)))
-		other_player.set_player_name(players[peer_id])
 		other_player.position = map.get_node("PlayerStartPositions/Player" + str(player_number)).position
 		other_player.rotation = map.get_node("PlayerStartPositions/Player" + str(player_number)).rotation
+		# AFTER the spawn position is set. The name label is top_level and is
+		# placed relative to the player's global position, so naming a player
+		# still sitting at the origin pinned their label there -- and
+		# Player._process(), which re-places it every frame, does not run while
+		# the tree is paused, which is exactly what the round countdown does.
+		other_player.set_player_name(players[peer_id])
 		other_player.player_dead.connect(Callable(self, "_on_player_dead").bind(peer_id))
 
 		if not GameState.online_play:
@@ -250,6 +262,47 @@ func _watch_setup(generation: int) -> void:
 	if map.has_method('map_start'):
 		map.map_start()
 	emit_signal("game_started_signal")
+	_run_countdown()
+
+# Holds the round for a beat before play begins.
+#
+# The tree has been paused since _do_game_setup(), and this deliberately leaves
+# it that way: players are already spawned and visible, so everyone can see the
+# arena and which character is theirs before anything can kill them. Rounds used
+# to begin on the very frame the tree unpaused.
+#
+# Length comes from GameSettings.round_countdown, so it replicates to every peer
+# with the rest of the tuning and the tests can set it to 0.
+func _run_countdown() -> void:
+	if _counting_down:
+		return
+
+	var seconds := int(ceil(get_game_settings().round_countdown))
+	if seconds <= 0:
+		# Disabled entirely: begin play without so much as a "GO!". The tick is
+		# deliberately NOT emitted, or a zero countdown would still flash across
+		# the screen. Anything that just wants to know play began has
+		# game_started_signal.
+		get_tree().set_pause(false)
+		return
+
+	_counting_down = true
+	# A round can be abandoned mid-countdown -- the back button, a peer leaving,
+	# the next round being set up -- and the tick that survives that must not
+	# unpause a tree that now belongs to a menu.
+	var generation := _setup_generation
+
+	for remaining in range(seconds, 0, -1):
+		emit_signal("countdown_tick", remaining)
+		# create_timer defaults to process_always, so it keeps ticking on the
+		# paused tree.
+		await get_tree().create_timer(1.0).timeout
+		if generation != _setup_generation or not game_started:
+			_counting_down = false
+			return
+
+	_counting_down = false
+	emit_signal("countdown_tick", 0)
 	get_tree().set_pause(false)
 
 	# Started HERE and not in _do_game_setup: setup pauses the tree and waits on
@@ -265,8 +318,10 @@ func game_stop() -> void:
 		map.map_stop()
 
 	game_started = false
-	# Any setup watchdog still in flight belongs to the round we just dropped.
+	# Any setup watchdog or countdown still in flight belongs to the round we
+	# just dropped.
 	_waiting_for_setup = false
+	_counting_down = false
 	_setup_generation += 1
 	players_setup.clear()
 	players_alive.clear()

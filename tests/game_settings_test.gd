@@ -58,6 +58,7 @@ func _check_defaults() -> void:
 	_check("default throw_torque", settings.throw_torque, 10.0)
 	_check("default rounds_to_win", settings.rounds_to_win, 5)
 	_check("default sync_delay", settings.sync_delay, 3)
+	_check("default round_countdown", settings.round_countdown, 3.0)
 
 	# The .tres the game actually loads must agree with the script defaults,
 	# otherwise editing one of them changes nothing.
