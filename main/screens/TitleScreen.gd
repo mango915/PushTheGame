@@ -108,8 +108,10 @@ func _build_crt_overlay() -> void:
 		"noise_opacity": 0.0,
 		"static_noise_intensity": 0.06,
 		"aberration": -0.006,
-		"brightness": 1.4,
-		"discolor": true,
+		"brightness": 1.15,
+		# Off: it pushes the whole screen sepia, which on a dusk sky turns white
+		# menu text pink and costs more contrast than the effect is worth.
+		"discolor": false,
 		# No barrel warp: it bends the button edges away from where the mouse
 		# actually is, since the shader moves pixels and not the controls.
 		"warp_amount": 0.0,

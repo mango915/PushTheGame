@@ -262,9 +262,11 @@ with the following exceptions:
   [CC BY-NC License](assets/LICENSE.txt) — art by Orlando Herrera a.k.a.
   [Pixel Frog](https://pixelfrog-store.itch.io/), music and sound by Jakob T.
   Rypdal.
-* Additional CC0 art from Kenney: [Scribble Platformer](https://kenney.nl/assets/scribble-platformer)
-  (`assets/doodle/sprites/`) and [1-Bit Pack](https://kenney.nl/assets/1-bit-pack)
-  (`assets/doodle/tilesets/`).
+* The game's current look — characters, arena tiles, weapons and backdrops — is
+  Kenney's [Scribble Platformer](https://kenney.nl/assets/scribble-platformer)
+  (CC0), with the [1-Bit Pack](https://kenney.nl/assets/1-bit-pack) alongside it.
+  The arena atlas and backdrop layers are derived from that sheet by
+  `tools/make_scribble_atlas.py`.
 * The [m5x7](https://managore.itch.io/m5x7) font by Daniel Linssen is CC0.
 * The title screen's CRT/VHS treatment (`assets/shaders/`) came from this
   project's own `compa_dev` branch, where it carried no attribution. The

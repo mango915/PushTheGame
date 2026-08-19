@@ -3,10 +3,10 @@
 [ext_resource type="FontFile" uid="uid://ctgimbrefgr5b" path="res://assets/fonts/monogram_extended.ttf" id="1"]
 [ext_resource type="Theme" uid="uid://cw86emnrbxxs8" path="res://assets/theme.tres" id="2"]
 [ext_resource type="Script" path="res://main/screens/TitleScreen.gd" id="3"]
-[ext_resource type="Texture2D" uid="uid://dy7xb2c071g5" path="res://assets/backgrounds/01.png" id="4"]
-[ext_resource type="Texture2D" uid="uid://cg5i3hiwxl2u8" path="res://assets/backgrounds/02.png" id="5"]
-[ext_resource type="Texture2D" uid="uid://caql1h6xh1y43" path="res://assets/backgrounds/03.png" id="6"]
-[ext_resource type="Texture2D" uid="uid://br7fxx4yfte6g" path="res://assets/backgrounds/04.png" id="7"]
+[ext_resource type="Texture2D" path="res://assets/doodle/backgrounds/bg_title.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/doodle/backgrounds/bg_trees.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/doodle/backgrounds/bg_clouds_far.png" id="6"]
+[ext_resource type="Texture2D" path="res://assets/doodle/backgrounds/bg_sky.png" id="7"]
 
 [sub_resource type="Gradient" id="2"]
 offsets = PackedFloat32Array(0, 0.55, 1)
@@ -2388,11 +2388,12 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = SubResource("3")
+texture = ExtResource("4")
 expand_mode = 1
 stretch_mode = 0
 
 [node name="Depth4" type="TextureRect" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -2407,6 +2408,7 @@ expand_mode = 1
 stretch_mode = 0
 
 [node name="Depth3" type="TextureRect" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -2421,6 +2423,7 @@ expand_mode = 1
 stretch_mode = 0
 
 [node name="Depth2" type="TextureRect" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -2440,11 +2443,11 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -88
+offset_top = -120
 grow_horizontal = 2
 grow_vertical = 0
-modulate = Color(0.047, 0.086, 0.145, 1)
-texture = ExtResource("4")
+modulate = Color(0.15, 0.12, 0.2, 1)
+texture = ExtResource("5")
 expand_mode = 1
 stretch_mode = 0
 

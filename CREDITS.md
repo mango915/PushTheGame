@@ -22,11 +22,16 @@ Art
 
 | What | Who | Licence |
 | --- | --- | --- |
-| Characters and arena tiles (`assets/sprites/kings_and_pigs/`) | Orlando Herrera, [Pixel Frog](https://pixelfrog-store.itch.io/) | see `assets/LICENSE.txt` |
-| Remaining original art | project authors | CC BY-NC |
-| [Scribble Platformer](https://kenney.nl/assets/scribble-platformer) (`assets/doodle/sprites/`) | Kenney | CC0 |
+| **Characters, arena tiles, weapons, backdrops** (`assets/doodle/`) — the game's current look | [Kenney](https://kenney.nl/assets/scribble-platformer), "Scribble Platformer" | CC0 |
 | [1-Bit Pack](https://kenney.nl/assets/1-bit-pack) (`assets/doodle/tilesets/`) | Kenney | CC0 |
+| Earlier characters and arena tiles (`assets/sprites/kings_and_pigs/`) — still used by the grenade, mine and disintegrate effect | Orlando Herrera, [Pixel Frog](https://pixelfrog-store.itch.io/) | see `assets/LICENSE.txt` |
+| Underwater backdrops (`assets/backgrounds/`) and whale characters — retired in the art migration, kept in history | project authors / Pixel Frog | CC BY-NC |
 | `assets/doodle/splash_screen.png` | project authors (photo collage) | project authors |
+
+The arena atlas (`assets/doodle/tilesets/scribble_arena.png`) and the backdrop
+layers (`assets/doodle/backgrounds/`) are **derived** from the Scribble
+Platformer sheet by `tools/make_scribble_atlas.py` and the generator in
+`tools/build_maps.gd`, not drawn by hand. They inherit its CC0 licence.
 
 Fonts
 -----
