@@ -56,6 +56,7 @@ func _ready() -> void:
 	_check_setup_report_guard()
 	_check_ready_tally()
 	await _check_local_scoring()
+	await _check_four_player_match()
 	await _check_teardown_resets_score()
 	await _check_departed_player_is_removed()
 
@@ -190,3 +191,73 @@ func _check_departed_player_is_removed() -> void:
 		victim.is_queued_for_deletion())
 
 	_main.game.players_alive.erase(99)
+
+# A whole four-player match, start to finish.
+#
+# Everything below is covered piecemeal elsewhere -- seats, the scoreboard, the
+# countdown, the map bag, scoring, the match end -- but they only ever meet each
+# other in a real match, and that is where the ordering between them can be
+# wrong without any single unit failing. Rounds here are decided by calling
+# _on_game_over_signal directly rather than by playing them out, so the test is
+# about the machinery around a round rather than about combat.
+func _check_four_player_match() -> void:
+	_main.stop_game()
+	await get_tree().process_frame
+
+	_main.game.get_game_settings().rounds_to_win = 3
+	_main.game.get_game_settings().round_countdown = 0.0
+	_main.players_score.clear()
+
+	GameState.online_play = false
+	_main._on_TitleScreen_play_local(4)
+	await get_tree().process_frame
+
+	var seats := 0
+	for child in _main.game.players_node.get_children():
+		if child.has_method("pickup_or_throw"):
+			seats += 1
+	_check("a four-player match seats four", seats, 4)
+
+	var hud = _main.ui_layer.hud
+	_check("the scoreboard has all four", hud.player_count(), 4)
+	_check_true("the scoreboard is up", hud.is_visible_in_tree())
+
+	# Seat 2 takes the match; seat 3 takes one round on the way, so the test
+	# proves the board tracks more than a single player.
+	var maps_seen := {}
+	var winners := [2, 3, 2, 2]
+	var expected := {2: 0, 3: 0}
+
+	for i in range(winners.size()):
+		maps_seen[_main.game.map_index] = true
+
+		var winner: int = winners[i]
+		expected[winner] += 1
+		_main._on_game_over_signal(winner)
+
+		_check("round %d credits seat %d" % [i + 1, winner],
+			int(_main.players_score.get(winner, 0)), expected[winner])
+
+		# The board has to agree with the tally, every round, not just at the end.
+		if hud.has_player(winner):
+			_check("round %d shows on the scoreboard" % [i + 1],
+				hud._score_of(winner), expected[winner])
+
+		await get_tree().create_timer(ROUND_GAP).timeout
+
+		if expected[winner] >= 3:
+			break
+
+	_check("the match ends when someone reaches rounds_to_win",
+		_main.game.game_started, false)
+	_check("winning the match clears the scoreboard", _main.players_score.size(), 0)
+	_check_true("the scoreboard comes down with the match",
+		not hud.is_visible_in_tree())
+	_check_true("a won match returns to the menu", _screen_visible("TitleScreen"))
+
+	# Three rounds were played, and the arena is drawn from a bag rather than
+	# being the same one every time.
+	_check_true("the match visited more than one arena (%d)" % maps_seen.size(),
+		maps_seen.size() > 1)
+
+	_main.game.get_game_settings().rounds_to_win = 5
