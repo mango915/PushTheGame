@@ -205,21 +205,50 @@ func get_device_id() -> String:
 #
 # Returns true on success. On failure the caller gets the message via the
 # returned bool plus auth_error.
+# How many suffixed names to try before giving up on a taken display name.
+const MAX_USERNAME_ATTEMPTS := 5
+
 func authenticate_device() -> bool:
-	var session = await get_nakama_client().authenticate_device_async(
-		_device_id, display_name, true)
+	# Nakama usernames are globally unique, and we use the player's display name
+	# as the username so it shows up in the lobby (Player.from_presence reads
+	# presence.username). Two players who pick the same name would otherwise
+	# collide, and the second one could not sign in AT ALL -- so on a collision
+	# we disambiguate with a short suffix rather than locking them out.
+	#
+	# Re-authenticating an existing device with the name it already holds is not
+	# a collision: the username belongs to that account already.
+	var attempt := 0
+	var requested := display_name
 
-	if session.is_exception():
-		var message := "Could not sign in"
+	while attempt < MAX_USERNAME_ATTEMPTS:
+		var session = await get_nakama_client().authenticate_device_async(
+			_device_id, requested, true)
+
+		if not session.is_exception():
+			nakama_session = session
+			# Keep whatever name we actually ended up with, so it is stable next
+			# launch instead of collecting a new suffix every time.
+			if session.username != "" and session.username != display_name:
+				display_name = session.username
+				save_profile()
+			return true
+
 		var exception = session.get_exception()
-		if exception and exception.message != '':
+		var message: String = "Could not sign in"
+		if exception and exception.message != "":
 			message = exception.message
-		nakama_session = null
-		emit_signal("auth_error", message)
-		return false
 
-	nakama_session = session
-	return true
+		if not message.to_lower().contains("username is already in use"):
+			nakama_session = null
+			emit_signal("auth_error", message)
+			return false
+
+		attempt += 1
+		requested = "%s#%04d" % [display_name, randi() % 10000]
+
+	nakama_session = null
+	emit_signal("auth_error", "That name is taken - try a different one")
+	return false
 
 # True when we hold a session that is still good.
 func has_valid_session() -> bool:

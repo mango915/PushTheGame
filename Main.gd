@@ -21,6 +21,11 @@ func _ready() -> void:
 	OnlineMatch.player_joined.connect(Callable(self, "_on_OnlineMatch_player_joined"))
 	OnlineMatch.player_left.connect(Callable(self, "_on_OnlineMatch_player_left"))
 
+	# Only the host ever calls start_game(), so this is the one thing that tells
+	# a client who is in the round. Connected in code rather than in Main.tscn so
+	# the wiring lives next to the handler that depends on it.
+	game.roster_updated.connect(Callable(self, "_on_Game_roster_updated"))
+
 	randomize()
 	music.play_random()
 
@@ -88,6 +93,13 @@ func _on_ReadyScreen_ready_pressed() -> void:
 #####
 
 func _on_OnlineMatch_error(message: String):
+	# Every exit from a match goes through here, so this is where the round has
+	# to be torn down: stop_game() is what clears players_score (otherwise the
+	# scores of an abandoned match leak into the next one) and what stops the
+	# abandoned round simulating -- and RPCing into a dead bridge -- behind the
+	# menu.
+	stop_game()
+
 	if message != '':
 		ui_layer.show_message(message)
 	ui_layer.show_screen("MatchScreen")
@@ -108,30 +120,61 @@ func _on_OnlineMatch_player_left(player) -> void:
 	# friend backed out. Only abandon a match that is actually in progress; in
 	# the lobby, ReadyScreen already disables Ready via match_not_ready.
 	if game.game_started and players.size() < 2:
-		OnlineMatch.leave()
+		# _on_OnlineMatch_error() leaves the match and stops the game.
 		_on_OnlineMatch_error(player.username + " has left - not enough players!")
 	else:
 		ui_layer.show_message(player.username + " has left")
 
 func _on_OnlineMatch_player_joined(player) -> void:
 	if get_tree().get_multiplayer().is_server():
-		# Tell this new player about all the other players that are already ready.
-		for player_ready in players_ready.values():
-			rpc_id(player_ready.peer_id, "player_ready", player_ready.peer_id)
+		# Tell this new player about all the other players that are already
+		# ready. players_ready is keyed by peer id and its values are plain
+		# `true`, so this iterates the keys -- `true.peer_id` was a runtime error
+		# that aborted the loop -- and the message goes to the new arrival, not
+		# back to the player who was already ready.
+		for ready_peer_id in players_ready:
+			rpc_id(player.peer_id, "player_ready", ready_peer_id)
 
 #####
 # Gameplay methods and callbacks
 #####
 
+# Emitted by Game._do_game_setup on every peer, which is the only roster message
+# a client ever receives. Without this, `players` stayed empty on clients all
+# match, so the "not enough players" check in _on_OnlineMatch_player_left fired
+# on any departure and threw every client back to the match screen.
+func _on_Game_roster_updated(roster: Dictionary) -> void:
+	players = roster.duplicate()
+
+	if GameState.online_play and OnlineMatch.match_state != OnlineMatch.MatchState.PLAYING:
+		# The round is starting on this peer. The host now refuses new arrivals
+		# ("the match has already begun"), so a client that still thought it was
+		# in READY would have added that rejected peer to its own lobby.
+		OnlineMatch.start_playing()
+
+# `peer_id` says whose READY! label to light up -- the host uses it to catch a
+# newcomer up on players who were already ready. It is NOT trusted for the
+# tally: one client could otherwise mark every other player ready and force the
+# round to start.
 @rpc("any_peer", "call_local") func player_ready(peer_id: int) -> void:
 	ready_screen.set_status(peer_id, "READY!")
 
-	if get_tree().get_multiplayer().is_server() and not players_ready.has(peer_id):
-		players_ready[peer_id] = true
-		if players_ready.size() == OnlineMatch.players.size():
-			if OnlineMatch.match_state != OnlineMatch.MatchState.PLAYING:
-				OnlineMatch.start_playing()
-			start_game()
+	if not get_tree().get_multiplayer().is_server():
+		return
+
+	# 0 means this was not a remote call, i.e. the host pressing its own button.
+	var sender_id: int = get_tree().get_multiplayer().get_remote_sender_id()
+	if sender_id == 0:
+		sender_id = get_tree().get_multiplayer().get_unique_id()
+
+	if players_ready.has(sender_id):
+		return
+
+	players_ready[sender_id] = true
+	if players_ready.size() == OnlineMatch.players.size():
+		if OnlineMatch.match_state != OnlineMatch.MatchState.PLAYING:
+			OnlineMatch.start_playing()
+		start_game()
 
 func start_game() -> void:
 	if GameState.online_play:
@@ -144,17 +187,21 @@ func start_game() -> void:
 
 	game.game_start(players)
 
-func stop_game() -> void:
+# Full teardown: leaves the match and forgets the scoreboard. `reset_score` is
+# false only between the rounds of a match still in progress, which is the one
+# case where the running score has to survive.
+func stop_game(reset_score: bool = true) -> void:
 	OnlineMatch.leave()
 
 	players.clear()
 	players_ready.clear()
-	players_score.clear()
+	if reset_score:
+		players_score.clear()
 
 	game.game_stop()
 
 func restart_game() -> void:
-	stop_game()
+	stop_game(false)
 	start_game()
 
 func _on_game_started_signal() -> void:
@@ -172,20 +219,28 @@ func _on_player_dead(peer_id: int) -> void:
 		if peer_id == my_id:
 			ui_layer.show_message("You lose!")
 
+# Adds a round win to the scoreboard and reports the new total.
+func _record_win(peer_id: int) -> int:
+	players_score[peer_id] = int(players_score.get(peer_id, 0)) + 1
+	return players_score[peer_id]
+
 func _on_game_over_signal(peer_id: int) -> void:
 	players_ready.clear()
 
+	# The roster is cleared on teardown, so do not assume the winner is still in it.
+	var winner_name: String = players.get(peer_id, "Player %d" % peer_id)
+	var rounds_to_win: int = game.get_game_settings().rounds_to_win
+
 	if not GameState.online_play:
-		show_winner(players[peer_id])
+		# Local play used to call show_winner() with just a name, so score and
+		# is_match defaulted to 0/false every single round: no scoreboard was
+		# ever kept, rounds_to_win was never consulted, and restart_game() looped
+		# forever with no way to win the match.
+		var score := _record_win(peer_id)
+		show_winner(winner_name, peer_id, score, score >= rounds_to_win)
 	elif get_tree().get_multiplayer( ).is_server():
-		if not players_score.has(peer_id):
-			players_score[peer_id] = 1
-		else:
-			players_score[peer_id] += 1
-
-		var is_match: bool = players_score[peer_id] >= game.get_game_settings().rounds_to_win
-
-		rpc("show_winner", players[peer_id], peer_id, players_score[peer_id], is_match)
+		var score := _record_win(peer_id)
+		rpc("show_winner", winner_name, peer_id, score, score >= rounds_to_win)
 
 func update_wins_leaderboard() -> void:
 	if not Online.has_valid_session():
@@ -200,6 +255,10 @@ func update_wins_leaderboard() -> void:
 @rpc("any_peer", "call_local") func show_winner(name: String, peer_id: int = 0, score: int = 0, is_match: bool = false) -> void:
 	if is_match:
 		ui_layer.show_message(name + " WINS THE WHOLE MATCH!")
+	elif score > 0:
+		# Local play has no ready screen to show a scoreboard on, so the running
+		# score goes in the message.
+		ui_layer.show_message("%s wins this round! (%d of %d)" % [name, score, game.get_game_settings().rounds_to_win])
 	else:
 		ui_layer.show_message(name + " wins this round!")
 
@@ -218,6 +277,11 @@ func update_wins_leaderboard() -> void:
 			ready_screen.reset_status("Waiting...")
 			ready_screen.set_score(peer_id, score)
 			ui_layer.show_screen("ReadyScreen")
+	elif is_match:
+		# Local match won: full teardown (which clears the scoreboard) and back
+		# to the menu, rather than restarting the same match forever.
+		stop_game()
+		ui_layer.show_screen("TitleScreen")
 	else:
 		restart_game()
 

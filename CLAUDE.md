@@ -31,6 +31,14 @@ docker-compose up -d      # Nakama on :7350, console on :7351
 
 Two-player local play needs no server: Title screen → "Play Local" wires `player1_*` / `player2_*` input actions to two players in the same window.
 
+### Watch for this bug pattern
+`var x: T = v: set = _set_readonly_variable` — an empty setter used to make a property read-only from outside. GDScript setters intercept writes from **inside** the class too, so every internal assignment is silently discarded and nothing errors. This has been found and fixed three times now: `OnlineMatch` (the whole match state machine was inert) and `UILayer` (`current_screen_name` was permanently `''`, so the Back button could never leave MatchScreen online). If you meet another one, it is a bug, not a style.
+
+### Testing multiplayer for real
+`scripts/check.sh` runs one process with no server, so it cannot see the online path at all. `scripts/nettest.sh` launches two headless clients that host and join the same room code against a local Nakama (`docker compose up -d` first). Use it for anything touching auth, the match lifecycle, or RPCs.
+
+Note `tests/net_multiplayer.tscn` is deliberately **not** named `*Test.tscn` — that pattern is auto-discovered by the unit gate, and this one needs a server plus CLI args.
+
 ### The regression harness
 
 `scripts/check.sh` is the only safety net — there is no unit-test framework. Four gates: **parse** every non-addon script, **boot** `Main.tscn` headless, **play** a full local 2-player round (including a forced death and round end), and **units**, which auto-discovers `tests/*Test.tscn`.

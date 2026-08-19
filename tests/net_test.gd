@@ -72,7 +72,11 @@ func _run() -> void:
 	# otherwise both clients authenticate as the SAME Nakama user, which is not
 	# what two players look like.
 	Online.apply_server_settings("127.0.0.1", 7350, "http")
-	Online._device_id = "nettest-%s-%s" % [_role, _code]
+	# Stable per-role device id, deliberately NOT derived from the room code:
+	# a fresh device id mints a fresh Nakama account each run, which then
+	# collides with the previous run on the hard-coded username and fails with
+	# "409 Username is already in use" forever after the first run.
+	Online._device_id = "nettest-%s" % _role
 	Online.display_name = "Test%s" % _role.capitalize()
 
 	print("[net-%s] authenticating..." % _role)
@@ -81,7 +85,10 @@ func _run() -> void:
 	if not signed_in:
 		return
 	_check_true("session is valid", Online.has_valid_session())
-	_check("display name reached the server", Online.nakama_session.username, "Test%s" % _role.capitalize())
+	# May carry a "#1234" suffix if the plain name was already taken.
+	var expected_name := "Test%s" % _role.capitalize()
+	_check_true("display name reached the server (got %s)" % Online.nakama_session.username,
+		Online.nakama_session.username.begins_with(expected_name))
 
 	print("[net-%s] connecting socket..." % _role)
 	var connected: bool = await Online.connect_nakama_socket()
@@ -130,7 +137,8 @@ func _run() -> void:
 	for peer_id in OnlineMatch.players:
 		names.append(OnlineMatch.players[peer_id].username)
 	names.sort()
-	_check("both usernames visible", ", ".join(names), "TestHost, TestJoin")
+	_check_true("both usernames visible (got %s)" % ", ".join(names),
+		names.size() == 2 and names[0].begins_with("TestHost") and names[1].begins_with("TestJoin"))
 
 	# match_state must have actually advanced -- this is the property whose
 	# no-op setter made the whole state machine inert.
