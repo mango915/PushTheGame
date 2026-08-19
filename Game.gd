@@ -50,16 +50,16 @@ var _setup_generation := 0
 func _ready() -> void:
 	reload_game_settings()
 
-func game_start(players: Dictionary) -> void:
+func game_start(players: Dictionary, characters: Dictionary = {}) -> void:
 	# Resources do not serialize over RPC safely, so the settings travel as a
 	# plain Dictionary and are rebuilt on each peer.
 	var settings_data: Dictionary = get_game_settings().to_dict()
 	var chosen_map := _pick_next_map()
 
 	if GameState.online_play:
-		rpc('_do_game_setup', players, settings_data, chosen_map)
+		rpc('_do_game_setup', players, settings_data, chosen_map, characters)
 	else:
-		_do_game_setup(players, settings_data, chosen_map)
+		_do_game_setup(players, settings_data, chosen_map, characters)
 
 # Rotate rather than pick at random, so a short session actually sees both
 # arenas instead of the same one three times running.
@@ -84,7 +84,7 @@ func reload_game_settings() -> void:
 	game_settings = GameSettings.load_saved()
 
 # Initializes the game so that it is ready to really start.
-@rpc("any_peer", "call_local") func _do_game_setup(players: Dictionary, settings_data: Dictionary = {}, chosen_map: int = -1) -> void:
+@rpc("any_peer", "call_local") func _do_game_setup(players: Dictionary, settings_data: Dictionary = {}, chosen_map: int = -1, characters: Dictionary = {}) -> void:
 	# Adopt the host's tuning before spawning anyone. from_dict() builds a fresh
 	# resource rather than mutating the preloaded default, which the resource
 	# cache would otherwise keep mutated for the rest of the process.
@@ -126,7 +126,7 @@ func reload_game_settings() -> void:
 		players_node.add_child(other_player)
 
 		other_player.set_multiplayer_authority(peer_id)
-		other_player.set_player_skin(player_number - 1)
+		other_player.set_player_skin(int(characters.get(peer_id, player_number - 1)))
 		other_player.set_player_name(players[peer_id])
 		other_player.position = map.get_node("PlayerStartPositions/Player" + str(player_number)).position
 		other_player.rotation = map.get_node("PlayerStartPositions/Player" + str(player_number)).rotation

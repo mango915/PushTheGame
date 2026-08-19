@@ -200,15 +200,24 @@ func _on_Game_roster_updated(roster: Dictionary) -> void:
 		start_game()
 
 func start_game() -> void:
+	var characters := {}
 	if GameState.online_play:
 		players = OnlineMatch.get_player_names_by_peer_id()
+		for peer_id in OnlineMatch.players:
+			characters[peer_id] = OnlineMatch.players[peer_id].character
 	else:
 		players = {
 			1: "Player1",
 			2: "Player2",
 		}
+		# Local players share one machine and cannot each pick, so give them
+		# distinct characters starting from whatever this profile chose.
+		var index := 0
+		for peer_id in players:
+			characters[peer_id] = (Online.character_index + index) % 4
+			index += 1
 
-	game.game_start(players)
+	game.game_start(players, characters)
 
 # Full teardown: leaves the match and forgets the scoreboard. `reset_score` is
 # false only between the rounds of a match still in progress, which is the one

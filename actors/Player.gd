@@ -216,9 +216,53 @@ func set_player_skin(_player_skin: int) -> void:
 			body_sprite.texture = skin_resources[player_skin]
 			fin_sprite.texture = skin_resources[player_skin]
 
+# Shows the player's name above their character. Built in code so Player.tscn
+# does not have to change.
+#
+# The label is top_level, so it ignores the player's transform entirely and is
+# positioned in global coordinates each frame. Parenting it normally and
+# counter-scaling does NOT work: flipping negates the player's scale.x, and the
+# pickup AnimationPlayer re-animates that scale, so the label would be left
+# mirrored whenever an animation reset the flip.
+const NAME_LABEL_OFFSET := Vector2(0, -46)
+
+var player_name: String = ""
+var _name_label: Label
+
 func set_player_name(_player_name: String) -> void:
-	# @todo Implement
-	pass
+	player_name = _player_name
+
+	if _name_label == null:
+		_name_label = Label.new()
+		_name_label.name = "NameLabel"
+		_name_label.top_level = true
+		_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		_name_label.add_theme_font_size_override("font_size", 12)
+		_name_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.92))
+		# A dark outline keeps the name readable against both the pale water and
+		# the dark terrain.
+		_name_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.75))
+		_name_label.add_theme_constant_override("outline_size", 4)
+		_name_label.z_index = 10
+		add_child(_name_label)
+
+	_name_label.text = player_name
+	_update_name_label()
+
+func _update_name_label() -> void:
+	if _name_label == null:
+		return
+
+	var width := _name_label.size.x
+	if width <= 0.0:
+		width = float(len(player_name)) * 7.0
+	_name_label.global_position = global_position + NAME_LABEL_OFFSET - Vector2(width * 0.5, 0)
+
+func _process(_delta: float) -> void:
+	# top_level means the label does not follow us automatically.
+	if _name_label != null:
+		_update_name_label()
 
 func set_flip_h(_flip_h: bool) -> void:
 	if flip_h != _flip_h:

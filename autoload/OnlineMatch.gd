@@ -68,6 +68,8 @@ signal match_joined (match_id, mode)
 
 signal player_joined (player)
 signal player_left (player)
+# An already-known player's details changed (their character arrived, say).
+signal player_updated (player)
 
 signal match_ready (players)
 signal match_not_ready ()
@@ -76,33 +78,38 @@ class Player:
 	var session_id: String
 	var peer_id: int
 	var username: String
+	# Index into Player.PlayerSkin -- which character this player chose.
+	var character: int = 0
 
-	func _init(_session_id: String, _username: String, _peer_id: int) -> void:
+	func _init(_session_id: String, _username: String, _peer_id: int, _character: int = 0) -> void:
 		session_id = _session_id
 		username = _username
 		peer_id = _peer_id
+		character = _character
 
 	static func from_presence(presence: NakamaRTAPI.UserPresence, _peer_id: int) -> Player:
 		return Player.new(presence.session_id, presence.username, _peer_id)
 
 	static func from_dict(data: Dictionary) -> Player:
-		return Player.new(data['session_id'], data['username'], int(data['peer_id']))
+		return Player.new(data['session_id'], data['username'], int(data['peer_id']),
+			int(data.get('character', 0)))
 
 	# LAN players have no Nakama presence: there is no server that issued them a
 	# session id, and nobody knows their name until they announce it over the
 	# wire. The session id is synthesised from the peer id, which is the only
 	# identity a LAN match actually has.
-	static func from_lan(_peer_id: int, _username: String) -> Player:
+	static func from_lan(_peer_id: int, _username: String, _character: int = 0) -> Player:
 		var name := _username.strip_edges()
 		if name == '':
 			name = 'Player %d' % _peer_id
-		return Player.new('lan-%d' % _peer_id, name, _peer_id)
+		return Player.new('lan-%d' % _peer_id, name, _peer_id, _character)
 
 	func to_dict() -> Dictionary:
 		return {
 			session_id = session_id,
 			username = username,
 			peer_id = peer_id,
+			character = character,
 		}
 
 static func serialize_players(_players: Dictionary) -> Dictionary:
@@ -198,6 +205,20 @@ func join_lan_match(address: String, port: int = -1) -> bool:
 
 	return true
 
+# Tell every other peer which character we just switched to, so their lobby
+# updates without waiting for a reconnect.
+func announce_local_character() -> void:
+	if players.has(get_tree().get_multiplayer().get_unique_id()):
+		players[get_tree().get_multiplayer().get_unique_id()].character = _local_character()
+	if get_tree().get_multiplayer().multiplayer_peer == null:
+		return
+	if players.size() <= 1:
+		return
+	rpc("_lan_announce_player", _local_display_name(), _local_character())
+
+func _local_character() -> int:
+	return Online.character_index if Online else 0
+
 func _local_display_name() -> String:
 	return Online.display_name.strip_edges()
 
@@ -205,7 +226,7 @@ func _ensure_local_lan_player() -> void:
 	var my_peer_id := get_tree().get_multiplayer().get_unique_id()
 	if my_peer_id == 0 or players.has(my_peer_id):
 		return
-	players[my_peer_id] = Player.from_lan(my_peer_id, _local_display_name())
+	players[my_peer_id] = Player.from_lan(my_peer_id, _local_display_name(), _local_character())
 
 func _emit_lan_match_joined() -> void:
 	if _lan_match_joined_emitted:
@@ -235,10 +256,7 @@ func _on_lan_server_disconnected() -> void:
 # Peers introduce themselves to each other on connect, because a LAN match has
 # no presence list to look names up in. The Player is created here rather than
 # in _on_network_peer_connected so the lobby never shows a placeholder name.
-@rpc("any_peer", "call_remote", "reliable") func _lan_announce_player(username: String) -> void:
-	# Ignore stray announcements arriving over a Nakama match.
-	if not is_lan() and nakama_multiplayer_bridge != null:
-		return
+@rpc("any_peer", "call_remote", "reliable") func _lan_announce_player(username: String, character: int = 0) -> void:
 
 	var peer_id := get_tree().get_multiplayer().get_remote_sender_id()
 	if peer_id == 0:
@@ -247,10 +265,16 @@ func _on_lan_server_disconnected() -> void:
 	var existing = players.get(peer_id)
 	if existing != null:
 		# A re-announcement only refreshes the name; the lobby already has them.
-		existing.username = Player.from_lan(peer_id, username).username
+		# On Nakama the presence username is authoritative; on LAN the
+		# announcement is the only source. Either way the character only ever
+		# arrives this way.
+		if is_lan():
+			existing.username = Player.from_lan(peer_id, username).username
+		existing.character = character
+		emit_signal("player_updated", existing)
 		return
 
-	var player := Player.from_lan(peer_id, username)
+	var player := Player.from_lan(peer_id, username, character)
 	players[peer_id] = player
 	emit_signal("player_joined", player)
 
@@ -403,6 +427,7 @@ func _on_match_joined() -> void:
 	var my_peer_id = get_tree().get_multiplayer().get_unique_id()
 	var presence: NakamaRTAPI.UserPresence = nakama_multiplayer_bridge.get_user_presence_for_peer(my_peer_id)
 	var player = Player.from_presence(presence, my_peer_id)
+	player.character = _local_character()
 	players[my_peer_id] = player
 	emit_signal("match_joined", nakama_multiplayer_bridge.match_id, match_mode)
 
@@ -449,13 +474,17 @@ func _on_network_peer_connected(peer_id: int) -> void:
 		if is_lan():
 			_ensure_local_lan_player()
 			_emit_lan_match_joined()
-		rpc_id(peer_id, "_lan_announce_player", _local_display_name())
+		rpc_id(peer_id, "_lan_announce_player", _local_display_name(), _local_character())
 		return
 
 	var presence: NakamaRTAPI.UserPresence = nakama_multiplayer_bridge.get_user_presence_for_peer(peer_id)
 	var player = Player.from_presence(presence, peer_id)
 	players[peer_id] = player
 	emit_signal("player_joined", player)
+
+	# A Nakama presence carries a username but no chosen character, so peers
+	# announce that to each other explicitly -- same message LAN uses.
+	rpc_id(peer_id, "_lan_announce_player", _local_display_name(), _local_character())
 
 	_check_enough_players()
 

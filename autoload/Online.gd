@@ -20,6 +20,11 @@ var nakama_scheme: String = 'http'
 # The name other players see. Persisted; defaults to a generated one.
 var display_name: String = ''
 
+# Which character (whale skin) this player picked, as an index into
+# Player.PlayerSkin. Persisted alongside the name and announced to the other
+# players so everyone sees the right character in the lobby and in the match.
+var character_index: int = 0
+
 # Stable per-installation id used for device authentication.
 var _device_id: String = ''
 
@@ -159,6 +164,7 @@ func _load_profile() -> void:
 	if loaded:
 		_device_id = config.get_value('profile', 'device_id', '')
 		display_name = config.get_value('profile', 'display_name', '')
+		character_index = int(config.get_value('profile', 'character_index', 0))
 
 	if _device_id == '':
 		# OS.get_unique_id() is unavailable on some platforms (notably web),
@@ -176,7 +182,12 @@ func save_profile() -> void:
 	var config := ConfigFile.new()
 	config.set_value('profile', 'device_id', _device_id)
 	config.set_value('profile', 'display_name', display_name)
+	config.set_value('profile', 'character_index', character_index)
 	config.save(PROFILE_FILENAME)
+
+func set_character(index: int) -> void:
+	character_index = maxi(0, index)
+	save_profile()
 
 func set_display_name(name: String) -> void:
 	name = name.strip_edges()
