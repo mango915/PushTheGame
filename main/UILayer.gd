@@ -8,13 +8,18 @@ class_name UILayer
 signal change_screen (name, screen)
 signal back_button_pressed ()
 
-var current_screen: Control = null: set = _set_readonly_variable
-var current_screen_name: String = '': get = get_current_screen_name, set = _set_readonly_variable
+# NOTE: these carried `set = _set_readonly_variable` -- an empty setter -- to
+# make them read-only from outside. GDScript setters also intercept writes from
+# INSIDE the class, so `current_screen = screen` in show_screen() was silently
+# discarded and current_screen_name was always ''. That broke the Back button in
+# online play: Main._on_UILayer_back_button tests the screen name, never matched,
+# and fell through to showing MatchScreen again -- so you could never get back to
+# the title screen. Same bug class as the one that made OnlineMatch inert.
+# Treat them as read-only from outside.
+var current_screen: Control = null
+var current_screen_name: String = '': get = get_current_screen_name
 
 var _is_ready := false
-
-func _set_readonly_variable(_value) -> void:
-	pass
 
 func _ready() -> void:
 	for screen in screens.get_children():

@@ -4,36 +4,11 @@ extends "res://main/Screen.gd"
 @onready var login_email_field := $TabContainer/Login/GridContainer/Email
 @onready var login_password_field := $TabContainer/Login/GridContainer/Password
 
-const CREDENTIALS_FILENAME = 'user://credentials.json'
-
 var email: String = ''
 var password: String = ''
 
 var _reconnect: bool = false
 var _next_screen
-
-func _ready() -> void:
-	return
-	if FileAccess.file_exists(CREDENTIALS_FILENAME):
-		var file = FileAccess.open(CREDENTIALS_FILENAME, FileAccess.READ)
-		var test_json_conv = JSON.new()
-		test_json_conv.parse(file.get_as_text())
-		var result = test_json_conv.get_data()
-		if result is Dictionary:
-			email = result['email']
-			password = result['password']
-			login_email_field.text = email
-			login_password_field.text = password
-		file.close()
-
-func _save_credentials() -> void:
-	var file = FileAccess.open(CREDENTIALS_FILENAME, FileAccess.WRITE)
-	var credentials = {
-		email = email,
-		password = password,
-	}
-	file.store_line(JSON.stringify(credentials))
-	file.close()
 
 func _show_screen(info: Dictionary = {}) -> void:
 
@@ -41,12 +16,15 @@ func _show_screen(info: Dictionary = {}) -> void:
 	_next_screen = info.get('next_screen', 'MatchScreen')
 	
 	tab_container.current_tab = 0
-	
-	# If we have a stored email and password, attempt to login straight away.
-	if email != '' and password != '':
-		do_login()
 
-func do_login(save_credentials: bool = false) -> void:
+# Email/password sign-in. This is no longer the default way in -- see
+# Online.authenticate_device() and Main._on_TitleScreen_play_online() -- but it
+# is kept so existing accounts still work.
+#
+# The password is deliberately not persisted. It previously went to
+# user://credentials.json in cleartext, behind code that a stray `return`
+# had disabled anyway.
+func do_login(_unused_save: bool = false) -> void:
 	visible = false
 	
 	if _reconnect:
@@ -69,8 +47,6 @@ func do_login(save_credentials: bool = false) -> void:
 		# on the "session_changed" signal.
 		Online.nakama_session = null
 	else:
-		if save_credentials:
-			_save_credentials()
 		Online.nakama_session = nakama_session
 		ui_layer.hide_message()
 
@@ -80,15 +56,13 @@ func do_login(save_credentials: bool = false) -> void:
 func _on_LoginButton_pressed() -> void:
 	email = login_email_field.text.strip_edges()
 	password = login_password_field.text.strip_edges()
-	do_login(true)#$TabContainer/Login/GridContainer/SaveCheckBox.pressed)
+	do_login()
 
 func _on_CreateAccountButton_pressed() -> void:
 	email = $"TabContainer/Create Account/GridContainer/Email".text.strip_edges()
 	password = $"TabContainer/Create Account/GridContainer/Password".text.strip_edges()
 	
 	var username = $"TabContainer/Create Account/GridContainer/Username".text.strip_edges()
-	var save_credentials = true #$"TabContainer/Create Account/GridContainer/SaveCheckBox".pressed
-	
 	if email == '':
 		ui_layer.show_message("Must provide email")
 		return
@@ -120,8 +94,6 @@ func _on_CreateAccountButton_pressed() -> void:
 		# on the "session_changed" signal.
 		Online.nakama_session = null
 	else:
-		if save_credentials:
-			_save_credentials()
 		Online.nakama_session = nakama_session
 		ui_layer.hide_message()
 		ui_layer.show_screen("MatchScreen")

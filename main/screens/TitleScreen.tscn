@@ -1,8 +1,23 @@
-[gd_scene load_steps=5 format=3 uid="uid://u1fw537kl61p"]
+[gd_scene load_steps=11 format=3 uid="uid://u1fw537kl61p"]
 
 [ext_resource type="FontFile" uid="uid://ctgimbrefgr5b" path="res://assets/fonts/monogram_extended.ttf" id="1"]
 [ext_resource type="Theme" uid="uid://cw86emnrbxxs8" path="res://assets/theme.tres" id="2"]
 [ext_resource type="Script" path="res://main/screens/TitleScreen.gd" id="3"]
+[ext_resource type="Texture2D" uid="uid://dy7xb2c071g5" path="res://assets/backgrounds/01.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://cg5i3hiwxl2u8" path="res://assets/backgrounds/02.png" id="5"]
+[ext_resource type="Texture2D" uid="uid://caql1h6xh1y43" path="res://assets/backgrounds/03.png" id="6"]
+[ext_resource type="Texture2D" uid="uid://br7fxx4yfte6g" path="res://assets/backgrounds/04.png" id="7"]
+
+[sub_resource type="Gradient" id="2"]
+offsets = PackedFloat32Array(0, 0.55, 1)
+colors = PackedColorArray(0.129, 0.243, 0.353, 1, 0.075, 0.141, 0.216, 1, 0.043, 0.078, 0.129, 1)
+
+[sub_resource type="GradientTexture2D" id="3"]
+gradient = SubResource("2")
+width = 64
+height = 360
+fill_from = Vector2(0, 0)
+fill_to = Vector2(0, 1)
 
 [sub_resource type="FontFile" id="1"]
 fallbacks = Array[Font]([ExtResource("1")])
@@ -2363,65 +2378,195 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-size_flags_horizontal = 0
 theme = ExtResource("2")
 script = ExtResource("3")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="Water" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 1)
+texture = SubResource("3")
+expand_mode = 1
+stretch_mode = 0
 
-[node name="TitleLabel" type="Label" parent="."]
+[node name="Depth4" type="TextureRect" parent="."]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -118.0
-offset_top = -115.0
-offset_right = 119.0
-offset_bottom = -39.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_fonts/font = SubResource("1")
-theme_override_font_sizes/font_size = 47
-text = "Push The Game"
-
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
-custom_minimum_size = Vector2(0, 125)
-layout_mode = 0
+anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -175.0
-offset_bottom = -50.0
-theme_override_constants/separation = 35
+offset_top = -150
+grow_horizontal = 2
+grow_vertical = 0
+modulate = Color(0.114, 0.196, 0.294, 1)
+texture = ExtResource("7")
+expand_mode = 1
+stretch_mode = 0
+
+[node name="Depth3" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -130
+grow_horizontal = 2
+grow_vertical = 0
+modulate = Color(0.09, 0.161, 0.247, 1)
+texture = ExtResource("6")
+expand_mode = 1
+stretch_mode = 0
+
+[node name="Depth2" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -110
+grow_horizontal = 2
+grow_vertical = 0
+modulate = Color(0.071, 0.129, 0.204, 1)
+texture = ExtResource("5")
+expand_mode = 1
+stretch_mode = 0
+
+[node name="Depth1" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -88
+grow_horizontal = 2
+grow_vertical = 0
+modulate = Color(0.047, 0.086, 0.145, 1)
+texture = ExtResource("4")
+expand_mode = 1
+stretch_mode = 0
+
+[node name="TitleShadow" type="Label" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -240.0
+offset_top = 46
+offset_right = 240.0
+offset_bottom = 106
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0, 0, 0, 0.45)
+theme_override_fonts/font = SubResource("1")
+theme_override_font_sizes/font_size = 54
+text = "PUSH THE GAME"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -240.0
+offset_top = 43
+offset_right = 240.0
+offset_bottom = 103
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.976, 0.949, 0.855, 1)
+theme_override_fonts/font = SubResource("1")
+theme_override_font_sizes/font_size = 54
+text = "PUSH THE GAME"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+
+[node name="Tagline" type="Label" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -240.0
+offset_top = 100
+offset_right = 240.0
+offset_bottom = 120
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.514, 0.706, 0.784, 1)
+theme_override_font_sizes/font_size = 17
+text = "2-4 players  .  last one swimming wins"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+
+[node name="PrimaryButtons" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -170.0
+offset_top = 150.0
+offset_right = 170.0
+offset_bottom = 194.0
+grow_horizontal = 2
+theme_override_constants/separation = 20
 alignment = 1
 
-[node name="LocalButton" type="Button" parent="HBoxContainer"]
-custom_minimum_size = Vector2(125, 0)
+[node name="LocalButton" type="Button" parent="PrimaryButtons"]
+custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
-theme_override_font_sizes/font_size = 35
-text = "Local"
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+text = "LOCAL"
 
-[node name="OnlineButton" type="Button" parent="HBoxContainer"]
-custom_minimum_size = Vector2(125, 0)
+[node name="OnlineButton" type="Button" parent="PrimaryButtons"]
+custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
-theme_override_font_sizes/font_size = 35
-text = "Online"
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+text = "ONLINE"
 
-[node name="CreditsButton" type="Button" parent="HBoxContainer"]
-custom_minimum_size = Vector2(125, 0)
+[node name="SecondaryButtons" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -130.0
+offset_top = 206.0
+offset_right = 130.0
+offset_bottom = 236.0
+grow_horizontal = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="SettingsButton" type="Button" parent="SecondaryButtons"]
+custom_minimum_size = Vector2(122, 30)
 layout_mode = 2
-theme_override_font_sizes/font_size = 35
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+text = "Settings"
+
+[node name="CreditsButton" type="Button" parent="SecondaryButtons"]
+custom_minimum_size = Vector2(122, 30)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
 text = "Credits"
 
-[connection signal="pressed" from="HBoxContainer/LocalButton" to="." method="_on_LocalButton_pressed"]
-[connection signal="pressed" from="HBoxContainer/OnlineButton" to="." method="_on_OnlineButton_pressed"]
-[connection signal="pressed" from="HBoxContainer/CreditsButton" to="." method="_on_CreditsButton_pressed"]
+[node name="Hint" type="Label" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -280.0
+offset_top = 330
+offset_right = 280.0
+offset_bottom = 348
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.435, 0.573, 0.643, 1)
+theme_override_font_sizes/font_size = 15
+text = "LOCAL: WASD + C/V  vs  Arrows + L/;      ONLINE: host a room, share the code"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+
+[connection signal="pressed" from="PrimaryButtons/LocalButton" to="." method="_on_LocalButton_pressed"]
+[connection signal="pressed" from="PrimaryButtons/OnlineButton" to="." method="_on_OnlineButton_pressed"]
+[connection signal="pressed" from="SecondaryButtons/SettingsButton" to="." method="_on_SettingsButton_pressed"]
+[connection signal="pressed" from="SecondaryButtons/CreditsButton" to="." method="_on_CreditsButton_pressed"]

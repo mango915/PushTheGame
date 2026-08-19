@@ -6,8 +6,8 @@ extends "res://addons/snopek-state-machine/State.gd"
 func _state_enter(info: Dictionary) -> void:
 	host.play_animation("Hurt")
 	host.sounds.play("Hurt")
-	var push_back_vector = info['push_back_vector'] if info.has("push_back_vector") else Vector2.UP
-	host.vector = push_back_vector * host.push_back_speed
+	var push_back_vector = info['push_back_vector'] if info.has("push_back_vector") else (Vector2.UP * host.push_back_speed)
+	host.vector = push_back_vector
 	timer.start()
 
 func _state_exit() -> void:

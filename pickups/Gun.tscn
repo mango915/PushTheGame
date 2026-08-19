@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://assets/sprites/gun.png" type="Texture2D" id=1]
 [ext_resource path="res://pickups/Pickup.tscn" type="PackedScene" id=2]
@@ -6,6 +6,7 @@
 [ext_resource path="res://assets/sounds/shoot.ogg" type="AudioStream" id=4]
 [ext_resource path="res://components/Sounds.gd" type="Script" id=5]
 [ext_resource path="res://assets/sounds/empty.wav" type="AudioStream" id=6]
+[ext_resource path="res://resources/gun_weapon.tres" type="Resource" id=7]
 
 [sub_resource type="CapsuleShape2D" id=1]
 radius = 11.9999
@@ -85,6 +86,7 @@ tracks/2/keys = {
 
 [node name="Gun" instance=ExtResource( 2 )]
 script = ExtResource( 3 )
+weapon_data = ExtResource( 7 )
 
 [node name="GunSprite" type="Sprite2D" parent="." index="0"]
 position = Vector2( 14, -4 )

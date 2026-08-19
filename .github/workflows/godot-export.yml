@@ -1,4 +1,10 @@
 name: "godot-export"
+
+# NOTE: this workflow has NOT been validated against Godot 4. The project was
+# ported from Godot 3 and export_presets.cfg still carries Godot 3 platform
+# names ("Mac OSX", "HTML5", "Linux/X11"), which Godot 4 does not use.
+# Regenerate the presets from the editor's Export dialog and fix the preset
+# names in the steps below before trusting a build from here.
 on:
   push:
     branches:
@@ -7,15 +13,15 @@ on:
       - 'v*'
 
 env:
-  GODOT_VERSION: 3.2.3
-  EXPORT_NAME: fishgame-godot
+  GODOT_VERSION: 4.2.1
+  EXPORT_NAME: push-the-game
 
 jobs:
   export-windows:
     name: Windows Export
     runs-on: ubuntu-latest
     container:
-      image: barichello/godot-ci:3.2.3
+      image: barichello/godot-ci:4.2.1
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -34,7 +40,7 @@ jobs:
       - name: Windows Build
         run: |
           mkdir -v -p build/windows
-          godot -v --export "Windows Desktop" ./build/windows/$EXPORT_NAME.exe
+          godot -v --headless --export-release "Windows Desktop" ./build/windows/$EXPORT_NAME.exe
       - name: Tar files
         run: tar -cvf ./build/$EXPORT_NAME-windows.tar ./build/windows/
       - name: Upload Artifact
@@ -47,7 +53,7 @@ jobs:
     name: Linux Export
     runs-on: ubuntu-latest
     container:
-      image: barichello/godot-ci:3.2.3
+      image: barichello/godot-ci:4.2.1
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -66,7 +72,7 @@ jobs:
       - name: Linux Build
         run: |
           mkdir -v -p build/linux
-          godot -v --export "Linux/X11" ./build/linux/$EXPORT_NAME.x86_64
+          godot -v --headless --export-release "Linux/X11" ./build/linux/$EXPORT_NAME.x86_64
       - name: Tar files
         run: tar -cvf ./build/$EXPORT_NAME-linux.tar ./build/linux/
       - name: Upload Artifact
@@ -79,7 +85,7 @@ jobs:
     name: MacOS Export
     runs-on: ubuntu-latest
     container:
-      image: barichello/godot-ci:3.2.3
+      image: barichello/godot-ci:4.2.1
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -98,7 +104,7 @@ jobs:
       - name: Mac Build
         run: |
           mkdir -v -p build/macosx
-          godot -v --export "Mac OSX" ./build/macosx/$EXPORT_NAME.zip
+          godot -v --headless --export-release "Mac OSX" ./build/macosx/$EXPORT_NAME.zip
       - name: Upload Artifact
         uses: actions/upload-artifact@v1
         with:

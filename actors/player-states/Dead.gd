@@ -1,12 +1,8 @@
 extends "res://addons/snopek-state-machine/State.gd"
 
-var ExplodeEffect: PackedScene = preload("res://actors/ExplodeEffect.tscn")
-
 @onready var host = $"../.."
 
 func _state_enter(info: Dictionary) -> void:
-	var explosion = ExplodeEffect.instantiate()
-	host.get_parent().add_child(explosion)
-	explosion.global_position = host.global_position
-	
+	# The explosion effect is spawned by Player._do_die(), which is an
+	# @rpc(..., "call_local") method and so runs on every peer.
 	host.die()
