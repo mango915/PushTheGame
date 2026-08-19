@@ -116,12 +116,42 @@ func game_start(players: Dictionary, characters: Dictionary = {}) -> void:
 	else:
 		_do_game_setup(players, settings_data, chosen_map, characters)
 
-# Rotate rather than pick at random, so a short session actually sees both
-# arenas instead of the same one three times running.
+# Which arenas are still unplayed in the current cycle. Refilled when it empties.
+var _map_bag: Array[int] = []
+
+# A shuffled bag rather than either extreme.
+#
+# Pure random repeats maps and can show the same one three rounds running; a
+# strict (map_index + 1) % size is the opposite problem -- with three arenas the
+# whole session is one predictable A-B-C loop, and players know the next map
+# before the round ends. Drawing without replacement gives every arena an
+# outing per cycle while keeping the order unguessable, and never repeats a map
+# back-to-back across the seam between cycles.
 func _pick_next_map() -> int:
 	if map_scenes.is_empty():
 		return 0
-	return (map_index + 1) % map_scenes.size()
+	if map_scenes.size() == 1:
+		return 0
+
+	if _map_bag.is_empty():
+		_refill_map_bag()
+	return _map_bag.pop_back()
+
+func _refill_map_bag() -> void:
+	_map_bag.clear()
+	for i in range(map_scenes.size()):
+		_map_bag.append(i)
+	_map_bag.shuffle()
+
+	# The bag is drawn from the back, so the last element is the next map. If it
+	# matches what is loaded, the seam between two cycles would repeat a map --
+	# swap it with the front rather than reshuffling until it does not, which
+	# could in principle spin forever.
+	if _map_bag.size() > 1 and _map_bag[_map_bag.size() - 1] == map_index:
+		var last := _map_bag.size() - 1
+		var first: int = _map_bag[0]
+		_map_bag[0] = _map_bag[last]
+		_map_bag[last] = first
 
 func get_map_scene() -> PackedScene:
 	if map_scenes.is_empty():
