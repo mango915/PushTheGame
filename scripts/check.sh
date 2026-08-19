@@ -36,7 +36,12 @@ mkdir -p "$OUT_DIR"
 
 # Patterns that indicate a real GDScript/engine failure. Kept deliberately tight
 # so that ordinary engine chatter does not produce false positives.
-ERROR_PATTERN='\[state\] FAIL|SCRIPT ERROR|Nonexistent function|Invalid call|Invalid access|Invalid get index|Invalid set index|Attempt to call|Parse Error|Compile Error|Cannot call method|Trying to assign|out of bounds|Condition "[^"]*" is true|USER ERROR|ERROR: |\[smoke\] FAIL'
+#
+# NOTE the leading '[tag] FAIL' alternative matches ANY test suite's tag. It
+# used to list only [smoke] and [state], so every suite added later -- zone,
+# char, cfg, weapon, player, match, lan, steam -- could fail while the gate
+# still reported "all gates clean". Keep this generic.
+ERROR_PATTERN='\[[a-z-]+\] FAIL|SCRIPT ERROR|Nonexistent function|Invalid call|Invalid access|Invalid get index|Invalid set index|Attempt to call|Parse Error|Compile Error|Cannot call method|Trying to assign|out of bounds|Condition "[^"]*" is true|USER ERROR|ERROR: '
 
 # Engine noise that matches the patterns above but is not a defect in our code.
 # Add narrowly and with a comment.

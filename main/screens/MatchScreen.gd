@@ -8,6 +8,17 @@ extends "res://main/Screen.gd"
 @onready var lan_host_list := $LanBrowser/VBoxContainer/ScrollContainer/HostList
 @onready var lan_refresh_button := $LanBrowser/VBoxContainer/Buttons/RefreshButton
 
+@onready var steam_panel := $PanelContainer/VBoxContainer/SteamPanel
+@onready var steam_status_label := $PanelContainer/VBoxContainer/SteamPanel/StatusLabel
+@onready var steam_host_button := $PanelContainer/VBoxContainer/SteamPanel/SteamHostButton
+@onready var steam_invite_button := $PanelContainer/VBoxContainer/SteamPanel/SteamInviteButton
+@onready var steam_friends_button := $PanelContainer/VBoxContainer/SteamPanel/SteamFriendsButton
+
+@onready var steam_browser := $SteamBrowser
+@onready var steam_browser_status := $SteamBrowser/VBoxContainer/StatusLabel
+@onready var steam_friend_list := $SteamBrowser/VBoxContainer/ScrollContainer/FriendList
+@onready var steam_refresh_button := $SteamBrowser/VBoxContainer/Buttons/RefreshButton
+
 func _ready() -> void:
 	$PanelContainer/VBoxContainer/MatchPanel/MatchButton.pressed.connect(Callable(self, "_on_match_button_pressed").bind(OnlineMatch.MatchMode.MATCHMAKER))
 	$PanelContainer/VBoxContainer/CreatePanel/CreateButton.pressed.connect(Callable(self, "_on_match_button_pressed").bind(OnlineMatch.MatchMode.CREATE))
@@ -21,15 +32,30 @@ func _ready() -> void:
 	lan_refresh_button.pressed.connect(Callable(self, "_on_LanRefreshButton_pressed"))
 	$LanBrowser/VBoxContainer/Buttons/CloseButton.pressed.connect(Callable(self, "_on_LanCloseButton_pressed"))
 
+	# Steam: same reasoning as LAN -- no Nakama session is involved, so these
+	# never go through _on_match_button_pressed either.
+	steam_host_button.pressed.connect(Callable(self, "_on_SteamHostButton_pressed"))
+	steam_invite_button.pressed.connect(Callable(self, "_on_SteamInviteButton_pressed"))
+	steam_friends_button.pressed.connect(Callable(self, "_on_SteamFriendsButton_pressed"))
+	steam_refresh_button.pressed.connect(Callable(self, "_on_SteamRefreshButton_pressed"))
+	$SteamBrowser/VBoxContainer/Buttons/CloseButton.pressed.connect(Callable(self, "_on_SteamCloseButton_pressed"))
+
+	SteamMatch.steam_error.connect(Callable(self, "_on_SteamMatch_error"))
+	SteamMatch.lobby_ready.connect(Callable(self, "_on_SteamMatch_lobby_ready"))
+	SteamMatch.invite_received.connect(Callable(self, "_on_SteamMatch_invite_received"))
+
 	OnlineMatch.match_joined.connect(Callable(self, "_on_OnlineMatch_joined"))
 
 func _show_screen(_info: Dictionary = {}) -> void:
 	matchmaker_player_count_control.value = 2
 	join_match_id_control.text = ''
 	_hide_lan_browser()
+	_hide_steam_browser()
+	_refresh_steam_panel()
 
 func _hide_screen() -> void:
 	_hide_lan_browser()
+	_hide_steam_browser()
 
 func _on_match_button_pressed(mode) -> void:
 	# Re-authenticate silently if the session lapsed, rather than bouncing the
@@ -190,8 +216,9 @@ func _on_OnlineMatch_joined(match_id: String, match_mode: int):
 		clear = true,
 	}
 
-	if match_mode != OnlineMatch.MatchMode.MATCHMAKER:
-		# Show the room code, not the underlying match UUID.
+	if match_mode != OnlineMatch.MatchMode.MATCHMAKER and not OnlineMatch.is_steam():
+		# Show the room code, not the underlying match UUID. Steam has neither:
+		# people get in by invite, so there is nothing to read out.
 		info['match_id'] = OnlineMatch.room_code if OnlineMatch.room_code != '' else match_id
 
 	ui_layer.show_screen("ReadyScreen", info)
@@ -201,3 +228,115 @@ func _on_PasteButton_pressed() -> void:
 
 func _on_LeaderboardButton_pressed() -> void:
 	ui_layer.show_screen("LeaderboardScreen")
+
+#####
+# Steam play: friends and invites, through Steam's own networking.
+#
+# The whole section is inert -- visible but disabled, with the reason on the
+# label -- when the GodotSteam extension is not installed, which is the state
+# this project ships in. See docs/steam.md.
+#####
+
+func _refresh_steam_panel() -> void:
+	# _show_screen runs before _ready has resolved the @onready vars the first
+	# time the screen is displayed.
+	if steam_status_label == null:
+		return
+
+	var available: bool = SteamMatch.is_available()
+	steam_status_label.text = SteamMatch.status_text()
+
+	steam_host_button.disabled = not available
+	steam_friends_button.disabled = not available
+	# Inviting needs a lobby to invite people into.
+	steam_invite_button.disabled = not available or SteamMatch.current_lobby == 0
+
+	var reason := "" if available else SteamMatch.UNAVAILABLE_MESSAGE
+	steam_host_button.tooltip_text = reason
+	steam_invite_button.tooltip_text = reason
+	steam_friends_button.tooltip_text = reason
+
+func _on_SteamHostButton_pressed() -> void:
+	_hide_lan_browser()
+	_hide_steam_browser()
+	ui_layer.hide_message()
+	# Friends-only lobbies: this mode is for playing with people you know, and
+	# a public lobby would list the game to strangers.
+	if OnlineMatch.host_steam_match(true):
+		ui_layer.show_message("Opening a Steam lobby...")
+	_refresh_steam_panel()
+
+func _on_SteamInviteButton_pressed() -> void:
+	# Steam's own overlay is what players expect, and it handles the whole
+	# picker for us. It only draws when the game runs under the Steam client.
+	if not SteamMatch.open_invite_overlay():
+		ui_layer.show_message(SteamMatch.last_error)
+
+func _on_SteamFriendsButton_pressed() -> void:
+	ui_layer.hide_message()
+	steam_browser.visible = true
+	_refresh_steam_friends()
+
+func _on_SteamRefreshButton_pressed() -> void:
+	_refresh_steam_friends()
+
+func _on_SteamCloseButton_pressed() -> void:
+	_hide_steam_browser()
+
+func _hide_steam_browser() -> void:
+	if steam_browser == null:
+		return
+	steam_browser.visible = false
+	_clear_steam_friend_list()
+
+func _clear_steam_friend_list() -> void:
+	for child in steam_friend_list.get_children():
+		steam_friend_list.remove_child(child)
+		child.queue_free()
+
+func _refresh_steam_friends() -> void:
+	_clear_steam_friend_list()
+
+	if not SteamMatch.is_available():
+		steam_browser_status.text = SteamMatch.UNAVAILABLE_MESSAGE
+		return
+
+	var friends: Array = SteamMatch.refresh_friends(true)
+	if friends.size() == 0:
+		steam_browser_status.text = "No friends online right now."
+		return
+
+	if SteamMatch.current_lobby == 0:
+		steam_browser_status.text = "Host on Steam first, then invite:"
+	else:
+		steam_browser_status.text = "Pick a friend to invite:"
+
+	for friend in friends:
+		var button := Button.new()
+		button.text = "%s   INVITE" % friend.name
+		# Nobody can be invited before there is a lobby to invite them to.
+		button.disabled = SteamMatch.current_lobby == 0
+		button.pressed.connect(Callable(self, "_on_steam_friend_chosen").bind(friend))
+		steam_friend_list.add_child(button)
+
+func _on_steam_friend_chosen(friend: Dictionary) -> void:
+	if SteamMatch.invite_friend(int(friend.steam_id)):
+		steam_browser_status.text = "Invited %s." % friend.name
+	else:
+		steam_browser_status.text = SteamMatch.last_error
+
+func _on_SteamMatch_error(message: String) -> void:
+	_refresh_steam_panel()
+	if steam_browser != null and steam_browser.visible:
+		steam_browser_status.text = message
+
+func _on_SteamMatch_lobby_ready(_lobby_id: int) -> void:
+	_refresh_steam_panel()
+	if steam_browser != null and steam_browser.visible:
+		_refresh_steam_friends()
+
+func _on_SteamMatch_invite_received(_lobby_id: int, _friend_steam_id: int, friend_name: String) -> void:
+	# Accepting happens in Steam's own notification; this is only so the player
+	# is not surprised when the game suddenly joins a match.
+	var who := friend_name if friend_name != "" else "A friend"
+	ui_layer.show_message("%s invited you to play - accept it in Steam" % who)

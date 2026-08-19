@@ -214,6 +214,82 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="SteamPanel" type="Panel" parent="PanelContainer/VBoxContainer"]
+offset_top = 275.0
+offset_right = 526.0
+offset_bottom = 334.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/SteamPanel"]
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 7.0
+offset_top = -22.0
+offset_right = 260.0
+offset_bottom = 2.0
+text = "Steam friends"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="StatusLabel" type="Label" parent="PanelContainer/VBoxContainer/SteamPanel"]
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 7.0
+offset_top = 2.0
+offset_right = 300.0
+offset_bottom = 22.0
+text = "GodotSteam is not installed - see docs/steam.md"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="SteamFriendsButton" type="Button" parent="PanelContainer/VBoxContainer/SteamPanel"]
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -475.0
+offset_top = -25.0
+offset_right = -320.0
+offset_bottom = 25.0
+disabled = true
+text = "FRIENDS"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="SteamInviteButton" type="Button" parent="PanelContainer/VBoxContainer/SteamPanel"]
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -315.0
+offset_top = -25.0
+offset_right = -160.0
+offset_bottom = 25.0
+disabled = true
+text = "INVITE FRIENDS"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="SteamHostButton" type="Button" parent="PanelContainer/VBoxContainer/SteamPanel"]
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -155.0
+offset_top = -25.0
+offset_right = -5.0
+offset_bottom = 25.0
+disabled = true
+text = "HOST ON STEAM"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="LeaderboardButton" type="Button" parent="."]
 anchor_left = 1.0
 anchor_top = 1.0
@@ -283,6 +359,65 @@ alignment = 1
 text = "SEARCH AGAIN"
 
 [node name="CloseButton" type="Button" parent="LanBrowser/VBoxContainer/Buttons"]
+text = "BACK"
+
+[node name="SteamBrowser" type="Panel" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 50.0
+offset_top = 50.0
+offset_right = -50.0
+offset_bottom = -100.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Background" type="ColorRect" parent="SteamBrowser"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.09, 0.09, 0.09, 1)
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SteamBrowser"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 8.0
+offset_right = -10.0
+offset_bottom = -8.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TitleLabel" type="Label" parent="SteamBrowser/VBoxContainer"]
+text = "Your Steam friends"
+
+[node name="StatusLabel" type="Label" parent="SteamBrowser/VBoxContainer"]
+text = "GodotSteam is not installed - see docs/steam.md"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="SteamBrowser/VBoxContainer"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="FriendList" type="VBoxContainer" parent="SteamBrowser/VBoxContainer/ScrollContainer"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Buttons" type="HBoxContainer" parent="SteamBrowser/VBoxContainer"]
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="RefreshButton" type="Button" parent="SteamBrowser/VBoxContainer/Buttons"]
+text = "REFRESH"
+
+[node name="CloseButton" type="Button" parent="SteamBrowser/VBoxContainer/Buttons"]
 text = "BACK"
 
 [connection signal="pressed" from="PanelContainer/VBoxContainer/JoinPanel/PasteButton" to="." method="_on_PasteButton_pressed"]

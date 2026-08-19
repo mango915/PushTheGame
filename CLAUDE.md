@@ -73,7 +73,9 @@ The leaderboard module `nakama/data/modules/fish_game.lua` is mounted into the c
 
 ### Autoload singletons (`autoload/`, registered in `project.godot`)
 - **`Online`** — owns the `NakamaClient`, session, and socket. Emits `session_changed`, `session_connected`, `socket_connected`. Screens `await` these signals rather than polling.
-- **`OnlineMatch`** — the layer that matters most. It wraps `NakamaMultiplayerBridge`, which turns a Nakama match into a Godot high-level multiplayer peer, so ordinary `@rpc` calls work over Nakama. Owns `MatchState` (LOBBY→MATCHING→CONNECTING→WAITING→READY→PLAYING), `MatchMode` (CREATE / JOIN / MATCHMAKER), the `players` dict keyed by **peer_id**, and enforces min/max players, client-version match, and "match already begun" rejection. **Peer 1 is always the host/authority.**
+- **`OnlineMatch`** — the layer that matters most. It wraps `NakamaMultiplayerBridge`, which turns a Nakama match into a Godot high-level multiplayer peer, so ordinary `@rpc` calls work over Nakama. Owns `MatchState` (LOBBY→MATCHING→CONNECTING→WAITING→READY→PLAYING), `MatchMode` (CREATE / JOIN / MATCHMAKER / LAN_HOST / LAN_JOIN / STEAM_HOST / STEAM_JOIN), the `players` dict keyed by **peer_id**, and enforces min/max players, client-version match, and "match already begun" rejection. **Peer 1 is always the host/authority.**
+- **`LanMatch`** — the serverless transport: an `ENetMultiplayerPeer` plus a UDP broadcast beacon so hosts on the same wi-fi are discovered without anyone typing an IP. `OnlineMatch.host_lan_match()` / `join_lan_match()` drive it.
+- **`SteamMatch`** — the Steam transport: lobbies, the friends list, invites, and a `SteamMultiplayerPeer`. Requires the GodotSteam GDExtension, which is **not installed in this repo**; every call is guarded behind `Engine.has_singleton("Steam")` so the game is unaffected without it, and the UI shows the Steam section disabled with the reason. See `docs/steam.md`.
 - **`GameState`** — a single `online_play: bool`. This flag is the central branch in nearly every gameplay path (see below).
 - **`Build`**, **`Util`** — generated config; name helpers.
 

@@ -26,8 +26,18 @@ func _ready() -> void:
 	# the wiring lives next to the handler that depends on it.
 	game.roster_updated.connect(Callable(self, "_on_Game_roster_updated"))
 
+	# Accepting a Steam invite has to switch the game into online mode by
+	# itself: the player never passed through the title screen's PLAY ONLINE
+	# button, so nothing else has set GameState.online_play. OnlineMatch does
+	# the joining (it listens for the same signal); this only prepares the UI.
+	SteamMatch.invite_accepted.connect(Callable(self, "_on_SteamMatch_invite_accepted"))
+
 	randomize()
 	music.play_random()
+
+	# Steam launches the game with `+connect_lobby <id>` when an invite is
+	# accepted while the game is closed. Deferred so every autoload is up.
+	call_deferred("_join_pending_steam_invite")
 
 #####
 # UI callbacks
@@ -81,6 +91,21 @@ func _sign_in_for_online_play() -> void:
 		# Server host/port is editable on SettingsScreen; the LAN buttons on
 		# MatchScreen work regardless.
 		ui_layer.show_message("No server - LAN games still work")
+
+func _on_SteamMatch_invite_accepted(_lobby_id: int, _friend_steam_id: int) -> void:
+	GameState.online_play = true
+
+	# Show the game map in the background, exactly as PLAY ONLINE does.
+	game.reload_map()
+
+	ui_layer.hide_screen()
+	ui_layer.show_message("Joining your friend's Steam game...")
+
+func _join_pending_steam_invite() -> void:
+	# Raises invite_accepted, which OnlineMatch turns into a join and the
+	# handler above turns into the online-mode UI. Does nothing at all in the
+	# normal case where the game was started by hand.
+	SteamMatch.accept_pending_invite()
 
 func _on_UILayer_change_screen(name: String, _screen) -> void:
 	if name == 'TitleScreen':

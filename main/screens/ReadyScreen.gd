@@ -12,10 +12,14 @@ signal ready_pressed ()
 const CharacterPickerScript = preload("res://main/screens/CharacterPicker.gd")
 
 var character_picker
+# Built in code rather than added to the scene, same as the character picker
+# above: it only exists for one of the three transports.
+var steam_invite_button: Button
 
 func _ready() -> void:
 	clear_players()
 	_build_character_picker()
+	_build_steam_invite_button()
 
 	OnlineMatch.player_joined.connect(Callable(self, "_on_OnlineMatch_player_joined"))
 	OnlineMatch.player_left.connect(Callable(self, "_on_OnlineMatch_player_left"))
@@ -34,6 +38,24 @@ func _build_character_picker() -> void:
 	character_picker.position = Vector2(0, 4)
 	character_picker.character_selected.connect(Callable(self, "_on_character_selected"))
 	character_picker.set_selected(Online.character_index)
+
+# A Steam match has no room code to read out -- friends get in by invite -- so
+# the invite button has to live here, in the lobby, where the host waits. On the
+# other two transports it stays hidden.
+func _build_steam_invite_button() -> void:
+	steam_invite_button = Button.new()
+	steam_invite_button.name = "SteamInviteButton"
+	steam_invite_button.text = "INVITE FRIENDS"
+	steam_invite_button.visible = false
+	$Panel.add_child(steam_invite_button)
+	steam_invite_button.position = Vector2(340, 5)
+	steam_invite_button.size = Vector2(180, 34)
+	steam_invite_button.pressed.connect(Callable(self, "_on_SteamInviteButton_pressed"))
+
+func _on_SteamInviteButton_pressed() -> void:
+	# Steam's own overlay does the friend picking. It reports its own failures.
+	if not SteamMatch.open_invite_overlay() and ui_layer != null:
+		ui_layer.show_message(SteamMatch.last_error)
 
 func _on_character_selected(index: int) -> void:
 	Online.set_character(index)
@@ -73,6 +95,9 @@ func _show_screen(info: Dictionary = {}) -> void:
 		match_id_label.text = match_id
 	else:
 		match_id_container.visible = false
+
+	if steam_invite_button != null:
+		steam_invite_button.visible = OnlineMatch.is_steam()
 
 	ready_button.grab_focus()
 

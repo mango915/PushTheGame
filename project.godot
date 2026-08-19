@@ -22,6 +22,7 @@ Nakama="*res://addons/com.heroiclabs.nakama/Nakama.gd"
 Online="*res://autoload/Online.gd"
 OnlineMatch="*res://autoload/OnlineMatch.gd"
 LanMatch="*res://autoload/LanMatch.gd"
+SteamMatch="*res://autoload/SteamMatch.gd"
 GameState="*res://autoload/GameState.gd"
 Util="*res://autoload/Util.gd"
 

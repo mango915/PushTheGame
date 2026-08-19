@@ -77,11 +77,17 @@ func _check_launch() -> void:
 
 	player.vector = Vector2(0, 200.0)
 	zone._try_launch(player)
-	await get_tree().process_frame
 
+	# Checked before any physics frame runs: one tick of gravity (1500/60 = 25)
+	# is applied immediately afterwards, so asserting the exact value after an
+	# await is measuring gravity, not the pad.
 	_check("launch sets upward velocity", player.vector.y, -1150.0)
 	_check_true("launch beats a normal jump",
 		absf(player.vector.y) > player.jump_speed)
+
+	await get_tree().process_frame
+	_check_true("the player is still travelling upward a frame later",
+		player.vector.y < -1000.0)
 	_check("launch puts the player in the Jump state",
 		player.state_machine.current_state.name, "Jump")
 
