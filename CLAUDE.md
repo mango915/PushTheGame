@@ -25,7 +25,13 @@ multiplayer runners — passed on 4.7.2 with **no code changes**; the only edit 
 a log-filter casing tweak in the harness, because 4.7 writes "N resources still in use at
 exit" where 4.2 wrote "Resources still in use at exit".
 
-`scripts/check.sh`, `scripts/nettest.sh` and `tests/lantest.sh` resolve Godot in this
+**Running it with an older Godot does not fail cleanly.** 4.2 cannot read the
+format-version-6 import cache 4.7 writes, so every font, sound and scene fails to load
+and the title screen never appears -- roughly a hundred resource errors that read like a
+broken project. `./run.sh` exists to prevent exactly that: it resolves the engine and
+refuses to start on anything older than 4.7. Prefer it over invoking Godot by path.
+
+`run.sh`, `scripts/check.sh`, `scripts/nettest.sh` and `tests/lantest.sh` resolve Godot in this
 order: a `GODOT` environment variable, then `/Applications/Godot 4.7.app`, then
 `/Applications/Godot.app`, then `godot` on `PATH`. On this machine 4.7.2 is installed
 alongside the older 4.2.1 rather than replacing it, so a stale `/Applications/Godot.app`
@@ -36,6 +42,9 @@ instantiable in 4.7, which is why the maps still work untouched. That is a depre
 retire deliberately, not something to discover when it is finally removed.
 
 ```bash
+# Launch the game (checks the engine version first -- see below)
+./run.sh
+
 # Regression harness -- run this before and after any change (see below)
 ./scripts/check.sh
 

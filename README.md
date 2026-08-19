@@ -139,6 +139,23 @@ That brings up the Nakama API on `:7350` and the admin console on
 
 ### Running the game from source ###
 
+
+The quickest way to play, which also checks you are on the right engine:
+
+```
+./run.sh
+```
+
+**This project needs Godot 4.7 or newer.** Running it with an older Godot does
+not fail cleanly: 4.2 cannot read the import cache 4.7 writes, so every font,
+sound and scene fails to load and you get a wall of "can't be loaded, as it uses
+a format version (6)" errors that look like a broken project. `run.sh` refuses
+to start on an older engine and tells you so. If you have several Godots
+installed, point it at the right one:
+
+```
+GODOT='/Applications/Godot 4.7.app/Contents/MacOS/Godot' ./run.sh
+```
 1. Download the source code to your computer.
 2. Open Godot and "Import" the project.
 3. (Optional) Point the game at your own Nakama server. The defaults live at
