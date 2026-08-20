@@ -96,6 +96,20 @@ Two-player local play needs no server: Title screen → "Play Local" wires `play
 ### Watch for this bug pattern
 `var x: T = v: set = _set_readonly_variable` — an empty setter used to make a property read-only from outside. GDScript setters intercept writes from **inside** the class too, so every internal assignment is silently discarded and nothing errors. This has been found and fixed three times now: `OnlineMatch` (the whole match state machine was inert) and `UILayer` (`current_screen_name` was permanently `''`, so the Back button could never leave MatchScreen online). If you meet another one, it is a bug, not a style.
 
+### Godot rewrites `project.godot`, and can drop things from it
+
+Running the engine rewrites `project.godot` in its own canonical form — key
+order changes, `location:0` appears on every `InputEventKey`, Godot 3 leftovers
+like `boot_splash/fullsize` get replaced by `boot_splash/stretch_mode`. Mostly
+harmless, and it is what "files updating by themselves" refers to.
+
+It is not always harmless. A capture run silently **deleted** the
+`Keybinds="*res://autoload/Keybinds.gd"` autoload line, which would have left the
+rebinding screen dead while `tests/KeybindsTest.tscn` still sat in the suite
+looking like coverage. Check `git diff project.godot` after any Godot run that
+followed an edit to it, and never assume a `[autoload]` entry survived just
+because you added it.
+
 ### DisplayServer calls the headless server does not implement
 
 `DisplayServer.keyboard_get_keycode_from_physical()` — used to show a physical
