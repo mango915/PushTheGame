@@ -66,8 +66,20 @@ def _post(server, path, payload, is_json=True):
     req = urllib.request.Request(url, data=data,
                                  headers={"Content-Type": "application/json"}
                                  if is_json else {})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        return json.load(r)
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return json.load(r)
+    except urllib.error.HTTPError as e:
+        # ComfyUI puts the reason a graph was rejected in the BODY of its 400 --
+        # which node, which input, and what it expected. Letting HTTPError
+        # propagate turns every graph mistake into an opaque "Bad Request" and
+        # throws away the one thing that would fix it.
+        body = e.read().decode("utf-8", "replace")
+        try:
+            detail = json.dumps(json.loads(body), indent=2)
+        except ValueError:
+            detail = body
+        raise SystemExit("ComfyUI %s on %s:\n%s" % (e.code, path, detail[:3000]))
 
 
 def _get(server, path, raw=False, timeout=60):
