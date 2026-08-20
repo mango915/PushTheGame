@@ -158,8 +158,10 @@ def run(server, graph, poll=15, timeout=7200):
     pid = res["prompt_id"]
     print("queued %s; CPU inference, expect minutes per step" % pid)
     start = time.time()
+    ticks = 0
     while time.time() - start < timeout:
         time.sleep(poll)
+        ticks += 1
         hist = _get(server, f"/history/{pid}")
         if pid in hist:
             entry = hist[pid]
@@ -171,8 +173,10 @@ def run(server, graph, poll=15, timeout=7200):
                 for img in out.get("images", []):
                     return img, time.time() - start
             raise SystemExit("finished with no image: %s" % json.dumps(entry)[:800])
-        mins = (time.time() - start) / 60
-        print("  ... %.0f min" % mins, flush=True)
+        # Poll often (so the result is picked up promptly) but report rarely --
+        # a 20 minute generation at a 15s poll is 80 lines of nothing.
+        if ticks % 8 == 0:
+            print("  ... %.0f min" % ((time.time() - start) / 60), flush=True)
     raise SystemExit("timed out after %.0f min" % (timeout / 60))
 
 
