@@ -142,6 +142,7 @@ func _ready() -> void:
 	await _check_mine()
 	await _check_laser()
 	_check_round_teardown()
+	await _check_carry_rotation()
 
 	print("[weapons] %d assertion(s) failed" % _failures)
 	get_tree().quit(0)
@@ -681,3 +682,48 @@ func _check_round_teardown() -> void:
 	gun.map_object_stop()
 	_check_true("...and stops simulating when the round ends", gun.sleeping)
 	gun.queue_free()
+
+
+# Carry tilt must pivot the weapon about its GRIP, not its own centre.
+#
+# An upright sword lies across a 48x68 capsule's face and pokes 2px past the
+# silhouette, which is what "decentralized when held" describes; tilting it puts
+# the hilt at the body edge and reads as a grip. The tilt is only correct if the
+# grip offset rotates with it -- rotate the sprite alone and the weapon turns
+# about its centre, carrying the grip away from the hand. Nothing errors when
+# that regresses; the weapon just drifts off the character.
+func _check_carry_rotation() -> void:
+	var sword = _add(SWORD_SCENE)
+	await get_tree().process_frame
+
+	_check_true("the sword carries tilted", absf(sword.carry_rotation) > 0.001)
+
+	# carry_offset() places the weapon's origin relative to the carry marker.
+	# Wherever it lands, the grip must come back to the marker origin.
+	var offset: Vector2 = sword.carry_offset()
+	var grip_in_marker_space: Vector2 = \
+		offset + sword.held_position.position.rotated(deg_to_rad(sword.carry_rotation))
+	_check_true("the grip lands on the carry marker",
+		grip_in_marker_space.length() < 0.01)
+
+	# The whole point of the tilt: the weapon must actually move off the upright.
+	var upright: Vector2 = -sword.held_position.position
+	_check_true("tilting moves the weapon off upright",
+		offset.distance_to(upright) > 1.0)
+
+	# pickup() is what applies the tilt when a player grabs it.
+	sword.pickup(null)
+	_check("picking it up applies the tilt",
+		snappedf(rad_to_deg(sword.rotation), 0.1),
+		snappedf(sword.carry_rotation, 0.1))
+
+	# A weapon with no tilt must be untouched by any of this.
+	var gun = _add(GUN_SCENE)
+	await get_tree().process_frame
+	if absf(gun.carry_rotation) < 0.001:
+		_check("an untilted weapon keeps the plain offset",
+			gun.carry_offset(), -gun.held_position.position)
+
+	sword.queue_free()
+	gun.queue_free()
+	await get_tree().process_frame

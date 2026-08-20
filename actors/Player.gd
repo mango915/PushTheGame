@@ -660,7 +660,7 @@ func pickup_or_throw() -> void:
 
 	current_pickup_position = back_pickup_position if current_pickup.pickup_position == Pickup.PickupPosition.BACK else front_pickup_position
 	current_pickup_position.add_child(current_pickup)
-	current_pickup.position = -current_pickup.held_position.position
+	current_pickup.position = current_pickup.carry_offset()
 
 @rpc("any_peer", "call_local") func _do_throw() -> void:
 	if not _sender_is_authority():

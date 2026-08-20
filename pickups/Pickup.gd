@@ -2,6 +2,19 @@ extends CharacterBody2D
 class_name Pickup
 
 @onready var held_position: Marker2D = $HeldPosition
+
+# Carry tilt in degrees; see WeaponData.carry_rotation. Lives here as well so a
+# pickup with no WeaponData resource still has a usable default.
+@export_range(-180.0, 180.0, 1.0) var carry_rotation: float = 0.0
+
+# Where this weapon sits once it is in a hand.
+#
+# The weapon is parented to the carry marker and offset so its HeldPosition --
+# the grip -- lands on the marker origin. Tilting it therefore has to rotate
+# that offset too: rotate the sprite alone and the weapon pivots about its own
+# centre, swinging the grip away from the hand instead of turning in it.
+func carry_offset() -> Vector2:
+	return -held_position.position.rotated(deg_to_rad(carry_rotation))
 @onready var original_parent: Node2D = get_parent()
 @onready var gravity: float = float(ProjectSettings.get_setting("physics/2d/default_gravity"))
 @onready var linear_damp: float = float(ProjectSettings.get_setting("physics/2d/default_linear_damp"))
@@ -87,6 +100,7 @@ func _apply_weapon_data() -> void:
 
 	pickup_position = weapon_data.pickup_position as PickupPosition
 	bounce = weapon_data.bounce
+	carry_rotation = weapon_data.carry_rotation
 
 	# 0 means "the resource does not care", so the scene's own value survives.
 	# See the note at the bottom of WeaponData.gd: gun_weapon.tres and
@@ -102,7 +116,7 @@ func can_pickup() -> bool:
 func pickup(_player: Node2D) -> void:
 	pickup_state = PickupState.PICKED_UP
 	player = _player
-	rotation = 0.0
+	rotation = deg_to_rad(carry_rotation)
 	sleeping = true
 	emit_signal("picked_up")
 

@@ -7,3 +7,4 @@ script = ExtResource("1")
 weapon_name = "Sword"
 pickup_position = 1
 bounce = 0.1
+carry_rotation = 28.0

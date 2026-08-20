@@ -30,6 +30,19 @@ extends Resource
 # depends on WeaponData) and create a cyclic reference.
 @export_enum("Front:0", "Back:1") var pickup_position: int = 0
 
+# Degrees to tilt the weapon while it is carried, pivoting about its grip.
+#
+# Not cosmetic trim: an upright weapon held against a 48x68 capsule reads as
+# impaled rather than held. The sword is 24px wide centred 14px right of the
+# midline, so at 0 degrees it lies across the character's face and pokes 2px
+# past the silhouette -- which is what "the sword is decentralized when held"
+# describes. Tilting it puts the hilt at the body edge and the blade clear,
+# and that alone reads as a grip even though these characters have no arms.
+#
+# Mirrors for free: the player's scale.x carries flip_h, so a left-facing
+# character tilts the other way without a second value.
+@export_range(-180.0, 180.0, 1.0) var carry_rotation: float = 0.0
+
 # Fraction of speed kept when a thrown weapon hits geometry.
 @export_range(0.0, 1.0, 0.01) var bounce: float = 0.1
 
