@@ -95,6 +95,21 @@ Two-player local play needs no server: Title screen → "Play Local" wires `play
 ### Watch for this bug pattern
 `var x: T = v: set = _set_readonly_variable` — an empty setter used to make a property read-only from outside. GDScript setters intercept writes from **inside** the class too, so every internal assignment is silently discarded and nothing errors. This has been found and fixed three times now: `OnlineMatch` (the whole match state machine was inert) and `UILayer` (`current_screen_name` was permanently `''`, so the Back button could never leave MatchScreen online). If you meet another one, it is a bug, not a style.
 
+### DisplayServer calls the headless server does not implement
+
+`DisplayServer.keyboard_get_keycode_from_physical()` — used to show a physical
+binding under the player's actual layout — logs `ERROR: Not supported by this
+display server` on the headless driver. `autoload/Keybinds.gd` guards it with
+`DisplayServer.get_name() != "headless"` and falls back to naming the physical
+code. It matters out of proportion to the feature: `scripts/check.sh` greps for
+a bare `ERROR: `, so 28 of these at boot (14 actions x 2 slots) failed **nine
+gates**, including ones with nothing to do with input. Anything reaching into
+`DisplayServer` for layout, window or clipboard state deserves the same guard.
+
+Related trap when reading the result: `./scripts/check.sh | tail` reports
+*tail's* exit code, so a failing run looks like a passing one. Redirect to a file
+and check `$?`.
+
 ### Testing multiplayer for real
 `scripts/check.sh` runs one process with no server, so it cannot see the online path at all. `scripts/nettest.sh` launches two headless clients that host and join the same room code against a local Nakama (`docker compose up -d` first). Use it for anything touching auth, the match lifecycle, or RPCs.
 

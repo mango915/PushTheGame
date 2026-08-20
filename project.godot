@@ -29,6 +29,7 @@ LanMatch="*res://autoload/LanMatch.gd"
 SteamMatch="*res://autoload/SteamMatch.gd"
 GameState="*res://autoload/GameState.gd"
 Util="*res://autoload/Util.gd"
+Keybinds="*res://autoload/Keybinds.gd"
 
 [display]
 

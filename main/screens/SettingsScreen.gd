@@ -40,6 +40,12 @@ var _host_field: LineEdit
 var _port_field: LineEdit
 var _jump_readout: Label
 
+# action -> Array[Button], one per key slot.
+var _bind_buttons := {}
+# The slot currently waiting for a keypress: {"action": String, "slot": int}.
+var _capturing := {}
+var _bind_hint: Label
+
 func _ready() -> void:
 	_settings = GameSettings.load_saved()
 	_build_ui()
@@ -49,6 +55,14 @@ func _show_screen(_info: Dictionary = {}) -> void:
 	# Re-read on every entry: another screen (or a host) may have changed things.
 	_settings = GameSettings.load_saved()
 	_refresh_from_settings()
+	_capturing = {}
+	_reset_bind_hint()
+	_refresh_all_binds()
+
+func _hide_screen() -> void:
+	# An armed slot left behind would eat the first keypress on whatever screen
+	# comes next.
+	_capturing = {}
 
 #####
 # UI construction
@@ -86,6 +100,14 @@ func _build_ui() -> void:
 	_name_field = LineEdit.new()
 	_name_field.placeholder_text = "Display name"
 	column.add_child(_labelled_row("Name", _name_field))
+
+	# --- Controls ---
+	column.add_child(_heading("Controls"))
+	_bind_hint = _hint("")
+	_reset_bind_hint()
+	column.add_child(_bind_hint)
+	for action in Keybinds.rebindable_actions():
+		column.add_child(_bind_row(action))
 
 	# --- Gameplay ---
 	column.add_child(_heading("Gameplay"))
@@ -186,6 +208,108 @@ func _slider_row(row: Array) -> HBoxContainer:
 	return container
 
 #####
+# Key binding
+#####
+
+func _seat_of(action: String) -> String:
+	for prefix in Keybinds.PREFIXES:
+		if action.begins_with(prefix):
+			return prefix.substr(6, 1)
+	return "?"
+
+func _bind_row(action: String) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+
+	var label := Label.new()
+	label.text = "P%s  %s" % [_seat_of(action), Keybinds.label_for(action)]
+	label.custom_minimum_size.x = LABEL_WIDTH
+	row.add_child(label)
+
+	var buttons := []
+	for slot in range(Keybinds.SLOTS):
+		var button := Button.new()
+		button.custom_minimum_size.x = 90
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		# Left click rebinds, right click clears. A dedicated clear button per
+		# slot would double the width of a list that is already 14 rows long.
+		button.pressed.connect(_on_bind_pressed.bind(action, slot))
+		button.gui_input.connect(_on_bind_gui_input.bind(action, slot))
+		row.add_child(button)
+		buttons.append(button)
+
+	_bind_buttons[action] = buttons
+	_refresh_bind_row(action)
+	return row
+
+func _refresh_bind_row(action: String) -> void:
+	if not _bind_buttons.has(action):
+		return
+	var keys: Array = Keybinds.keys_for(action)
+	for slot in range(_bind_buttons[action].size()):
+		var button: Button = _bind_buttons[action][slot]
+		if _capturing.get("action", "") == action \
+				and _capturing.get("slot", -1) == slot:
+			button.text = "press a key"
+		else:
+			button.text = Keybinds.key_name(keys[slot])
+
+func _refresh_all_binds() -> void:
+	for action in _bind_buttons:
+		_refresh_bind_row(action)
+
+func _reset_bind_hint() -> void:
+	if _bind_hint:
+		_bind_hint.text = ("Click a key to rebind, right-click to clear. "
+			+ "Escape cancels. Players 3 and 4 are gamepad-only.")
+
+func _on_bind_pressed(action: String, slot: int) -> void:
+	_capturing = {"action": action, "slot": slot}
+	_bind_hint.text = "Press a key for P%s %s, or Escape to cancel." % [
+		_seat_of(action), Keybinds.label_for(action)]
+	_refresh_all_binds()
+
+func _on_bind_gui_input(event: InputEvent, action: String, slot: int) -> void:
+	if event is InputEventMouseButton and event.pressed \
+			and event.button_index == MOUSE_BUTTON_RIGHT:
+		Keybinds.clear_key(action, slot)
+		_refresh_all_binds()
+
+# Captured here rather than in _unhandled_input: a Button has focus while it is
+# waiting, and would otherwise swallow Space and Enter as "press me again" --
+# which are exactly two keys somebody will try to bind to jump.
+func _input(event: InputEvent) -> void:
+	if _capturing.is_empty() or not visible:
+		return
+	if not (event is InputEventKey) or not event.pressed or event.echo:
+		return
+	get_viewport().set_input_as_handled()
+
+	var code: int = event.physical_keycode
+	if code == 0:
+		code = event.keycode
+	var action: String = _capturing["action"]
+	var slot: int = _capturing["slot"]
+	_capturing = {}
+
+	if code == KEY_ESCAPE:
+		_reset_bind_hint()
+		_refresh_all_binds()
+		return
+
+	var taken := Keybinds.set_key(action, slot, code)
+	if taken == "reserved":
+		_bind_hint.text = "%s is reserved for the pause menu." % Keybinds.key_name(code)
+	elif taken != "":
+		# Say what was taken and from whom. The alternative -- silently leaving
+		# one key firing two actions -- reads as the game being broken.
+		_bind_hint.text = "%s was bound to P%s %s; that binding was cleared." % [
+			Keybinds.key_name(code), _seat_of(taken), Keybinds.label_for(taken)]
+	else:
+		_reset_bind_hint()
+	_refresh_all_binds()
+
+#####
 # Values
 #####
 
@@ -246,6 +370,7 @@ func _update_jump_readout() -> void:
 
 func _on_save_pressed() -> void:
 	_settings.save_to_config()
+	Keybinds.save()
 
 	Online.set_display_name(_name_field.text)
 
@@ -268,5 +393,10 @@ func _on_save_pressed() -> void:
 func _on_reset_pressed() -> void:
 	GameSettings.clear_saved()
 	_settings = GameSettings.load_saved()
+	Keybinds.clear_saved()
+	Keybinds.reset_to_defaults()
+	_capturing = {}
+	_reset_bind_hint()
+	_refresh_all_binds()
 	_refresh_from_settings()
 	ui_layer.show_message("Settings reset to defaults")
