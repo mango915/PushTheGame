@@ -9,7 +9,7 @@
 [ext_resource path="res://resources/sword_weapon.tres" type="Resource" id=7]
 
 [sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 12.9448, 32.6482 )
+size = Vector2( 16, 46 )
 
 [sub_resource type="Animation" id=2]
 resource_name = "Idle"
@@ -52,12 +52,11 @@ throw_damage_speed = 260.0
 throw_self_immunity = 0.35
 
 [node name="Sprite2D" type="Sprite2D" parent="." index="0"]
-position = Vector2( 24, -39 )
+position = Vector2( 0, -26 )
 texture = ExtResource( 2 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." index="1"]
-position = Vector2( 14, -29.5 )
-rotation = 0.486947
+position = Vector2( 0, -26 )
 shape = SubResource( 1 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." index="2"]
@@ -66,12 +65,12 @@ anims/Idle = SubResource( 2 )
 anims/Swing = SubResource( 3 )
 
 [node name="Hitbox" parent="." index="3" instance=ExtResource( 3 )]
-position = Vector2( 29, -23.5 )
+position = Vector2( 4, -26 )
 collision_mask = 2
 disabled = true
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Hitbox" index="0"]
-polygon = PackedVector2Array( -23, -5.5, -16, -18.5, -8, -48.5, 9, -34.5, 25, -4.5, 27, 16.5, 22, 25.5, 8, 30.5, -3, 30.5, -23, 20.5 )
+polygon = PackedVector2Array(-9, -34, 9, -34, 9, 10, -9, 10)
 
 [node name="Sounds" type="Node" parent="." index="4"]
 script = ExtResource( 6 )
@@ -81,4 +80,4 @@ stream = ExtResource( 5 )
 bus = "Sound Effects"
 
 [node name="HeldPosition" parent="." index="5"]
-position = Vector2( 0, -8.5 )
+position = Vector2( 0, -8 )

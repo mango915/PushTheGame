@@ -385,7 +385,36 @@ func set_pass_through_one_way_platforms(_pass_through: bool) -> void:
 		pass_through_one_way_platforms = _pass_through
 		set_collision_mask_value(ONE_WAY_PLATFORMS_COLLISION_LAYER, !_pass_through)
 
+# Down + jump on a one-way platform. Clears the platform layer from our mask and
+# gives a nudge downward, because from a standing start there is no downward
+# velocity at all and the player would simply sit there.
+#
+# The flag is cleared by PassThroughDetectorArea once we are genuinely below the
+# platform; DROP_THROUGH_TIMEOUT is the backstop for a drop that never resolves
+# (walking off the side mid-drop, say), so a player cannot end up permanently
+# unable to stand on one-way platforms.
+const DROP_THROUGH_NUDGE := 60.0
+const DROP_THROUGH_TIMEOUT := 0.4
+
+var _drop_through_left := 0.0
+
+func drop_through() -> void:
+	if jump_blocked:
+		return
+	pass_through_one_way_platforms = true
+	_drop_through_left = DROP_THROUGH_TIMEOUT
+	if vector.y < DROP_THROUGH_NUDGE:
+		vector.y = DROP_THROUGH_NUDGE
+
+func _update_drop_through(delta: float) -> void:
+	if _drop_through_left <= 0.0:
+		return
+	_drop_through_left -= delta
+	if _drop_through_left <= 0.0:
+		pass_through_one_way_platforms = false
+
 func _on_PassThroughDetectorArea_body_exited(body: Node) -> void:
+	_drop_through_left = 0.0
 	self.pass_through_one_way_platforms = false
 
 func set_show_gliding(_show_gliding: bool) -> void:
@@ -799,6 +828,7 @@ func _physics_process(delta: float) -> void:
 		input_buffer_changed = input_buffer.update_local()
 
 	_update_jump_assists(delta)
+	_update_drop_through(delta)
 	state_machine._physics_process(delta)
 
 	vector.y += (gravity * delta)

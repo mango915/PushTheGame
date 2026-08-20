@@ -1,36 +1,36 @@
-[gd_scene load_steps=19 format=3 uid="uid://bfhe2n4g71cu"]
+[gd_scene format=3 uid="uid://bfhe2n4g71cu"]
 
-[ext_resource type="Script" path="res://Main.gd" id="1"]
+[ext_resource type="Script" uid="uid://d2ba3lm07b2yi" path="res://Main.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://c1tbtdciosmlb" path="res://main/screens/ConnectionScreen.tscn" id="2"]
 [ext_resource type="PackedScene" uid="uid://cdyj7ly8lcdlv" path="res://Game.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://main/screens/MatchScreen.tscn" id="4"]
-[ext_resource type="Script" path="res://main/UILayer.gd" id="5"]
+[ext_resource type="Script" uid="uid://bx1wckwm08mtg" path="res://main/UILayer.gd" id="5"]
 [ext_resource type="PackedScene" uid="uid://cvr6o7834fy1t" path="res://main/screens/ReadyScreen.tscn" id="6"]
 [ext_resource type="PackedScene" uid="uid://u1fw537kl61p" path="res://main/screens/TitleScreen.tscn" id="7"]
 [ext_resource type="FontFile" uid="uid://dpsvmpxtgjnrg" path="res://assets/fonts/monogram.tres" id="8"]
-[ext_resource type="Script" path="res://main/Music.gd" id="9"]
+[ext_resource type="Script" uid="uid://b4j3trb8cbx5g" path="res://main/Music.gd" id="9"]
 [ext_resource type="AudioStream" uid="uid://clhunui0oqjs2" path="res://assets/music/BUILD UP.ogg" id="10"]
 [ext_resource type="AudioStream" uid="uid://dpcvmn5wya6jo" path="res://assets/music/THEME #1.ogg" id="11"]
 [ext_resource type="AudioStream" uid="uid://bhwpacdkwpvr5" path="res://assets/music/DOMEFIGHTERS.ogg" id="12"]
 [ext_resource type="AudioStream" uid="uid://dfeknvjjx0wiu" path="res://assets/music/FISHSTICKS.ogg" id="13"]
 [ext_resource type="PackedScene" path="res://main/screens/LeaderboardScreen.tscn" id="14"]
 [ext_resource type="PackedScene" path="res://main/screens/CreditsScreen.tscn" id="15"]
-[ext_resource type="PackedScene" path="res://main/screens/SettingsScreen.tscn" id="20"]
-[ext_resource type="Script" path="res://main/screens/TransparentButton.gd" id="17"]
+[ext_resource type="Script" uid="uid://cuijfyd72bk64" path="res://main/screens/TransparentButton.gd" id="17"]
 [ext_resource type="Texture2D" uid="uid://wqifmham4jn0" path="res://assets/ui/mute.png" id="18"]
 [ext_resource type="Texture2D" uid="uid://cvjrremywfuyx" path="res://assets/ui/close.png" id="19"]
+[ext_resource type="PackedScene" path="res://main/screens/SettingsScreen.tscn" id="20"]
 
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node2D" unique_id=2141244762]
 script = ExtResource("1")
 
-[node name="Game" parent="." instance=ExtResource("3")]
+[node name="Game" parent="." unique_id=613358694 instance=ExtResource("3")]
 position = Vector2(-1, 0)
 
-[node name="UILayer" type="CanvasLayer" parent="."]
+[node name="UILayer" type="CanvasLayer" parent="." unique_id=840233398]
 process_mode = 3
 script = ExtResource("5")
 
-[node name="Screens" type="Control" parent="UILayer"]
+[node name="Screens" type="Control" parent="UILayer" unique_id=1149221036]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -38,24 +38,15 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TitleScreen" parent="UILayer/Screens" instance=ExtResource("7")]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="ConnectionScreen" parent="UILayer/Screens" instance=ExtResource("2")]
+[node name="TitleScreen" parent="UILayer/Screens" unique_id=375261077 instance=ExtResource("7")]
 visible = false
 layout_mode = 1
 
-[node name="MatchScreen" parent="UILayer/Screens" instance=ExtResource("4")]
+[node name="ConnectionScreen" parent="UILayer/Screens" unique_id=804868149 instance=ExtResource("2")]
+visible = false
+layout_mode = 1
+
+[node name="MatchScreen" parent="UILayer/Screens" unique_id=633914148 instance=ExtResource("4")]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -66,11 +57,11 @@ offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ReadyScreen" parent="UILayer/Screens" instance=ExtResource("6")]
+[node name="ReadyScreen" parent="UILayer/Screens" unique_id=1259104359 instance=ExtResource("6")]
 visible = false
 layout_mode = 1
 
-[node name="LeaderboardScreen" parent="UILayer/Screens" instance=ExtResource("14")]
+[node name="LeaderboardScreen" parent="UILayer/Screens" unique_id=370101346 instance=ExtResource("14")]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -81,42 +72,32 @@ offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="CreditsScreen" parent="UILayer/Screens" instance=ExtResource("15")]
+[node name="CreditsScreen" parent="UILayer/Screens" unique_id=744323868 instance=ExtResource("15")]
 visible = false
 anchors_preset = 0
 
-[node name="SettingsScreen" parent="UILayer/Screens" instance=ExtResource("20")]
+[node name="SettingsScreen" parent="UILayer/Screens" unique_id=225882399 instance=ExtResource("20")]
 visible = false
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
-grow_horizontal = 2
-grow_vertical = 2
 
-[node name="RoundTimer" type="Label" parent="UILayer"]
+[node name="RoundTimer" type="Label" parent="UILayer" unique_id=508420288]
 visible = false
-offset_left = -48.0
-offset_top = 0.0
-offset_right = 48.0
-offset_bottom = 20.0
+anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
+offset_left = -48.0
+offset_right = 48.0
+offset_bottom = 20.0
 grow_horizontal = 2
-mouse_filter = 2
-theme_override_fonts/font = ExtResource("8")
-theme_override_font_sizes/font_size = 16
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.7)
 theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("8")
+theme_override_font_sizes/font_size = 16
 text = "1:30"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Overlay" type="Control" parent="UILayer"]
+[node name="Overlay" type="Control" parent="UILayer" unique_id=1627744674]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -125,7 +106,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Message" type="Label" parent="UILayer/Overlay"]
+[node name="Message" type="Label" parent="UILayer/Overlay" unique_id=1274984121]
 visible = false
 layout_mode = 0
 anchor_right = 1.0
@@ -134,7 +115,7 @@ offset_bottom = 45.0
 theme_override_fonts/font = ExtResource("8")
 text = "Waiting for players..."
 
-[node name="BackButton" type="Button" parent="UILayer/Overlay"]
+[node name="BackButton" type="Button" parent="UILayer/Overlay" unique_id=260932820]
 visible = false
 layout_mode = 0
 anchor_left = 1.0
@@ -148,7 +129,7 @@ icon = ExtResource("19")
 clip_text = true
 script = ExtResource("17")
 
-[node name="MuteButton" type="Button" parent="UILayer/Overlay"]
+[node name="MuteButton" type="Button" parent="UILayer/Overlay" unique_id=855666443]
 layout_mode = 1
 offset_right = 24.0
 offset_bottom = 24.0
@@ -158,22 +139,22 @@ icon = ExtResource("18")
 clip_text = true
 script = ExtResource("17")
 
-[node name="Music" type="Node" parent="."]
+[node name="Music" type="Node" parent="." unique_id=1688170347]
 script = ExtResource("9")
 
-[node name="BuildUp" type="AudioStreamPlayer" parent="Music"]
+[node name="BuildUp" type="AudioStreamPlayer" parent="Music" unique_id=1903112006]
 stream = ExtResource("10")
 bus = &"Music"
 
-[node name="DomeFighters" type="AudioStreamPlayer" parent="Music"]
+[node name="DomeFighters" type="AudioStreamPlayer" parent="Music" unique_id=1395390845]
 stream = ExtResource("12")
 bus = &"Music"
 
-[node name="Fishsticks" type="AudioStreamPlayer" parent="Music"]
+[node name="Fishsticks" type="AudioStreamPlayer" parent="Music" unique_id=801305416]
 stream = ExtResource("13")
 bus = &"Music"
 
-[node name="Theme1" type="AudioStreamPlayer" parent="Music"]
+[node name="Theme1" type="AudioStreamPlayer" parent="Music" unique_id=342113773]
 stream = ExtResource("11")
 bus = &"Music"
 

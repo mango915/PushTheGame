@@ -178,9 +178,16 @@ func _physics_process(delta: float) -> void:
 
 	# Bounce the object if it collides.
 	if collision:
-		#linear_velocity = collision.normal * collision.remainder.length()
-		linear_velocity = collision.get_normal() * (linear_velocity.length() * bounce)
-		move_and_collide(collision.get_normal() * collision.get_remainder().length())
+		# REFLECT the velocity about the surface normal. It used to be set to the
+		# normal itself times the speed, which is not a bounce but a redirect:
+		# every thrown weapon that touched the floor shot straight up regardless
+		# of which way it had been travelling, which is what made thrown swords
+		# and grenades behave so strangely.
+		var normal := collision.get_normal()
+		linear_velocity = linear_velocity.bounce(normal) * bounce
+		# Spin scrubs off on impact too, rather than continuing untouched.
+		angular_velocity *= bounce
+		move_and_collide(normal * collision.get_remainder().length())
 
 	# Sleep the object if it gets below certain linear/angular velocity thresholds.
 	if not GameState.online_play or is_multiplayer_authority():

@@ -54,13 +54,34 @@ func _timeline() -> Dictionary:
 		"fight":
 			return {
 				10: [["player1_right", true]],
-				55: [["player1_right", false]],
-				60: [["player1_grab", true]],
-				63: [["player1_grab", false]],
-				75: [["player1_use", true]],
-				79: [["player1_use", false]],
+				70: [["player1_right", false]],
+				# Grab repeatedly: a single press can miss if the pickup area has
+				# not overlapped the weapon yet, and a scenario that quietly
+				# fails to arm the player tests nothing.
+				76: [["player1_grab", true]],
+				79: [["player1_grab", false]],
+				84: [["player1_grab", true]],
+				87: [["player1_grab", false]],
 				100:[["player1_use", true]],
 				104:[["player1_use", false]],
+				125:[["player1_use", true]],
+				129:[["player1_use", false]],
+			}
+		# Handed a sword: swing standing, swing walking, then throw it.
+		"sword":
+			return {
+				20: [["player1_use", true]], 24: [["player1_use", false]],
+				55: [["player1_right", true]],
+				70: [["player1_use", true]], 74: [["player1_use", false]],
+				95: [["player1_right", false]],
+				110: [["player1_grab", true]], 114: [["player1_grab", false]],
+			}
+		# Same for the grenade: carried, then thrown.
+		"grenade":
+			return {
+				30: [["player1_right", true]],
+				60: [["player1_grab", true]], 64: [["player1_grab", false]],
+				90: [["player1_right", false]],
 			}
 		# Hold the draw, then loose: the bow only makes sense in motion.
 		"bow":
@@ -71,6 +92,30 @@ func _timeline() -> Dictionary:
 				85: [["player1_use", false]],
 			}
 	return {}
+
+# Some things are about the WEAPON, not about finding one. Walking to a
+# generator and hoping the pickup area overlaps tests the arena layout; putting
+# the weapon straight into the player's hands tests the weapon.
+func _arm_player(scene_path: String) -> void:
+	var players := []
+	for child in _main.game.players_node.get_children():
+		if child.has_method("pickup_or_throw"):
+			players.append(child)
+	if players.is_empty():
+		return
+	var p = players[0]
+	var weapon = load(scene_path).instantiate()
+	_main.game.map.add_child(weapon)
+	await get_tree().process_frame
+	weapon.global_position = p.global_position
+	weapon.pickup_state = Pickup.PickupState.PICKED_UP
+	weapon.pickup(p)
+	weapon.get_parent().remove_child(weapon)
+	var slot = p.back_pickup_position if weapon.pickup_position == Pickup.PickupPosition.BACK else p.front_pickup_position
+	slot.add_child(weapon)
+	weapon.position = -weapon.held_position.position
+	p.current_pickup = weapon
+	p.current_pickup_position = slot
 
 # One line of ground truth per physics frame. What the player IS, alongside the
 # frame that shows what they LOOK like -- a mismatch between the two is what a
@@ -141,6 +186,10 @@ func _ready() -> void:
 	await get_tree().process_frame
 	_main.ui_layer.hide_all()
 	_main._refresh_hud()
+
+	match _scenario:
+		"sword": await _arm_player("res://pickups/Sword.tscn")
+		"grenade": await _arm_player("res://pickups/Grenade.tscn")
 
 	var timeline := _timeline()
 	var log_lines := PackedStringArray()

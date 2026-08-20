@@ -14,7 +14,7 @@ weapon_data = ExtResource("3")
 
 [node name="Sprite2D" type="Sprite2D" parent="." index="0"]
 position = Vector2(0, -8)
-scale = Vector2(0.72, 0.72)
+scale = Vector2(1.05, 1.05)
 texture = ExtResource("4")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." index="1"]

@@ -9,21 +9,17 @@
 layer = -100
 
 [node name="Sky" type="Sprite2D" parent="."]
-scale = Vector2(2.11, 2.11)
 texture = ExtResource("1")
 centered = false
 
 [node name="CloudsFar" type="Sprite2D" parent="."]
-scale = Vector2(2.11, 2.11)
 texture = ExtResource("2")
 centered = false
 
 [node name="CloudsNear" type="Sprite2D" parent="."]
-scale = Vector2(2.11, 2.11)
 texture = ExtResource("3")
 centered = false
 
 [node name="Trees" type="Sprite2D" parent="."]
-scale = Vector2(2.11, 2.11)
 texture = ExtResource("4")
 centered = false

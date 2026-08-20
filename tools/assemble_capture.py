@@ -42,6 +42,40 @@ def main():
     imgs[0].save(out + ".gif", save_all=True, append_images=imgs[1:],
                  duration=20, loop=0, optimize=True)
 
+    # --- optional: follow a character instead of cropping blind -------------
+    # The camera moves, so a fixed crop shows whatever happens to be there.
+    # Player 1 is the yellow capsule; find it by colour and centre on it.
+    track = "--track" in sys.argv
+    if track:
+        TARGET = (247, 181, 30)   # Butter's fill
+        box = int(sys.argv[sys.argv.index("--track") + 1]) if len(sys.argv) > sys.argv.index("--track") + 1 and sys.argv[sys.argv.index("--track") + 1].isdigit() else 130
+        tracked = []
+        for im in imgs:
+            px = im.load()
+            xs, ys, n = 0, 0, 0
+            # Skip the bottom band: the scoreboard portraits are the same
+            # colours as the characters, so averaging over the whole frame
+            # centres the crop between the player and the HUD.
+            for y in range(0, im.height - 46, 2):
+                for x in range(0, im.width, 2):
+                    r, g, b = px[x, y]
+                    if abs(r - TARGET[0]) < 26 and abs(g - TARGET[1]) < 30 and abs(b - TARGET[2]) < 34:
+                        xs += x; ys += y; n += 1
+            if n > 8:
+                cx, cy = xs // n, ys // n
+            else:
+                cx, cy = im.width // 2, im.height // 2
+            half = box // 2
+            # PAD rather than clamp: clamping keeps the crop inside the frame,
+            # which puts a player standing near the edge against the border of
+            # every tile instead of in the middle where it can be read.
+            padded = Image.new("RGB", (im.width + box * 2, im.height + box * 2), (18, 20, 26))
+            padded.paste(im, (box, box))
+            px0, py0 = cx + box - half, cy + box - half
+            tracked.append(padded.crop((px0, py0, px0 + box, py0 + box))
+                                 .resize((box * 2, box * 2), Image.NEAREST))
+        imgs = tracked
+
     # --- strip: what a still-image reader can actually inspect --------------
     picks = list(range(0, len(files), stride))
     rows = (len(picks) + cols - 1) // cols

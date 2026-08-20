@@ -1,6 +1,6 @@
-[gd_resource type="TileSet" format=3]
+[gd_resource type="TileSet" format=3 uid="uid://cvvxydxv00dji"]
 
-[ext_resource type="Texture2D" path="res://assets/doodle/tilesets/scribble_arena.png" id="1_lhqpv"]
+[ext_resource type="Texture2D" uid="uid://dun6s7ty74rf5" path="res://assets/doodle/tilesets/scribble_arena.png" id="1_lhqpv"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3vyhp"]
 texture = ExtResource("1_lhqpv")
