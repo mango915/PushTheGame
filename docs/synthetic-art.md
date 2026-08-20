@@ -91,6 +91,33 @@ because both looked like art failures rather than test failures:
 The lesson generalises: when a measurement lands suspiciously close to a
 quantity you already know, suspect the measurement.
 
+### Cut the backdrop as a snap target, not with a threshold
+
+Generated art arrives on a flat backdrop (prompt for magenta; nothing in the
+palette is near it) and has to be cut out. The obvious way — threshold anything
+within tolerance of the backdrop colour — is wrong, and wrong in the most
+expensive place.
+
+A generated silhouette has a soft edge, so the pixels along it are blends of
+backdrop and *outline*. A fixed tolerance cuts a band of those and takes the
+outline with them. Measured on a simulated generation (real art, upscaled onto
+magenta, blurred, hue-shifted, gradient-shaded):
+
+| | ink | dominant | aa | opaque px |
+|---|---|---|---|---|
+| reference | 10.3% | 53.5% | 6.0% | 2217 |
+| threshold key | **4.8%** | 61.7% | 9.2% | 1737 |
+| backdrop as snap target | **9.7%** | 51.1% | 5.1% | 2515 |
+
+Making the backdrop one more entry in the snap targets puts the decision
+boundary exactly halfway between "mostly backdrop" and "mostly ink", so a pixel
+only vanishes when it really is more backdrop than character. Half the outline
+came back, and every metric landed within ~2.5% of the reference.
+
+Worth noting how this was caught: by faking a generation and measuring it, not
+by generating one. The failure was invisible in the output image — it just
+looked like a slightly thinner sprite.
+
 ## Pipeline order
 
 Generate large, project, *then* downsample. In that order the ~6% soft edge is

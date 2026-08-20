@@ -134,40 +134,40 @@ def learn(paths, ink_lum: int = 70) -> StyleProfile:
                         round(aa_num / max(1, aa_den), 4))
 
 
-def _key_background(img: np.ndarray, bg, tol: int = 40) -> np.ndarray:
-    """Knock out a flat backdrop.
-
-    Generated images arrive on a solid background rather than on transparency,
-    so the sprite has to be cut out before anything else is measured -- palette
-    coverage counts pixels, and a backdrop would dominate every ratio.
-
-    Keying a named colour beats a learned matte here because we control the
-    generation prompt: ask for the character on flat magenta and the cut is
-    exact, with no model needed. `auto` samples the corners for the case where
-    we did not get to choose.
-    """
-    rgb = img[..., :3].astype(int)
+def _background_rgb(img: np.ndarray, bg):
+    """The backdrop colour to cut, named or sampled from the corners."""
     if bg == "auto":
+        rgb = img[..., :3].astype(int)
         h, w = rgb.shape[:2]
-        corners = np.array([rgb[0, 0], rgb[0, w - 1], rgb[h - 1, 0], rgb[h - 1, w - 1]])
-        bg_rgb = np.median(corners, axis=0).astype(int)
-    else:
-        s = bg.lstrip("#")
-        bg_rgb = np.array([int(s[i:i + 2], 16) for i in (0, 2, 4)])
-    out = img.copy()
-    out[..., 3] = np.where(np.abs(rgb - bg_rgb).max(2) <= tol, 0, img[..., 3])
-    return out
+        corners = np.array([rgb[0, 0], rgb[0, w - 1],
+                            rgb[h - 1, 0], rgb[h - 1, w - 1]])
+        return np.median(corners, axis=0).astype(int)
+    text = bg.lstrip("#")
+    return np.array([int(text[i:i + 2], 16) for i in (0, 2, 4)])
 
 
-def _snap(img: np.ndarray, palette, ink) -> np.ndarray:
-    """Quantise every visible pixel to the palette, or to ink.
+def _snap(img: np.ndarray, palette, ink, bg_rgb=None) -> np.ndarray:
+    """Quantise every visible pixel to the palette, to ink, or to the backdrop.
 
     This is where style consistency actually comes from. The model only has to
     get the SHAPE approximately right; hue drift, invented shading and soft
     gradients all collapse onto the same handful of colours here, so two sprites
     generated an hour apart cannot disagree about what colour the character is.
+
+    The backdrop is cut HERE rather than by a separate threshold pass, and that
+    is not a tidiness choice. A generated image has a soft edge, so pixels along
+    the silhouette are blends of backdrop and outline. A fixed tolerance cuts a
+    band of them and eats the outline with it -- measured on a simulated
+    generation, keying first dropped ink coverage from 10.3% to 4.8% and lost a
+    fifth of the sprite. Making the backdrop one more snap target puts the
+    decision boundary exactly halfway between "mostly backdrop" and "mostly
+    ink", which is where it belongs, and a pixel only disappears when it really
+    is more backdrop than character.
     """
-    targets = np.array(list(palette) + [list(ink)], dtype=float)
+    targets = np.array(list(palette) + [list(ink)]
+                       + ([list(bg_rgb)] if bg_rgb is not None else []),
+                       dtype=float)
+    bg_index = len(targets) - 1 if bg_rgb is not None else -1
     rgb = img[..., :3].astype(float)
     flat = rgb.reshape(-1, 3)
     # Chunked so a 1024x1024 source does not allocate a 1M x N x 3 temporary.
@@ -178,6 +178,9 @@ def _snap(img: np.ndarray, palette, ink) -> np.ndarray:
         idx[lo:lo + 65536] = d.argmin(1)
     out = img.copy()
     out[..., :3] = targets[idx].reshape(rgb.shape).astype(np.uint8)
+    if bg_index >= 0:
+        is_bg = (idx.reshape(rgb.shape[:2]) == bg_index)
+        out[..., 3] = np.where(is_bg, 0, img[..., 3])
     return out
 
 
@@ -215,9 +218,8 @@ def apply_style(img: np.ndarray, palette, ink, size=None, bg=None,
     # shipped sprites carry transparent padding (a 48x68 canvas around a 43x64
     # character), so cropping it would make every reference art file "fail" on a
     # difference the projection never introduced.
-    if bg:
-        img = _key_background(img, bg)
-    img = _snap(img, palette, ink)
+    bg_rgb = _background_rgb(img, bg) if bg else None
+    img = _snap(img, palette, ink, bg_rgb)
     if trim:
         img = _trim(img)
     if size is None:
