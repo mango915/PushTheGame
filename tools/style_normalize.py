@@ -383,6 +383,76 @@ def _cmd_check(args) -> int:
     return 1 if failures else 0
 
 
+def _degrade(img: np.ndarray, bg_rgb, size: int = 768) -> np.ndarray:
+    """Turn reference art into a plausible generation of itself.
+
+    Upscale onto the backdrop, blur the edges, drift the hue and lay a gradient
+    across it -- soft outlines, wrong colours and invented shading, which is
+    what a diffusion model actually gets wrong. The shape stays right, because
+    the shape is the only thing the model is being asked to supply.
+    """
+    from PIL import ImageFilter
+    h, w = img.shape[:2]
+    scale = (size * 0.8) / max(h, w)
+    big = Image.fromarray(img, "RGBA").resize(
+        (max(1, int(w * scale)), max(1, int(h * scale))), Image.BICUBIC)
+    canvas = Image.new("RGBA", (size, size),
+                       tuple(int(v) for v in bg_rgb) + (255,))
+    canvas.alpha_composite(big, ((size - big.width) // 2,
+                                 (size - big.height) // 2))
+    canvas = canvas.filter(ImageFilter.GaussianBlur(2.5))
+    a = np.array(canvas).astype(float)
+    a[..., 0] = np.clip(a[..., 0] * 0.93 + 12, 0, 255)
+    a[..., 2] = np.clip(a[..., 2] * 1.10, 0, 255)
+    a[..., :3] = np.clip(
+        a[..., :3] * np.linspace(0.82, 1.18, size).reshape(1, -1, 1), 0, 255)
+    return a.astype(np.uint8)
+
+
+def _cmd_simulate(args) -> int:
+    """Prove a degraded generation still lands on the style.
+
+    `check` proves the projection does not move art that is already correct.
+    This proves the other half: art that is WRONG in the ways a model gets it
+    wrong still comes back on-style. It exists because the bug it was written
+    for -- thresholding the backdrop colour, which cut the soft silhouette edge
+    and took the outline with it -- produced output that looked entirely
+    plausible. Ink coverage had halved and the only visible symptom was a
+    slightly thinner sprite, which reads as "the model drew thin outlines" and
+    sends you off tuning prompts to fix a post-processing bug.
+    """
+    profile = StyleProfile.from_json(open(args.profile).read())
+    bg_rgb = _background_rgb(np.zeros((1, 1, 4), np.uint8), args.bg)
+    failures = 0
+    for path in args.inputs:
+        name = os.path.splitext(os.path.basename(path))[0]
+        if name not in profile.palettes:
+            continue
+        original = _load(path)
+        h, w = original.shape[:2]
+        recovered = apply_style(_degrade(original, bg_rgb),
+                                profile.palettes[name], profile.ink,
+                                size=(w, h), bg=args.bg)
+        ref, got = score(original, profile, name), score(recovered, profile, name)
+        d_ink = abs(got["ink_coverage"] - ref["ink_coverage"])
+        d_dom = abs(got["dominant_coverage"] - ref["dominant_coverage"])
+        visible = recovered[..., 3] > ALPHA_PRESENT
+        rgb = recovered[..., :3].astype(int)
+        leaked = int((visible & (np.abs(rgb - bg_rgb).max(2) < 60)).sum())
+        ok = d_ink <= args.tolerance and d_dom <= args.tolerance and leaked == 0
+        if not ok:
+            failures += 1
+        print("[style] %s: %s ink %.1f%%->%.1f%% (d %.1f) dom %.1f%%->%.1f%% "
+              "(d %.1f) backdrop leak %d"
+              % ("OK" if ok else "FAIL", name,
+                 100 * ref["ink_coverage"], 100 * got["ink_coverage"], 100 * d_ink,
+                 100 * ref["dominant_coverage"], 100 * got["dominant_coverage"],
+                 100 * d_dom, leaked))
+    print("[style] %d failure(s) (tolerance %.1f%%)"
+          % (failures, 100 * args.tolerance))
+    return 1 if failures else 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -407,6 +477,14 @@ def main(argv=None) -> int:
     p.add_argument("--profile", default=PROFILE_PATH)
     p.add_argument("--reference", help="compare against this sprite")
     p.set_defaults(fn=_cmd_score)
+
+    p = sub.add_parser("simulate",
+                       help="degrade the reference art and prove it recovers")
+    p.add_argument("inputs", nargs="+")
+    p.add_argument("--profile", default=PROFILE_PATH)
+    p.add_argument("--bg", default="#ff00ff")
+    p.add_argument("--tolerance", type=float, default=0.04)
+    p.set_defaults(fn=_cmd_simulate)
 
     p = sub.add_parser("check", help="idempotency over the reference art")
     p.add_argument("inputs", nargs="+")

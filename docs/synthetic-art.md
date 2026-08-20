@@ -46,6 +46,25 @@ about as flat as they come.
 
 `tools/style_normalize.py` — four subcommands:
 
+Two gates, and they prove opposite halves of the same property:
+
+```bash
+# art that is already right must not move
+python3 tools/style_normalize.py check assets/doodle/sprites/*.png
+
+# art that is wrong the way a model gets it wrong must come back right
+python3 tools/style_normalize.py simulate assets/doodle/sprites/char_*.png
+```
+
+`simulate` was verified to fail: reinstating the threshold-keying bug makes all
+four characters fail it, with coverage deltas up to 18%. A gate that cannot fail
+is not a gate.
+
+Neither runs in `scripts/check.sh`, deliberately -- the harness is the *game's*
+safety net and must not acquire a numpy/Pillow dependency that would make it
+fail on a machine that can still build and run the game. Run them when touching
+the projection.
+
 ```bash
 # Measure the style from the real art (writes tools/scribble_style.json)
 python3 tools/style_normalize.py learn assets/doodle/sprites/*.png
