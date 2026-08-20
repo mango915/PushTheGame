@@ -166,7 +166,7 @@ def build_graph(prompt, refs, seed, steps, cfg, size):
 
 
 def build_graph_sd15(prompt, refs, seed, steps, cfg, size,
-                     ip_weight=0.85, weapon_weight=0.35, ip_end=0.7):
+                     ip_weight=0.55, ip_end=0.5):
     """SD1.5 + IP-Adapter: identity from the reference image, not the prompt."""
     w, h = size
     g = {
@@ -210,22 +210,15 @@ def build_graph_sd15(prompt, refs, seed, steps, cfg, size,
                "inputs": {"images": ["50", 0],
                           "filename_prefix": "ptg_sd15"}},
     }
-    model_out = "10"
-    # The weapon, as a second and much weaker reference. The first run uploaded
-    # it and never wired it in -- the graph only ever read refs[0] -- so "the
-    # sword from image 2" was asking the model to invent a sword it had never
-    # been shown.
-    if len(refs) > 1 and weapon_weight > 0.0:
-        g["5"] = {"class_type": "LoadImage",
-                  "inputs": {"image": refs[1], "upload": "image"}}
-        g["11"] = {"class_type": "IPAdapterAdvanced", "inputs": {
-            "model": ["10", 0], "ipadapter": ["2", 0], "image": ["5", 0],
-            "clip_vision": ["3", 0],
-            "weight": weapon_weight, "weight_type": "linear",
-            "combine_embeds": "concat", "start_at": 0.0, "end_at": ip_end,
-            "embeds_scaling": "V only"}}
-        model_out = "11"
-    g["40"]["inputs"]["model"] = [model_out, 0]
+    # ONE reference, deliberately. Feeding a second image (the weapon) into
+    # IP-Adapter does not compose the two -- it averages their embeddings, and
+    # the sweep produced literal pink-and-steel bars: a character-shaped sword
+    # rather than a character holding one. Dominant colour coverage collapsed
+    # from 49% to 31% as the blade's greys contaminated the palette.
+    #
+    # So each sprite is generated ALONE and composed in the engine, where a
+    # transform is exact and free. That is also why the held weapon is a
+    # separate node on a carry marker rather than baked into the character.
     return g
 
 
@@ -272,9 +265,8 @@ def main(argv=None):
     ap.add_argument("--raw", help="also keep the unprojected generation here")
     ap.add_argument("--server", default=os.environ.get("COMFY_SERVER", DEFAULT_SERVER))
     ap.add_argument("--pipeline", choices=["qwen", "sd15"], default="qwen")
-    ap.add_argument("--ip-weight", type=float, default=0.85)
-    ap.add_argument("--weapon-weight", type=float, default=0.35)
-    ap.add_argument("--ip-end", type=float, default=0.7,
+    ap.add_argument("--ip-weight", type=float, default=0.55)
+    ap.add_argument("--ip-end", type=float, default=0.5,
                     help="release IP-Adapter after this fraction of the schedule")
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--steps", type=int, default=DEFAULT_STEPS)
@@ -303,7 +295,7 @@ def main(argv=None):
     if args.pipeline == "sd15":
         graph = build_graph_sd15(args.prompt, refs, args.seed, args.steps,
                                  args.cfg, (gw, gh), args.ip_weight,
-                                 args.weapon_weight, args.ip_end)
+                                 args.ip_end)
     else:
         graph = build_graph(args.prompt, refs, args.seed, args.steps,
                             args.cfg, (gw, gh))

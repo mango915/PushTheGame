@@ -15,6 +15,26 @@ const TEXTURES := [
 # character has a temperament rather than being a palette swap.
 const NAMES := ["Butter", "Chili", "Moody", "Sprout"]
 
+# Each character's body colour, MEASURED from the sprite rather than eyeballed
+# (tools/style_normalize.py learn: the fill is 52-54% of every character, by far
+# its largest flat area). Anything drawn in code that has to match the body --
+# the held hand, for one -- reads as a different character if the hue is even
+# slightly off, so these are taken from the art and not chosen to look right.
+const COLORS := [
+	Color("ffb600"),   # Butter
+	Color("fc5c65"),   # Chili
+	Color("9179ff"),   # Moody
+	Color("37d98c"),   # Sprout
+]
+
+# The ink these sprites are outlined in. Also measured -- it is #282828 across
+# all ten art files, NOT pure black, and a true black border beside it reads as
+# a different, harder line.
+const INK := Color("282828")
+
+static func body_color(index: int) -> Color:
+	return COLORS[clamp_index(index)]
+
 # One sprite per character now, rather than a frame out of an animation sheet:
 # the Scribble characters have no animation frames at all, and motion comes from
 # squash and stretch in Player.gd instead. FRAME_SIZE is therefore the whole

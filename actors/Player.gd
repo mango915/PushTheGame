@@ -280,6 +280,7 @@ func _ready():
 	if fin_sprite != null:
 		fin_sprite.visible = false
 	_set_squash(1.0, 1.0, true)
+	_build_hand()
 	reset_state()
 
 func set_player_skin(_player_skin: int) -> void:
@@ -289,6 +290,7 @@ func set_player_skin(_player_skin: int) -> void:
 		if body_sprite != null:
 			body_sprite.texture = skin_resources[player_skin]
 			fin_sprite.texture = skin_resources[player_skin]
+		_refresh_hand_color()
 
 # Shows the player's name above their character. Built in code so Player.tscn
 # does not have to change.
@@ -360,6 +362,7 @@ func _process(_delta: float) -> void:
 
 	_update_squash(_delta)
 	_update_flash(_delta)
+	_update_hand()
 
 	# Lean into a run, and level out when not moving. Reads as weight without
 	# needing a walk cycle the art does not have.
@@ -454,6 +457,43 @@ func set_show_sliding(_show_sliding: bool) -> void:
 
 # Where the sprite sits when unsquashed. Scaling happens about the FEET, not the
 # sprite centre, so a squashed body stays planted instead of sinking.
+#####
+# Held-weapon hand
+#####
+#
+# See actors/Hand.gd for why this is a dot and not an arm. It rides the carry
+# marker, which the existing animations already move and rotate, so a swing
+# carries the hand with it and no new animation track is needed on a scene that
+# has none for the body either.
+const HandScene := preload("res://actors/Hand.gd")
+
+var _hand: Node2D
+
+func _build_hand() -> void:
+	_hand = HandScene.new()
+	_hand.name = "HeldHand"
+	# Above the weapon: a dot UNDER the grip reads as a bead behind the handle,
+	# while the same dot on top reads as fingers closed around it.
+	_hand.z_index = 2
+	_hand.visible = false
+	_hand.ink = Characters.INK
+	add_child(_hand)
+	_refresh_hand_color()
+
+func _refresh_hand_color() -> void:
+	if _hand != null:
+		_hand.color = Characters.body_color(player_skin)
+
+func _update_hand() -> void:
+	if _hand == null:
+		return
+	var holding := current_pickup != null and current_pickup_position != null
+	_hand.visible = holding
+	if holding:
+		# The marker position in player space. No flip correction: the player's
+		# scale.x carries flip_h, so the hand mirrors with everything else.
+		_hand.position = current_pickup_position.position
+
 const BODY_REST_Y := -34.0
 # How fast the current pose chases the target. High enough to feel snappy,
 # low enough that a landing still reads as a bounce.

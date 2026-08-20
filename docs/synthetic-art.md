@@ -159,6 +159,57 @@ Ink erodes (9.4% â†’ 7.9%) because blur eats thin outlines. That is not noise â€
 is the characteristic failure of generated line art, and the fingerprint turns it
 into a number you can gate on rather than a hunch.
 
+## One sprite per image, composed in the engine
+
+Never generate two things in one picture. IP-Adapter does not compose multiple
+references, it AVERAGES their embeddings: asking for "the character holding the
+sword" with both as references produced literal pink-and-steel bars, a
+character-shaped sword rather than a character holding one, and dominant colour
+coverage fell from 49% to 31% as the blade's greys contaminated the palette.
+
+Generate each sprite alone; place it with a transform, which is exact and free.
+That is the same reason a held weapon is a separate node parented to a carry
+marker rather than baked into the character sprite.
+
+## What the models actually did
+
+Measured on `scatoletta` (Ryzen 9 8945HS, 8 cores, no GPU), same character, same
+weapon, same instruction, same post-processing:
+
+| | params | per step | 20 steps | style | composition |
+|---|---|---|---|---|---|
+| Qwen-Image-Edit 2511 | 20B | 1197 s | **6.7 h** | untestable | untestable |
+| SD1.5 + IP-Adapter | 0.86B | **5.11 s** | **2 min** | very good | **none** |
+
+Qwen is 234x slower per step -- about 2x what its raw FLOP count predicts, so it
+is model size on 8 cores, not a misconfiguration. It cannot be iterated on and
+was deleted.
+
+SD1.5 reproduces the style well and **cannot follow a compositional
+instruction**. Across ip_weight 0.85..0.40, weapon reference 0..0.55 and CFG
+7..9, no run ever produced an arm or a held weapon. That is what IP-Adapter *is*
+-- identity and style transfer, not editing. The style projection cannot rescue
+it either: bad runs come back on-palette while remaining nonsense, which is the
+useful proof that **the post-process fixes style and cannot fix composition**.
+
+So the pipeline is for NEW STANDALONE assets -- weapons, pickups, props -- and
+not for changing an existing character's pose. The held hand is drawn in code
+instead (`actors/Hand.gd`).
+
+### The dtype that decides everything
+
+fp16 has no native path on this CPU and falls back to scalar emulation:
+
+| dtype | 1024x1024 matmul | throughput |
+|---|---|---|
+| fp32 | 5.0 ms | 429 GFLOP/s |
+| bf16 | 2.2 ms | 962 GFLOP/s |
+| **fp16** | **2077.9 ms** | **1 GFLOP/s** |
+
+ComfyUI's CPU default picked fp16. `serve.sh` forces fp32 -- not bf16, which is
+faster on paper but fails where IP-Adapter and CLIP vision stay fp32
+(`mat1 and mat2 must have the same dtype`). Uniform beats fast.
+
 ## Hardware
 
 Two machines, and the split is deliberate.

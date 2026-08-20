@@ -143,6 +143,7 @@ func _ready() -> void:
 	await _check_laser()
 	_check_round_teardown()
 	await _check_carry_rotation()
+	await _check_held_hand()
 
 	print("[weapons] %d assertion(s) failed" % _failures)
 	get_tree().quit(0)
@@ -726,4 +727,49 @@ func _check_carry_rotation() -> void:
 
 	sword.queue_free()
 	gun.queue_free()
+	await get_tree().process_frame
+
+
+# The hand a carried weapon is held in.
+#
+# Cosmetic, but it fails silently in ways that read as a broken character: a
+# hand left visible after a throw is a dot floating in mid-air, and a hand whose
+# colour does not track the skin looks like somebody else is holding the weapon.
+# Neither errors.
+func _check_held_hand() -> void:
+	var player = load("res://actors/Player.tscn").instantiate()
+	_holder.add_child(player)
+	player.player_controlled = false
+	await get_tree().process_frame
+
+	var hand: Node2D = player.get_node_or_null("HeldHand") as Node2D
+	_check_true("the player has a hand node", hand != null)
+	if hand == null:
+		player.queue_free()
+		return
+
+	_check("empty-handed, no hand is drawn", hand.visible, false)
+
+	# It must sit ON the grip, which is the carry marker -- a hand offset from
+	# the weapon is worse than no hand at all.
+	var sword = _add(SWORD_SCENE)
+	await get_tree().process_frame
+	player._do_pickup(sword.get_path())
+	await get_tree().process_frame
+
+	_check("holding, the hand appears", hand.visible, true)
+	_check("the hand sits on the carry marker",
+		hand.position, player.current_pickup_position.position)
+	# In FRONT of the weapon: underneath it reads as a bead behind the handle.
+	_check_true("the hand draws above the weapon",
+		hand.z_index > player.current_pickup.z_index)
+
+	# Colour is measured from the art, so it must match the skin exactly.
+	player.set_player_skin(2)
+	await get_tree().process_frame
+	_check("the hand takes the character colour",
+		hand.color, Characters.body_color(2))
+	_check("...and is outlined in the measured ink", hand.ink, Characters.INK)
+
+	player.queue_free()
 	await get_tree().process_frame
