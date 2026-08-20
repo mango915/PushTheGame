@@ -27,6 +27,15 @@ the project started with. Two consequences that are easy to trip over:
   rebuilding the maps straight afterwards silently uses the PREVIOUS art and
   reports zero errors. Let the editor re-import in between.
 
+**Art the pack does not contain** — held-weapon poses above all — is generated
+locally rather than faked in code. The sword sitting beside the character instead
+of in a hand is an art gap, not a bug: the characters are single capsules with no
+arms. `tools/style_normalize.py` measures the style (four flat colours, ink
+`#282828`, ~6% antialiasing) and projects generated images onto it, so style
+consistency comes from a deterministic post-process rather than from sampling.
+Generate large, project, THEN downsample — that order is what produces the soft
+edge, and reversing it hardens every edge. See `docs/synthetic-art.md`.
+
 **This was a sloppy Godot 3 → 4 port.** The dominant bug class is calls into APIs that no longer exist: they parse fine and only fail on the frame they finally run. A large batch has been fixed (see git log), but assume more are lurking in code paths nothing exercises yet. `export_presets.cfg` now exports cleanly for all four presets (`Windows Desktop`, `Linux`, `macOS`, `Web`) on 4.7.2, verified by actually running each one. It did not need the editor: what it needed was the export templates installed, `rendering/textures/vram_compression/import_etc2_astc` enabled in `project.godot` (macOS/arm64 is refused outright without it), and `application/bundle_identifier` on the macOS preset — Godot 3 spelled that `application/identifier`, which Godot 4 ignores, leaving the bundle id empty and the export failing. `project.godot`'s dead Godot 3 rendering keys (`quality/driver/driver_name`, `quality/2d/use_pixel_snap`, `vram_compression/import_etc`) are gone with it.
 
 Several scenes are also still saved in the Godot 3 text format (`format=2`): `main/screens/{LeaderboardRecord,LeaderboardScreen,MatchScreen,PeerStatus}.tscn`. They load, but Godot-3-only properties in them are silently dropped — that is exactly how the Credits screen ended up rendering an unstyled fallback for months (see below).

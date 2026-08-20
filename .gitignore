@@ -9,3 +9,7 @@
 settings.json
 /tests/.godot/
 .DS_Store
+
+# Python bytecode from tools/
+__pycache__/
+*.pyc
