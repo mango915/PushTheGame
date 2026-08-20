@@ -31,7 +31,8 @@ the project started with. Two consequences that are easy to trip over:
 locally rather than faked in code. The sword sitting beside the character instead
 of in a hand is an art gap, not a bug: the characters are single capsules with no
 arms. `tools/style_normalize.py` measures the style (four flat colours, ink
-`#282828`, ~6% antialiasing) and projects generated images onto it, so style
+`#282828`, ~6% antialiasing, and a silhouette that reads dark outline -> white
+band -> fill from the outside in) and projects generated images onto it, so style
 consistency comes from a deterministic post-process rather than from sampling.
 Generate large, project, THEN downsample — that order is what produces the soft
 edge, and reversing it hardens every edge. See `docs/synthetic-art.md`.

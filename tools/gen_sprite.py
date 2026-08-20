@@ -46,8 +46,14 @@ VAE = "qwen_image_vae.safetensors"
 # magenta, so the cut is exact and costs nothing.
 BACKDROP = "#ff00ff"
 
+# Describes the art as MEASURED, not as remembered. A scanline through a
+# character reads, from the outside in: ~2px dark outline, ~4px WHITE band, then
+# the flat colour fill. That white band is 22% of the sprite -- more of it than
+# there is ink -- so a prompt that says only "black outline, flat colours" asks
+# for a different character design and gets one.
 STYLE_SUFFIX = (
-    "hand-drawn doodle style, thick black ink outline, flat solid colours, "
+    "hand-drawn doodle style, thick dark outline with a broad white band just "
+    "inside the outline, flat solid colour fill, simple white facial features, "
     "no shading, no gradients, no texture, plain flat magenta background, "
     "full body, centred, side view"
 )

@@ -13,7 +13,7 @@ same style, is the hard part — that is the objection this pipeline has to answ
 It is answerable because the target style is extraordinarily tight. Measured
 across the eight shipped sprites (`tools/style_normalize.py learn`):
 
-| sprite | body | white (eyes) | ink | tint |
+| sprite | body | white band | ink | tint |
 |---|---|---|---|---|
 | char_butter | `#ffb600` 52% | 22% | 9% | 3% |
 | char_chili  | `#fc5c65` 54% | 22% | 10% | 3% |
@@ -23,6 +23,13 @@ across the eight shipped sprites (`tools/style_normalize.py learn`):
 Four flat colours, in near-identical proportions, with a canonical ink of
 `#282828` — not pure black — across all ten art files. The ~6% soft edge is a
 downsampling artefact of vector source art, not a brush.
+
+A scanline through a character reads, from the outside in: **~2px dark outline,
+~4px white band, then the flat fill** (facial features are white too). That white
+band is 22% of the sprite — more of it than there is ink — and it is easy to
+mistake for "white eyes" from the coverage table alone. Prompting for "thick
+black outline, flat colours" without it describes a different character design
+and gets one. Measure the art; do not describe it from memory.
 
 That changes where consistency comes from. **The model does not have to hold the
 style; it only has to get the shape roughly right.** Hue drift, invented shading
