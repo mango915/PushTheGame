@@ -41,6 +41,22 @@ UNET = "qwen-image-edit-2511-Q8_0.gguf"
 CLIP = "qwen_2.5_vl_7b.safetensors"
 VAE = "qwen_image_vae.safetensors"
 
+# The SD1.5 pipeline, for comparison against Qwen-Image-Edit.
+#
+# Qwen at 20B measured 1197 s/it on the 8-core CPU box -- about twice what the
+# raw FLOP count predicts, so it is model SIZE, not a misconfiguration, and
+# 20 steps would be nearly seven hours per image. SD1.5 is 0.86B: ~23x smaller.
+#
+# It cannot follow an instruction the way an edit model can, so identity comes
+# from IP-Adapter conditioning on the reference sprite instead of from a
+# sentence. That is a real downgrade in control -- but style, palette, ink and
+# outline weight are all forced afterwards by style_normalize, so the only thing
+# actually being asked of the model is the SHAPE. A weaker model is allowed to
+# be enough, and this comparison is what decides whether it is.
+SD15_CKPT = "v1-5-pruned-emaonly-fp16.safetensors"
+SD15_IPADAPTER = "ip-adapter-plus_sd15.safetensors"
+SD15_CLIP_VISION = "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors"
+
 # Flat magenta backdrop, keyed out afterwards by style_normalize --bg. Asking for
 # a known backdrop beats running a matting model: nothing in the palette is near
 # magenta, so the cut is exact and costs nothing.
@@ -149,6 +165,70 @@ def build_graph(prompt, refs, seed, steps, cfg, size):
     return g
 
 
+def build_graph_sd15(prompt, refs, seed, steps, cfg, size,
+                     ip_weight=0.85, weapon_weight=0.35, ip_end=0.7):
+    """SD1.5 + IP-Adapter: identity from the reference image, not the prompt."""
+    w, h = size
+    g = {
+        "1": {"class_type": "CheckpointLoaderSimple",
+              "inputs": {"ckpt_name": SD15_CKPT}},
+        "2": {"class_type": "IPAdapterModelLoader",
+              "inputs": {"ipadapter_file": SD15_IPADAPTER}},
+        "3": {"class_type": "CLIPVisionLoader",
+              "inputs": {"clip_name": SD15_CLIP_VISION}},
+        "4": {"class_type": "LoadImage",
+              "inputs": {"image": refs[0], "upload": "image"}},
+        # Character identity. end_at < 1.0 on purpose: IP-Adapter held for the
+        # whole schedule reproduces the reference so faithfully that the prompt
+        # never gets to add anything -- the first run came back as the input
+        # character with no sword at all. Releasing it partway leaves the late,
+        # detail-forming steps to the text.
+        "10": {"class_type": "IPAdapterAdvanced", "inputs": {
+            "model": ["1", 0], "ipadapter": ["2", 0], "image": ["4", 0],
+            "clip_vision": ["3", 0],
+            "weight": ip_weight, "weight_type": "linear",
+            "combine_embeds": "concat", "start_at": 0.0, "end_at": ip_end,
+            "embeds_scaling": "V only"}},
+        "20": {"class_type": "CLIPTextEncode",
+               "inputs": {"clip": ["1", 1],
+                          "text": "%s. %s" % (prompt, STYLE_SUFFIX)}},
+        "21": {"class_type": "CLIPTextEncode",
+               "inputs": {"clip": ["1", 1],
+                          "text": "photorealistic, 3d render, soft shading, "
+                                  "gradient, blurry, grainy, thin faint "
+                                  "outline, drop shadow, text, watermark"}},
+        "30": {"class_type": "EmptyLatentImage",
+               "inputs": {"width": w, "height": h, "batch_size": 1}},
+        "40": {"class_type": "KSampler", "inputs": {
+            "model": ["10", 0], "positive": ["20", 0], "negative": ["21", 0],
+            "latent_image": ["30", 0], "seed": seed, "steps": steps,
+            "cfg": cfg, "sampler_name": "dpmpp_2m", "scheduler": "karras",
+            "denoise": 1.0}},
+        "50": {"class_type": "VAEDecode",
+               "inputs": {"samples": ["40", 0], "vae": ["1", 2]}},
+        "60": {"class_type": "SaveImage",
+               "inputs": {"images": ["50", 0],
+                          "filename_prefix": "ptg_sd15"}},
+    }
+    model_out = "10"
+    # The weapon, as a second and much weaker reference. The first run uploaded
+    # it and never wired it in -- the graph only ever read refs[0] -- so "the
+    # sword from image 2" was asking the model to invent a sword it had never
+    # been shown.
+    if len(refs) > 1 and weapon_weight > 0.0:
+        g["5"] = {"class_type": "LoadImage",
+                  "inputs": {"image": refs[1], "upload": "image"}}
+        g["11"] = {"class_type": "IPAdapterAdvanced", "inputs": {
+            "model": ["10", 0], "ipadapter": ["2", 0], "image": ["5", 0],
+            "clip_vision": ["3", 0],
+            "weight": weapon_weight, "weight_type": "linear",
+            "combine_embeds": "concat", "start_at": 0.0, "end_at": ip_end,
+            "embeds_scaling": "V only"}}
+        model_out = "11"
+    g["40"]["inputs"]["model"] = [model_out, 0]
+    return g
+
+
 def run(server, graph, poll=15, timeout=7200):
     client_id = uuid.uuid4().hex
     res = _post(server, "/prompt", {"prompt": graph, "client_id": client_id})
@@ -191,6 +271,11 @@ def main(argv=None):
     ap.add_argument("--out", required=True)
     ap.add_argument("--raw", help="also keep the unprojected generation here")
     ap.add_argument("--server", default=os.environ.get("COMFY_SERVER", DEFAULT_SERVER))
+    ap.add_argument("--pipeline", choices=["qwen", "sd15"], default="qwen")
+    ap.add_argument("--ip-weight", type=float, default=0.85)
+    ap.add_argument("--weapon-weight", type=float, default=0.35)
+    ap.add_argument("--ip-end", type=float, default=0.7,
+                    help="release IP-Adapter after this fraction of the schedule")
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--steps", type=int, default=DEFAULT_STEPS)
     ap.add_argument("--cfg", type=float, default=DEFAULT_CFG)
@@ -215,7 +300,13 @@ def main(argv=None):
     print("references: %s" % ", ".join(os.path.basename(p) for p in paths))
     refs = [upload_image(args.server, p) for p in paths]
     gw, gh = (int(v) for v in args.gen_size.lower().split("x"))
-    graph = build_graph(args.prompt, refs, args.seed, args.steps, args.cfg, (gw, gh))
+    if args.pipeline == "sd15":
+        graph = build_graph_sd15(args.prompt, refs, args.seed, args.steps,
+                                 args.cfg, (gw, gh), args.ip_weight,
+                                 args.weapon_weight, args.ip_end)
+    else:
+        graph = build_graph(args.prompt, refs, args.seed, args.steps,
+                            args.cfg, (gw, gh))
     img, secs = run(args.server, graph)
 
     q = urllib.parse.urlencode({"filename": img["filename"],
